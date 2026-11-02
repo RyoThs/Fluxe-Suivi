@@ -77,6 +77,7 @@ return null;
 function best(name){return done().reduce((m,s)=>{const e=s.exercises.find(e=>norm(e.name)===norm(name));return e?e.sets.filter(ok).reduce((a,x)=>Math.max(a,e1(x)||0),m):m},0)}
 function newEx(name){const p=prevSets(name);return{name,sets:(p||[{kg:'',reps:''}]).map(x=>({kg:x.kg,reps:x.reps,done:false}))}}
 function names(){const st=new Set();S.sessions.forEach(s=>s.exercises.forEach(e=>st.add(e.name)));return [...st]}
+const cname=v=>String(v).replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,60); /* même règle que le nettoyage des données */
 const K=n=>'k:'+norm(n).slice(0,60);
 const RS=[60,90,120,180,240];
 const restFor=n=>(S.rests&&S.rests[K(n)])||S.rest||90;
@@ -97,6 +98,9 @@ if(!done().length||n-(S.lastBackup||0)<6048e5||n-(S.snooze||0)<1728e5)return '';
 return `<div class="card"><div class="hist-date">Pense à sauvegarder</div><div class="mu">${S.lastBackup?'Dernière sauvegarde : '+esc(fmtDate(S.lastBackup)):'Aucune sauvegarde pour l’instant'}. Tes données ne sont que sur ce téléphone.</div><div class="dat"><button class="btn" data-act="file">Exporter</button><button class="sec" data-act="snz">Plus tard</button></div></div>`;
 }
 function render(){
+if(S.current&&!cur())S.current=null;
+if(!S.current)S.editBak=null;
+S.sessions.forEach(x=>{if(x.edit&&x.id!==S.current)delete x.edit});
 document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab));
 $('#app').innerHTML=tab==='seance'?viewSeance():tab==='histo'?viewHisto():viewStats();
 veille();
@@ -182,8 +186,8 @@ function plist(){
 const q=norm(pk.q),own=names().filter(n=>!MU[n]).map(n=>[n,'Perso']);
 const l=[...LIB,...own].filter(([n,m])=>(pk.m==='Tous'||m===pk.m)&&norm(n).includes(q));
 const mk=(n,m,t)=>`<button class="pi" data-act="padd" data-n="${esc(n)}"><b>${t}</b><span>${esc(m)}</span></button>`;
-const nv=pk.q.trim().slice(0,60);
-return l.map(([n,m])=>mk(n,m+(TG[n]?' · '+TG[n]:''),esc(n))).join('')+(q&&![...LIB,...own].some(([n])=>norm(n)===q)?mk(nv,'Exercice perso','Créer « '+esc(nv)+' »'):'');
+const nv=cname(pk.q);
+return l.map(([n,m])=>mk(n,m+(TG[n]?' · '+TG[n]:''),esc(n))).join('')+(nv&&q&&![...LIB,...own].some(([n])=>norm(n)===q)?mk(nv,'Exercice perso','Créer « '+esc(nv)+' »'):'');
 }
 /* Minuteur de repos */
 let tEnd=0,tInt=null,tTot=90000;
@@ -240,6 +244,10 @@ const tb=ev.target.closest('[data-tab]');if(tb){tab=tb.dataset.tab;render();wind
 const b=ev.target.closest('[data-act]');if(!b)return;
 const a=b.dataset.act,s=cur(),i=+b.dataset.i,j=+b.dataset.j,k=+b.dataset.k;
 if(!s&&['padd','addset','delex','finish','cancel','chk','rex','wu','sug'].includes(a))return;
+if(['addset','delex','rex','sug','chk','wu'].includes(a)&&!s.exercises[i])return;
+if((a==='chk'||a==='wu')&&!s.exercises[i].sets[j])return;
+if((a==='pm'||a==='bar')&&!pk)return;
+if((a==='start'||a==='startr')&&S.current)return;
 if(a==='t+'){tEnd+=15000;tTot+=15000;tick();return}
 if(a==='t0'){tStop();return}
 if(a==='pm'){pk.m=b.dataset.m;sheet();return}
@@ -247,16 +255,16 @@ if(a==='closepk'){closePk();return}
 if(a==='pick'){openPk();return}
 if(a==='tool'){openTool();return}
 if(a==='bar'){pk.bar=[20,15,10].includes(+b.dataset.b)?+b.dataset.b:20;sheet();return}
-if(a==='padd'){s.exercises.push(newEx(String(b.dataset.n).slice(0,60)));closePk()}
+if(a==='padd'){const nm=cname(b.dataset.n);if(!nm)return;s.exercises.push(newEx(nm));closePk()}
 else if(a==='rest'){const o=[60,90,120,180,240];S.rest=o[(o.indexOf(S.rest||90)+1)%o.length]}
 else if(a==='rex'){S.rests=S.rests||{};const n=s.exercises[i].name,c=restFor(n);S.rests[K(n)]=RS[(RS.indexOf(c)+1)%RS.length]}
 else if(a==='wu'){const x=s.exercises[i].sets[j];if(x){if(x.w)delete x.w;else x.w=true}}
-else if(a==='sug'){const sg=suggest(s.exercises[i].name);if(sg)s.exercises[i].sets.forEach(x=>{if(!x.done&&!x.w)x.kg=String(sg.kg)})}
+else if(a==='sug'){const sg=suggest(s.exercises[i].name);if(sg)s.exercises[i].sets.forEach(x=>{if(!x.done&&!x.w)x.kg=String(Math.round(sg.kg*100)/100)})}
 else if(a==='snz'){S.snooze=Date.now()}
 else if(a==='sx'){sx=b.dataset.n}
 else if(a==='editsess'){if(S.current){alert('Termine ou annule d’abord la séance en cours.');return}const x=S.sessions.find(y=>y.id===b.dataset.id);if(!x)return;S.editBak=JSON.parse(JSON.stringify(x));x.edit=true;S.current=x.id;tab='seance';window.scrollTo(0,0)}
 else if(a==='start'){const n={id:uid(),date:Date.now(),exercises:[]};S.sessions.push(n);S.current=n.id}
-else if(a==='startr'){const n={id:uid(),date:Date.now(),exercises:[]};S.current=n.id;n.exercises=S.routines[k].exercises.map(newEx);S.sessions.push(n)}
+else if(a==='startr'){const r=S.routines[k];if(!r)return;const n={id:uid(),date:Date.now(),exercises:r.exercises.map(x=>newEx(x))};S.current=n.id;S.sessions.push(n)}
 else if(a==='delr'){if(!confirm('Supprimer cette routine ?'))return;S.routines.splice(k,1)}
 else if(a==='delex'){if(!confirm('Retirer cet exercice ?'))return;s.exercises.splice(i,1)}
 else if(a==='addset'){const l=s.exercises[i].sets;const p=l[l.length-1]||{kg:'',reps:''};l.push({kg:p.kg,reps:p.reps,done:false})}
