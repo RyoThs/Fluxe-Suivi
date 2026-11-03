@@ -1,5 +1,5 @@
 (function(){
-const KEY='muscu-v1'; /* ne pas changer : c'est la clé où sont tes données */
+const KEY='muscu-v1',VER='2.0'; /* ne pas changer : c'est la clé où sont tes données */
 const M=['Pectoraux','Dos','Épaules','Bras','Jambes','Fessiers','Abdos','Corps entier','Cardio'];
 const T={h:'Hammer Strength',s:'Machine guidée',p:'Poulie',e:'Eleiko',l:'Life Fitness'};
 const LIB=[].concat(...Object.entries({
@@ -31,7 +31,7 @@ for(const e of s.exercises.slice(0,60)){
 if(!e||typeof e!=='object'||!Array.isArray(e.sets))continue;
 const name=str(e.name,60);if(!name)continue;
 const cd=e.cardio===true,sets=[];
-for(const x of e.sets.slice(0,60)){if(!x||typeof x!=='object')continue;const t=cd?{min:val(x.min),km:val(x.km),kcal:val(x.kcal),done:x.done!==false}:{kg:val(x.kg),reps:val(x.reps),done:x.done!==false};if(!cd&&x.w===true)t.w=true;sets.push(t)}
+for(const x of e.sets.slice(0,60)){if(!x||typeof x!=='object')continue;const t=cd?{min:val(x.min),km:val(x.km),kcal:val(x.kcal),done:x.done!==false}:{kg:val(x.kg),reps:val(x.reps),done:x.done!==false};if(!cd&&x.w===true)t.w=true;if(x.t===true)t.t=true;sets.push(t)}
 n.exercises.push(cd?{name,cardio:true,sets}:{name,sets});
 }
 return n;
@@ -54,7 +54,12 @@ function load(){
 try{const raw=localStorage.getItem(KEY),p=JSON.parse(raw),d=clean(p);if(d){if(p.sessions.length!==d.sessions.length)try{localStorage.setItem(KEY+'-brut',raw)}catch(e){}return d}}catch(e){}
 return{sessions:[],routines:[],current:null,notes:{},rests:{}};
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const MSG_SAVE='⚠ Impossible d’enregistrer sur ce navigateur : tes séances seront perdues à la fermeture. Ouvre Fluxe depuis l’icône de l’écran d’accueil (pas en navigation privée) et fais une sauvegarde.';
+let saveFail=false;const wm={};
+function warn(k,m){wm[k]=m;const t=Object.values(wm).filter(Boolean).join(' '),w=document.querySelector('#warn');w.textContent=t;w.hidden=!t}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(saveFail){saveFail=false;warn('save','')}}catch(e){if(!saveFail){saveFail=true;warn('save',MSG_SAVE)}}}
+let tt2=0;
+function toast(m){const e=document.querySelector('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt2);tt2=setTimeout(()=>e.classList.remove('on'),3200)}
 const $=q=>document.querySelector(q);
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -106,7 +111,7 @@ document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current'
 $('#app').innerHTML=tab==='seance'?viewSeance():tab==='histo'?viewHisto():tab==='stats'?viewStats():viewGuide();
 veille();
 }
-/* Pictogrammes des machines + photo personnelle (dossier machines/) */
+/* Pictogrammes des machines */
 const IC=Object.assign(Object.create(null),{
 dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
 barbell:'<path d="M2 12h20M5 7v10M8 9v6M19 7v10M16 9v6"/>',
@@ -135,12 +140,8 @@ if(/barre|squat|soulevé|développé|good morning|hip thrust|push press|arraché
 if(/pompes|tractions|dips|gainage|crunch|roue|relevé|fentes|step|nordic|russian|reverse|hyperext/i.test(n))return 'body';
 return 'dumbbell';
 }
-/* nom de fichier de la photo : minuscules, sans accents, tirets (ex. Hack squat -> machines/hack-squat.jpg) */
-const slug=n=>String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
-/* le pictogramme est toujours là ; la photo, si elle existe, se pose par-dessus */
 function thumb(n,sz){
-const s=slug(n);
-return `<span class="mi${sz?' '+sz:''}">${svg(iconOf(n))}${s?`<img src="machines/${s}.jpg" alt="" loading="lazy">`:''}</span>`;
+return `<span class="mi${sz?' '+sz:''}">${svg(iconOf(n))}</span>`;
 }
 const csum=(e,k)=>e.sets.filter(dn).reduce((a,x)=>a+(+x[k]||0),0);
 const cline=e=>{const p=[fmtN(csum(e,'min'))+' min'];if(csum(e,'km'))p.push(fmtN(csum(e,'km'))+' km');if(csum(e,'kcal'))p.push(Math.round(csum(e,'kcal'))+' kcal');return p.join(' · ')};
@@ -216,11 +217,11 @@ ${cardio7}<div class="card"><div class="hist-date">Records</div><div class="mu">
 let gq='',gm='Tous';
 function glist(){
 const q=norm(gq),l=LIB.filter(([n,g])=>(gm==='Tous'||g===gm)&&norm(n).includes(q));
-return l.map(([n,g,tg])=>`<div class="gi">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(g)}${tg?' · '+esc(tg):''}</span><small>machines/${slug(n)}.jpg</small></div></div>`).join('')||'<p class="empty">Aucun résultat.</p>';
+return l.map(([n,g,tg])=>`<div class="gi">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(g)}${tg?' · '+esc(tg):''}</span></div></div>`).join('')||'<p class="empty">Aucun résultat.</p>';
 }
 function viewGuide(){
-return `<h1>Guide</h1><p class="sub">Repère les machines avant de créer ta routine. Les images sont des pictogrammes : ta photo les remplace si tu ajoutes un fichier .jpg dans le dossier machines de ton dépôt, avec le nom écrit sous la machine.</p>
-<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine"><div class="chips">${['Tous',...M].map(m=>`<button class="chip${gm===m?' on':''}" data-act="gm" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div><div id="gl">${glist()}</div>`;
+return `<h1>Guide</h1><p class="sub">Repère les machines avant de créer ta routine. Chaque dessin montre le type de machine à repérer dans la salle.</p>
+<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine"><div class="chips">${['Tous',...M].map(m=>`<button class="chip${gm===m?' on':''}" data-act="gm" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div><div id="gl">${glist()}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
 }
 function openPk(){pk={q:'',m:'Tous'};history.pushState({fx:1},'');sheet()}
 function openTool(){pk={tool:1,kg:'',bar:20};history.pushState({fx:1},'');sheet()}
@@ -299,7 +300,7 @@ const x=s.exercises[+t.dataset.i]&&s.exercises[+t.dataset.i].sets[+t.dataset.j];
 let v=t.value.replace(',','.').replace(/[^\d.]/g,'');
 v=['reps','kcal'].includes(t.dataset.f)?v.replace(/\./g,'').slice(0,4):(v.match(/^\d{0,5}\.?\d{0,3}/)||[''])[0];
 if(v!==t.value.replace(',','.'))t.value=v;
-x[t.dataset.f]=v;save();
+x[t.dataset.f]=v;x.t=true;save();
 });
 document.addEventListener('click',ev=>{
 const tb=ev.target.closest('[data-tab]');if(tb){tab=tb.dataset.tab;render();window.scrollTo(0,0);return}
@@ -339,13 +340,27 @@ else if(ex.cardio){if(String(x.min).trim()===''||!(+x.min>0)){alert('Renseigne a
 else{if(String(x.reps).trim()===''||isNaN(+x.reps)||isNaN(+x.kg)){alert('Renseigne les répétitions (et la charge).');return}if(String(x.kg).trim()==='')x.kg='0';x.done=true;if(!s.edit&&!x.w)tStart(restFor(ex.name))}
 }
 else if(a==='finish'){
-if(!confirm(s.edit?'Enregistrer les modifications ?':'Terminer la séance ?'))return;
+/* séries saisies à la main mais pas validées avec ✓ : on les montre et on propose de les garder, au lieu de les perdre en silence.
+   Les séries seulement préremplies (valeurs de la dernière fois, jamais touchées) ne sont jamais enregistrées comme faites. */
+const pend=[];let skip=0;
+s.exercises.forEach(e=>e.sets.forEach(x=>{if(x.done)return;if(!s.edit&&x.t&&(e.cardio?+x.min>0:(String(x.reps).trim()!==''&&!isNaN(+x.reps)&&!isNaN(+x.kg))))pend.push([e,x]);else skip++}));
+const has=pend.length||s.exercises.some(e=>e.sets.some(x=>x.done));
+if(!has){if(!confirm('Aucune série n’est validée (touche ✓ sur chaque série que tu as faite) : la séance ne sera pas conservée. Quitter quand même ?'))return}
+else if(pend.length){
+const lst=pend.slice(0,5).map(([e,x])=>'• '+e.name+' : '+(e.cardio?x.min+' min':(x.kg||0)+' kg × '+x.reps)).join('\n')+(pend.length>5?'\n… et '+(pend.length-5)+' autre(s)':'');
+if(!confirm('Ces séries sont remplies mais pas validées avec ✓ :\n'+lst+'\n\nOK = les enregistrer avec la séance.\nAnnuler = revenir à la séance.'))return;
+pend.forEach(([e,x])=>{if(!e.cardio&&String(x.kg).trim()==='')x.kg='0';x.done=true});
+}
+else if(!confirm((s.edit?'Enregistrer les modifications ?':'Terminer la séance ?')+(skip&&!s.edit?'\n'+skip+(skip>1?' séries non validées seront ignorées.':' série non validée sera ignorée.'):'')))return;
 s.exercises.forEach(e=>e.sets=e.sets.filter(dn));s.exercises=s.exercises.filter(e=>e.sets.length);
+s.exercises.forEach(e=>e.sets.forEach(x=>{delete x.t}));
+let saved=false;
 if(!s.exercises.length)S.sessions=S.sessions.filter(x=>x.id!==s.id);
-else if(s.edit){delete s.edit}
-else{s.dur=mins(s.date);
+else if(s.edit){delete s.edit;saved='edit'}
+else{s.dur=mins(s.date);saved=true;
 if(confirm('Enregistrer cette séance comme routine ?')){const n=prompt('Nom de la routine','Séance du '+new Date().toLocaleDateString('fr-FR'));if(n&&n.trim())S.routines.push({name:n.trim().slice(0,60),exercises:s.exercises.map(e=>e.name)})}}
 S.current=null;S.editBak=null;tStop();
+if(saved){tab='histo';window.scrollTo(0,0);toast(saved==='edit'?'Modifications enregistrées ✓':'Séance enregistrée ✓')}
 }
 else if(a==='cancel'){
 if(s.edit){if(!confirm('Annuler les modifications ?'))return;const bk=S.editBak;if(bk)S.sessions=S.sessions.map(x=>x.id===s.id?bk:x);S.current=null;S.editBak=null;tStop()}
@@ -357,8 +372,10 @@ else if(a==='imp'){$('#fi').click();return}
 else if(a==='paste'){const t=prompt('Colle ici les données copiées avec « Copier le texte » :');if(t)imp(t);return}
 save();render();
 });
-/* photo absente : on retire l'image, le pictogramme reste visible */
-document.addEventListener('error',ev=>{const t=ev.target;if(t&&t.tagName==='IMG'&&t.closest&&t.closest('.mi'))t.remove()},true);
+/* contrôles au démarrage : stockage disponible, fichiers de la même version, stockage durable */
+try{localStorage.setItem('fx-test','1');localStorage.removeItem('fx-test')}catch(e){saveFail=true;warn('save',MSG_SAVE)}
+{const mv=document.querySelector('meta[name="app-version"]');if(!mv||mv.content!==VER)warn('ver','Les fichiers de l’application ne sont pas tous à la même version : remplace index.html, app.js, manifest.json et sw.js ensemble, puis rouvre l’app.')}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 render();
 })();
