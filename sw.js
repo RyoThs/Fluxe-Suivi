@@ -1,7 +1,7 @@
 /* Fluxe Suivi - service worker (fonctionnement hors ligne)
    Stratégie : réseau d'abord (tu vois toujours la dernière version),
    et si le téléphone est hors ligne, on utilise la copie gardée en cache. */
-const VERSION = 'fluxe-v5'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = 'fluxe-v6'; // change ce numéro à chaque mise à jour de l'app
 const FICHIERS = [
   './', 'index.html', 'manifest.json', 'app.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
