@@ -1,12 +1,28 @@
 /* Fluxe Suivi - service worker (fonctionnement hors ligne)
    Stratégie : réseau d'abord (tu vois toujours la dernière version),
-   et si le téléphone est hors ligne, on utilise la copie gardée en cache. */
-const VERSION = 'fluxe-v10'; // change ce numéro à chaque mise à jour de l'app
+   et si le téléphone est hors ligne, on utilise la copie gardée en cache.
+
+   ATTENTION : Fluxe Suivi, Fluxe App et ATLAS sont publiés sur le même domaine
+   (ryoths.github.io). Dans le navigateur, ils partagent donc le même espace de caches.
+   Règle de sécurité : Fluxe Suivi ne supprime QUE ses propres caches, reconnus par
+   leur préfixe. Il ne touche jamais aux caches des autres applications ni aux caches inconnus.
+   (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
+
+const PREFIXE = 'fluxe-suivi-';
+const VERSION = PREFIXE + 'v11'; // change ce numéro à chaque mise à jour de l'app
+
+// Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
+// Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
+const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
+
 const FICHIERS = [
   './', 'index.html', 'manifest.json', 'app.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'icons/apple-touch-icon-v2.png', 'icons/favicon.png'
 ];
+
+// Un cache appartient à Fluxe Suivi uniquement s'il porte son préfixe.
+const estUnCacheFluxeSuivi = nom => nom.startsWith(PREFIXE);
 
 self.addEventListener('install', e => {
   // On ajoute chaque fichier séparément : si une icône manque, le reste est quand même gardé.
@@ -18,12 +34,24 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // Nettoyage : uniquement les anciennes versions préfixées de Fluxe Suivi.
   e.waitUntil(
     caches.keys()
-      .then(noms => Promise.all(noms.filter(n => n !== VERSION).map(n => caches.delete(n))))
+      .then(noms => Promise.all(noms.filter(n => estUnCacheFluxeSuivi(n) && n !== VERSION).map(n => caches.delete(n))))
       .then(() => self.clients.claim())
   );
 });
+
+// Cherche une réponse uniquement dans les caches de Fluxe Suivi (actuel d'abord, puis anciens noms).
+const chercherDansMesCaches = async requete => {
+  const noms = await caches.keys();
+  for (const nom of [VERSION, ...ANCIENS_CACHES]) {
+    if (!noms.includes(nom)) continue;
+    const trouve = await (await caches.open(nom)).match(requete);
+    if (trouve) return trouve;
+  }
+  return undefined;
+};
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
@@ -41,10 +69,10 @@ self.addEventListener('fetch', e => {
         }
         return rep;
       })
-      .catch(() =>
-        caches.match(e.request).then(r =>
-          r || (e.request.mode === 'navigate' ? caches.match('index.html') : null) || Response.error()
-        )
+      .catch(async () =>
+        (await chercherDansMesCaches(e.request)) ||
+        (e.request.mode === 'navigate' ? await chercherDansMesCaches('index.html') : undefined) ||
+        Response.error()
       )
   );
 });
