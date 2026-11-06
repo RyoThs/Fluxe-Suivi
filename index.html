@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Fluxe Suivi</title>
-<meta name="app-version" content="2.0">
+<meta name="app-version" content="2.1">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -120,6 +120,17 @@ nav button[data-tab=aide]{flex:0 0 56px;font-size:20px;font-weight:800;padding:1
 #warn[hidden]{display:none}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(150px + env(safe-area-inset-bottom,0px));max-width:90%;padding:12px 18px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* v2.1 : Ma salle, versions de secours, corbeille */
+.gi.in{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));background:color-mix(in srgb,var(--ok) 6%,var(--surface))}
+.tg{flex:none;width:44px;height:44px;border-radius:14px;background:var(--raise);color:var(--accent);font-size:22px;font-weight:800}
+.tg.on{background:var(--ok);color:#fff}
+.card.gym .chips{flex-wrap:wrap}
+.card.gym .del{padding-left:0}
+.vr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.vr:first-child{border-top:0}
+.vr b{display:block;font-size:15px}
+.vr span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.pi .pt b{font-size:16px}
 @media (prefers-reduced-motion:reduce){button,#toast{transition:none}}
 </style>
 </head>
