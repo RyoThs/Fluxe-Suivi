@@ -9,14 +9,14 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v12'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v13'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
 const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
 
 const FICHIERS = [
-  './', 'index.html', 'manifest.json', 'app.js',
+  './', 'index.html', 'manifest.json', 'app.js?v=2.1.1',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'icons/apple-touch-icon-v2.png', 'icons/favicon.png'
 ];
@@ -53,6 +53,9 @@ const chercherDansMesCaches = async requete => {
   return undefined;
 };
 
+// Même requête, mais en demandant toujours au serveur si le fichier a changé.
+const sansVieilleCopie = req => { try { return new Request(req, { cache: 'no-cache' }); } catch (x) { return req; } };
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
@@ -61,7 +64,8 @@ self.addEventListener('fetch', e => {
   if (!garder) return;
 
   e.respondWith(
-    fetch(e.request)
+    // cache: 'no-cache' = toujours demander au serveur si le fichier a changé (évite les vieilles copies du téléphone)
+    fetch(sansVieilleCopie(e.request))
       .then(rep => {
         if (rep && rep.ok) {
           const copie = rep.clone();
