@@ -14,6 +14,10 @@ Abdos:['Crunch','Gainage','Relevé de jambes','Crunch machine|s','Crunch oblique
 'Corps entier':['Arraché (snatch)|e','Épaulé (power clean)|e','Épaulé-jeté|e','Thruster','Kettlebell swing','Farmer walk'],
 Cardio:['Tapis de course','Marche inclinée','Vélo droit','Vélo semi-allongé','Elliptique','Rameur','Escalier (stepper)','PowerMill Climber|l','Assault bike','SkiErg']
 }).map(([g,l])=>l.map(n=>{const[a,t]=n.split('|');return[a,g,T[t]||'']})));
+/* Machines exclusives au catalogue On Air (modèles cités par Life Fitness et Panatta) : jamais mélangées aux autres salles */
+const XO=[['Tirage vertical Select','Dos','Hammer Strength Select'],['Leg extension Select','Jambes','Hammer Strength Select'],['Abducteurs Select','Fessiers','Hammer Strength Select'],
+['Tirage vertical convergent (Super Lat Machine)','Dos','Panatta'],['Rowing bas (Super Low Row)','Dos','Panatta'],['Développé vertical (Super Vertical Chest Press)','Pectoraux','Panatta'],['Développé incliné (Super Inclined Chest Press)','Pectoraux','Panatta'],['Développé décliné (Super Declined Chest Press)','Pectoraux','Panatta']];
+const XS=new Set(XO.map(x=>x[0]));LIB.push(...XO);
 const MU=Object.assign(Object.create(null),Object.fromEntries(LIB.map(x=>[x[0],x[1]])));
 const TG=Object.assign(Object.create(null),Object.fromEntries(LIB.map(x=>[x[0],x[2]])));
 const DB=`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>`;
@@ -115,15 +119,30 @@ const MG='Ma salle';
    et chaque club est différent. Ces modèles sont donc un point de départ « probable » à vérifier sur place. */
 const CARDIO=['Tapis de course','Marche inclinée','Vélo droit','Vélo semi-allongé','Elliptique','Rameur','Escalier (stepper)'];
 const CROSS=['Rameur','Assault bike','SkiErg','Kettlebell swing','Farmer walk','Thruster'];
-const pickLib=tags=>LIB.filter(([n,m,t])=>m!=='Cardio'&&tags.includes(t)).map(x=>x[0]);
+const pickLib=tags=>LIB.filter(([n,m,t])=>m!=='Cardio'&&!XS.has(n)&&tags.includes(t)).map(x=>x[0]);
 const BASE=()=>[...pickLib(['','Machine guidée','Poulie']),...CARDIO];
-const CHAINS=[
+/* ⭐ Catalogue On Air : enseigne prioritaire, catalogue à part, rangé par familles de machines */
+const ONAIR={id:'on-air',name:'On Air',brands:'Hammer Strength, Life Fitness, Panatta (grands clubs)',info:'Catalogue dédié : Hammer Strength à disques et Select, cardio Life Fitness, espace Panatta dans les grands clubs.',
+groups:[
+{t:'Hammer Strength à disques',on:1,eq:()=>pickLib(['Hammer Strength'])},
+{t:'Hammer Strength Select (guidées)',on:1,eq:()=>XO.filter(x=>x[2]==='Hammer Strength Select').map(x=>x[0])},
+{t:'Panatta Freeweight Special (grands clubs)',on:0,eq:()=>XO.filter(x=>x[2]==='Panatta').map(x=>x[0])},
+{t:'Poids libres, poulies et machines guidées',on:1,eq:()=>pickLib(['','Machine guidée','Poulie'])},
+{t:'Cardio Life Fitness',on:1,eq:()=>[...CARDIO,'PowerMill Climber']}]};
+/* Catalogue séparé : les autres enseignes (jamais les machines exclusives On Air) */
+const OTHERS=[
 {id:'basic-fit',name:'Basic-Fit',brands:'Matrix, Technogym dans certains clubs',info:'Poids libres, machines guidées, multi-stations et cardio.',eq:BASE},
 {id:'fitness-park',name:'Fitness Park',brands:'Hammer Strength, Technogym',info:'Machines Hammer Strength, zone cross-training (rameur, airbike, SkiErg, kettlebells).',eq:()=>[...BASE(),...pickLib(['Hammer Strength']),...CROSS]},
-{id:'on-air',name:'On Air',brands:'Hammer Strength, Life Fitness, Panatta dans les grands clubs',info:'Machines Hammer Strength à disques et guidées (tirage vertical, leg extension, abducteurs), cardio Life Fitness.',eq:()=>[...BASE(),...pickLib(['Hammer Strength'])]},
 {id:'neoness',name:'Neoness',brands:'Matrix',info:'Machines guidées, poids libres et cardio Matrix.',eq:BASE},
 {id:'orange-bleue',name:'L’Orange Bleue',brands:'BH, Bodytone',info:'Machines guidées, poids libres et cardio (tapis, vélos, elliptiques, rameurs).',eq:BASE},
 {id:'keepcool',name:'Keepcool',brands:'machines à air comprimé, Technogym dans certains clubs',info:'Machines guidées, poids libres, cardio ; espace « Lady Corner » dans plusieurs clubs.',eq:BASE}];
+const CHAINS=[ONAIR,...OTHERS];
+/* catalogue complet d'une enseigne, et machines cochées par défaut à la création */
+const catOf=c=>[...new Set(c.groups?c.groups.flatMap(g=>g.eq()):c.eq())];
+const defOf=c=>[...new Set(c.groups?c.groups.filter(g=>g.on).flatMap(g=>g.eq()):c.eq())];
+const CAT='Catalogue';
+/* une machine exclusive On Air n'est visible que si la salle active est une salle On Air */
+const vis=n=>!XS.has(n)||(gymCur()&&gymCur().chain==='on-air');
 const chainOf=g=>g&&CHAINS.find(c=>c.id===g.chain)||null;
 const restFor=n=>(S.rests&&S.rests[K(n)])||S.rest||90;
 const fmtN=n=>String(Math.round(n*100)/100).replace('.',',');
@@ -172,8 +191,8 @@ function iconOf(n){
 if(CI[n])return CI[n];
 const tg=TG[n];
 if(tg==='Poulie')return 'cable';
-if(tg==='Hammer Strength')return 'plate';
-if(tg==='Machine guidée')return 'stack';
+if(tg==='Hammer Strength'||tg==='Panatta')return 'plate';
+if(tg==='Machine guidée'||tg==='Hammer Strength Select')return 'stack';
 if(/haltère|kettlebell|farmer|thruster/i.test(n))return 'dumbbell';
 if(/barre|squat|soulevé|développé|good morning|hip thrust|push press|arraché|épaulé/i.test(n)||tg==='Eleiko')return 'barbell';
 if(/pompes|tractions|dips|gainage|crunch|roue|relevé|fentes|step|nordic|russian|reverse|hyperext/i.test(n))return 'body';
@@ -255,9 +274,14 @@ ${cardio7}<div class="card"><div class="hist-date">Records</div><div class="mu">
 /* Sélecteur d’exercices (le bouton Retour d’Android le ferme) */
 let gq='',gm='Tous';
 function glist(){
-const g=gymCur();if(gm===MG&&!g)gm='Tous';
-const q=norm(gq),l=LIB.filter(([n,m])=>(gm==='Tous'||(gm===MG?inGym(n):m===gm))&&norm(n).includes(q));
-return l.map(([n,m,tg])=>{const on=g&&inGym(n);return `<div class="gi${on?' in':''}">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(m)}${tg?' · '+esc(tg):''}</span></div>${g?`<button class="tg${on?' on':''}" data-act="gtog" data-n="${esc(n)}" aria-pressed="${!!on}" aria-label="${on?'Retirer de':'Ajouter à'} ${esc(g.name)} : ${esc(n)}">${on?'✓':'+'}</button>`:''}</div>`}).join('')||`<p class="empty">${gm===MG?'Aucune machine cochée pour l’instant. Choisis « Tous » et touche + sur les machines de ta salle.':'Aucun résultat.'}</p>`;
+const g=gymCur(),c=chainOf(g);if((gm===MG&&!g)||(gm===CAT&&!c))gm='Tous';
+const q=norm(gq),row=([n,m,tg])=>{const on=g&&inGym(n);return `<div class="gi${on?' in':''}">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(m)}${tg?' · '+esc(tg):''}</span></div>${g?`<button class="tg${on?' on':''}" data-act="gtog" data-n="${esc(n)}" aria-pressed="${!!on}" aria-label="${on?'Retirer de':'Ajouter à'} ${esc(g.name)} : ${esc(n)}">${on?'✓':'+'}</button>`:''}</div>`},match=([n])=>norm(n).includes(q);
+/* Catalogue de l'enseigne : rangé par familles (On Air) ou en une liste (autres enseignes) */
+if(gm===CAT){const L=n=>LIB.find(x=>x[0]===n);
+if(c.groups)return c.groups.map(gr=>{const l=gr.eq().map(L).filter(Boolean).filter(match);return l.length?`<h2 class="cg">${esc(gr.t)}<small>${l.length}</small></h2>${l.map(row).join('')}`:''}).join('')||'<p class="empty">Aucun résultat.</p>';
+return catOf(c).map(L).filter(Boolean).filter(match).map(row).join('')||'<p class="empty">Aucun résultat.</p>'}
+const l=LIB.filter(([n,m])=>vis(n)&&(gm==='Tous'||(gm===MG?inGym(n):m===gm))&&match([n]));
+return l.map(row).join('')||`<p class="empty">${gm===MG?'Aucune machine cochée pour l’instant. Choisis « Tous » et touche + sur les machines de ta salle.':'Aucun résultat.'}</p>`;
 }
 /* Carte « Ma salle » en haut du Guide */
 function gymCard(){
@@ -269,9 +293,9 @@ ${chainOf(g)?`<p class="mu">Modèle ${esc(chainOf(g).name)} (marques annoncées 
 ${g?`<button class="del" data-act="gdel">Supprimer cette salle</button>`:''}</div>`;
 }
 function viewGuide(){
-const ch=['Tous',...(gymCur()?[MG]:[]),...M];
+const ch=['Tous',...(gymCur()?[MG]:[]),...(chainOf(gymCur())?[CAT]:[]),...M];
 return `<h1>Guide</h1><p class="sub">Repère les machines avant de créer ta routine. Chaque dessin montre le type de machine à repérer dans la salle.</p>${gymCard()}
-<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine"><div class="chips">${ch.map(m=>`<button class="chip${gm===m?' on':''}" data-act="gm" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div><div id="gl">${glist()}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
+<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine"><div class="chips">${ch.map(m=>`<button class="chip${gm===m?' on':''}${m===CAT&&chainOf(gymCur()).groups?' star':''}" data-act="gm" data-m="${esc(m)}">${esc(m===CAT?(chainOf(gymCur()).groups?'⭐ ':'')+'Catalogue '+chainOf(gymCur()).name:m)}</button>`).join('')}</div><div id="gl">${glist()}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
 }
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 function openSheet(o){if(!pk)history.pushState({fx:1},'');pk=o;sheet()}
@@ -288,12 +312,16 @@ if(pk.data){el.innerHTML=top('Sauvegarde')+viewData();fillData();return}
 if(pk.imp){const d=pk.imp,n=d.sessions.filter(x=>x.id!==d.current).length;el.innerHTML=top('Importer')+`<div class="card"><div class="hist-date">Fichier valide ✓</div><div class="mu">${n} séance${n>1?'s':''}, ${d.routines.length} routine${d.routines.length>1?'s':''}${d.gyms.length?', '+d.gyms.length+' salle'+(d.gyms.length>1?'s':''):''}.</div></div>
 <div class="card"><button class="btn" data-act="imerge">Fusionner (conseillé)</button><p class="mu">Ajoute les séances qui manquent sur ce téléphone et garde la version la plus récente de chaque séance. Rien n’est effacé.</p></div>
 <div class="card"><button class="sec" data-act="irepl">Tout remplacer</button><p class="mu">Les données de ce téléphone sont remplacées par celles du fichier. Une version de secours est créée juste avant.</p></div>`;return}
-if(pk.gtpl){el.innerHTML=top('Nouvelle salle')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » : par quoi veux-tu commencer ? Tu pourras cocher ou décocher chaque machine ensuite dans le Guide.</p>
+if(pk.gtpl){if(!pk.others)el.innerHTML=top('Nouvelle salle')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » : par quoi veux-tu commencer ? Tu pourras cocher ou décocher chaque machine ensuite dans le Guide.</p>
+<h2>⭐ Mon enseigne prioritaire</h2>
+<button class="pi prio" data-act="gtpl" data-t="on-air"><div class="pt"><b>On Air</b><span>${esc(ONAIR.info)}</span><small>${ONAIR.groups.map(g=>esc(g.t)+' ('+g.eq().length+')'+(g.on?'':' : à cocher toi-même')).join(' · ')}</small></div></button>
+<h2>Ou partir de zéro</h2>
 <button class="pi" data-act="gtpl" data-t="vide"><div class="pt"><b>Je coche moi-même</b><span>Liste vide, idéal pour faire le tour de la salle</span></div></button>
 <button class="pi" data-act="gtpl" data-t="base"><div class="pt"><b>Salle essentielle</b><span>Barres, haltères, poulies et machines guidées, sans les marques spécialisées</span></div></button>
 <button class="pi" data-act="gtpl" data-t="tout"><div class="pt"><b>Salle très équipée</b><span>Toutes les machines du Guide (Hammer Strength, Eleiko…), tu décocheras celles qui manquent</span></div></button>
-<h2>Mon enseigne</h2><p class="mu" style="margin-left:4px">Machines probables, d’après ce que chaque enseigne annonce publiquement. Chaque club est différent : vérifie sur place et décoche ce qui manque.</p>
-${CHAINS.map(c=>`<button class="pi" data-act="gtpl" data-t="${c.id}"><div class="pt"><b>${esc(c.name)}</b><span>${esc(c.info)}</span><small>Marques annoncées : ${esc(c.brands)}</small></div></button>`).join('')}`;return}
+<button class="sec" data-act="gothers" style="margin-top:8px">Autres enseignes (catalogue séparé)</button>`;
+if(pk.others)el.innerHTML=top('Autres enseignes')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » · Catalogue séparé d’On Air : ces modèles ne contiennent jamais les machines exclusives On Air. Machines probables d’après ce que chaque enseigne annonce publiquement : vérifie sur place et décoche ce qui manque.</p>
+${OTHERS.map(c=>`<button class="pi" data-act="gtpl" data-t="${c.id}"><div class="pt"><b>${esc(c.name)}</b><span>${esc(c.info)}</span><small>Marques annoncées : ${esc(c.brands)}</small></div></button>`).join('')}`;return}
 if(pk.tool){el.innerHTML=top('Disques')+`<p class="mu" style="margin-left:4px">Charge totale (barre comprise)</p><input id="dq" inputmode="decimal" maxlength="6" placeholder="Ex. 82,5" value="${esc(pk.kg)}" autocomplete="off" aria-label="Charge totale en kg"><div class="chips">${[20,15,10].map(b=>`<button class="chip${pk.bar===b?' on':''}" data-act="bar" data-b="${b}">Barre ${b} kg</button>`).join('')}</div><div id="dr">${discs()}</div>`;return}
 el.innerHTML=top('Exercices')+`<input id="pq" placeholder="Rechercher ou créer" value="${esc(pk.q)}" autocomplete="off" aria-label="Rechercher"><div class="chips">${['Tous',...(gymCur()?[MG]:[]),...M].map(m=>`<button class="chip${pk.m===m?' on':''}" data-act="pm" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div><div id="pl">${plist()}</div>`;
 }
@@ -308,7 +336,7 @@ return `<div class="card"><div class="mu">Pour chaque côté de la barre :</div>
 }
 function plist(){
 const q=norm(pk.q),own=names().filter(n=>!MU[n]).map(n=>[n,'Perso']);
-const l=[...LIB,...own].filter(([n,m])=>(pk.m==='Tous'||(pk.m===MG?inGym(n):m===pk.m))&&norm(n).includes(q));
+const l=[...LIB,...own].filter(([n,m])=>vis(n)&&(pk.m==='Tous'||(pk.m===MG?inGym(n):m===pk.m))&&norm(n).includes(q));
 const mk=(n,m,t)=>`<button class="pi" data-act="padd" data-n="${esc(n)}">${thumb(n)}<div class="pt"><b>${t}</b><span>${esc(m)}</span></div></button>`;
 const nv=cname(pk.q);
 const h=l.map(([n,m])=>mk(n,m+(TG[n]?' · '+TG[n]:''),esc(n))).join('')+(nv&&q&&![...LIB,...own].some(([n])=>norm(n)===q)?mk(nv,'Exercice perso','Créer « '+esc(nv)+' »'):'');
@@ -479,9 +507,10 @@ S.trash.splice(x,1);save();render();sheet();toast('Restauré ✓');return}
 if(a==='tempty'){if(!confirm('Vider la corbeille ? Ces éléments seront effacés définitivement.'))return;S.trash=[];save();render();sheet();return}
 if(a==='gtpl'){const name=pk.gtpl,t=b.dataset.t,id=uid();
 const ch=CHAINS.find(c=>c.id===t);
-const eq=ch?[...new Set(ch.eq())]:t==='tout'?LIB.map(x=>x[0]):t==='base'?LIB.filter(x=>!['Hammer Strength','Eleiko','Life Fitness'].includes(x[2])).map(x=>x[0]):[];
-S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;tab='aide';gm=eq.length?MG:'Tous';save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
+const eq=ch?defOf(ch):t==='tout'?LIB.filter(x=>!XS.has(x[0])).map(x=>x[0]):t==='base'?LIB.filter(x=>!['Hammer Strength','Eleiko','Life Fitness'].includes(x[2])).map(x=>x[0]):[];
+S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;tab='aide';gm=ch?CAT:eq.length?MG:'Tous';save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
 if(a==='closepk'){closePk();return}
+if(a==='gothers'){if(!pk||!pk.gtpl)return;pk.others=1;sheet();return}
 if(a==='pick'){openPk();return}
 if(a==='tool'){openTool();return}
 if(a==='bar'){pk.bar=[20,15,10].includes(+b.dataset.b)?+b.dataset.b:20;sheet();return}
@@ -492,7 +521,7 @@ else if(a==='wu'){const x=s.exercises[i].sets[j];if(x){if(x.w)delete x.w;else x.
 else if(a==='sug'){const sg=suggest(s.exercises[i].name);if(sg)s.exercises[i].sets.forEach(x=>{if(!x.done&&!x.w)x.kg=String(Math.round(sg.kg*100)/100)})}
 else if(a==='snz'){S.snooze=Date.now()}
 else if(a==='sx'){sx=b.dataset.n}
-else if(a==='gm'){gm=M.includes(b.dataset.m)||b.dataset.m===MG?b.dataset.m:'Tous'}
+else if(a==='gm'){gm=M.includes(b.dataset.m)||b.dataset.m===MG||b.dataset.m===CAT?b.dataset.m:'Tous'}
 else if(a==='gnew'){if(S.gyms.length>=20){alert('20 salles maximum.');return}const n=prompt('Nom de ta salle (ex. : la ville ou le quartier)','Ma salle');if(!n||!cname(n))return;openSheet({gtpl:cname(n).slice(0,40)});return}
 else if(a==='gsel'){S.gym=S.gyms.some(g=>g.id===b.dataset.id)?b.dataset.id:null;if(!S.gym&&gm===MG)gm='Tous'}
 else if(a==='gren'){const g=gymCur();if(!g)return;const n=prompt('Nouveau nom de la salle',g.name);if(!n||!cname(n))return;g.name=cname(n).slice(0,40)}
