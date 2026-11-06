@@ -9,7 +9,7 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v11'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v12'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
