@@ -35,3 +35,23 @@ test('vieille page qui revient toujours → pas de boucle infinie, un message s�
   assert.ok(n <= 3, `page demandée ${n} fois`);
   assert.equal(await p.$eval('#warn', e => e.hidden), false);
 });
+
+test('vieille page de la v2.2.1 (qui demande app.js) → réparation, puis la nouvelle version s’affiche', async () => {
+  const p = await A.page();
+  await donner(p, { ...VIDE, sessions: [seance('a', 1)] });
+  await p.evaluate(() => sessionStorage.clear());
+  let n = 0;
+  await p.route(A.url, async r => {
+    const res = await r.fetch();
+    let t = await res.text();
+    if (n++ === 0) t = t.replace(/<script type="module"[^>]*><\/script>/, '<script src="app.js?v=2.2.1" defer></script>').replace(/name="app-version" content="[^"]+"/, 'name="app-version" content="2.2.1"');
+    return r.fulfill({ response: res, body: t });
+  });
+  await p.reload();
+  await p.waitForTimeout(2500);
+  assert.ok(n >= 2, 'la page a été redemandée');
+  assert.ok(await p.$('script[type=module]'), 'nouvelle page chargée');
+  assert.equal(await p.$eval('#warn', e => e.hidden), true);
+  assert.equal((await donnees(p)).sessions.length, 1);
+  assert.deepEqual(p.erreurs, []);
+});
