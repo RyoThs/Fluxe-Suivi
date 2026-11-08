@@ -1,5 +1,5 @@
 (function(){
-const KEY='muscu-v1',VER='2.2.0'; /* ne pas changer KEY : c'est la clé où sont tes données */
+const KEY='muscu-v1',VER='2.2.1'; /* ne pas changer KEY : c'est la clé où sont tes données */
 const BKD=[3,7,14,30];
 const FORMAT=3,J30=30*864e5; /* FORMAT : version du fichier de sauvegarde · J30 : durée de la corbeille */
 const M=['Pectoraux','Dos','Épaules','Bras','Jambes','Fessiers','Abdos','Corps entier','Cardio'];
@@ -76,7 +76,10 @@ return o;
 function unwrap(p){return p&&typeof p==='object'&&p.app==='fluxe-suivi'&&p.data&&typeof p.data==='object'?p.data:p}
 function purge(d){const n=Date.now();d.trash=d.trash.filter(t=>n-t.at<J30);return d}
 function load(){
-try{const raw=localStorage.getItem(KEY),p=JSON.parse(raw),d=clean(p);if(d){if(p.sessions.length!==d.sessions.length)try{localStorage.setItem(KEY+'-brut',raw)}catch(e){}return purge(d)}}catch(e){}
+let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
+try{const p=JSON.parse(raw),d=clean(p);if(d){if(p.sessions.length!==d.sessions.length)try{localStorage.setItem(KEY+'-brut',raw)}catch(e){}return purge(d)}}catch(e){}
+/* Données présentes mais illisibles : on en garde une copie AVANT que le premier enregistrement ne les écrase */
+if(raw){load.bad=raw;try{localStorage.setItem(KEY+'-illisible',raw)}catch(e){}}
 return{sessions:[],routines:[],current:null,notes:{},rests:{},trash:[],gyms:[]};
 }
 const MSG_SAVE='⚠ Impossible d’enregistrer sur ce navigateur : tes séances seront perdues à la fermeture. Ouvre Fluxe depuis l’icône de l’écran d’accueil (pas en navigation privée) et fais une sauvegarde.';
@@ -396,7 +399,7 @@ async run(mode,f){const db=await this.open();return new Promise((ok,ko)=>{const 
 all(){return this.run('readonly',st=>st.getAll()).then(l=>(l||[]).sort((a,b)=>b.at-a.at))},
 put(v){return this.run('readwrite',st=>st.put(v))},
 del(at){return this.run('readwrite',st=>st.delete(at))}};
-const WHY={auto:'Copie automatique',imp:'Avant un import',rest:'Avant une restauration',man:'Créée à la main',old:'Ancienne copie (avant v2.1)'};
+const WHY={auto:'Copie automatique',imp:'Avant un import',rest:'Avant une restauration',man:'Créée à la main',old:'Ancienne copie (avant v2.1)',bad:'Données illisibles (copie gardée)'};
 let lastAt=0;
 async function snap(why,raw){
 try{
@@ -414,6 +417,7 @@ return true;
 /* Au démarrage : copie du jour + récupération unique des anciennes copies gardées dans le localStorage */
 async function snapStart(){
 try{if(!localStorage.getItem('fx-old-done')){for(const k of [KEY+'-sauvegarde',KEY+'-brut']){const o=localStorage.getItem(k);if(o)await snap('old',o)}localStorage.setItem('fx-old-done','1')}}catch(e){}
+if(load.bad){await snap('bad',load.bad);warn('bad','⚠ Les données enregistrées sur ce téléphone étaient illisibles. Une copie a été gardée à part. Si tu as un fichier de sauvegarde, importe-le : Historique → 🛟 Sauvegarde → Importer un fichier.')}
 if(done().length)snap('auto');
 }
 /* ===== Sauvegarde vers un fichier (format versionné) et partage ===== */
