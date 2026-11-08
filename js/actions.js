@@ -5,10 +5,10 @@ import {clean,purge,unwrap} from './donnees.js';
 import {S,cur,pk,save,setS,setTab,toast} from './etat.js';
 import {$,K,RS,cname,dn,mins,norm,uid} from './outils.js';
 import {newEx,restFor,suggest} from './calculs.js';
-import {MG,gymCur,inGym} from './salle.js';
+import {gymCur,inGym} from './salle.js';
 import {render} from './rendu.js';
 import {setSx} from './vues/stats.js';
-import {glist,gm,gymCard,setGm,setGq} from './vues/guide.js';
+import {glist,gymCard,setGc,setGm,setGq,setGv} from './vues/guide.js';
 import {closePk,discs,openPk,openSheet,openTool,plist,sheet} from './vues/panneaux.js';
 import {fillData} from './vues/ecran-sauvegarde.js';
 import {tAdd,tStart,tStop} from './minuteur.js';
@@ -41,7 +41,8 @@ if(['pm','bar','imerge','irepl','gtpl','trest','vrest','tempty'].includes(a)&&!p
 if((a==='start'||a==='startr')&&S.current)return;
 if(a==='t+'){tAdd(15000);return}
 if(a==='t0'){tStop();return}
-if(a==='pm'){pk.m=b.dataset.m;sheet();return}
+if(a==='pm'){pk.m=M.includes(b.dataset.m)?b.dataset.m:'Tous';sheet();return}
+if(a==='pv'){pk.v=b.dataset.v==='salle'?'salle':'tout';sheet();return}
 if(a==='data'){openSheet({data:1});return}
 if(a==='file'){saveFile();return}
 if(a==='imerge'||a==='irepl'){const d=pk.imp;if(!d)return;
@@ -64,9 +65,8 @@ if(a==='tempty'){if(!confirm('Vider la corbeille ? Ces éléments seront effacé
 if(a==='gtpl'){const name=pk.gtpl,t=b.dataset.t,id=uid();
 const ch=CHAINS.find(c=>c.id===t);
 const eq=ch?defOf(ch):t==='tout'?LIB.filter(x=>!XS.has(x[0])).map(x=>x[0]):t==='base'?LIB.filter(x=>!['Hammer Strength','Eleiko','Life Fitness'].includes(x[2])).map(x=>x[0]):[];
-S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;setTab('aide');setGm(ch?(ch.id==='on-air'?C1:C2):eq.length?MG:'Tous');save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
+S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;setTab('aide');setGm('Tous');if(ch){setGv('cat');setGc(ch.id==='on-air'?C1:C2)}else setGv(eq.length?'salle':'tout');save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
 if(a==='closepk'){closePk();return}
-if(a==='gothers'){if(!pk||!pk.gtpl)return;pk.others=1;sheet();return}
 if(a==='pick'){openPk();return}
 if(a==='tool'){openTool();return}
 if(a==='bar'){pk.bar=[20,15,10].includes(+b.dataset.b)?+b.dataset.b:20;sheet();return}
@@ -78,11 +78,13 @@ else if(a==='sug'){const sg=suggest(s.exercises[i].name);if(sg)s.exercises[i].se
 else if(a==='snz'){S.snooze=Date.now();toast('D’accord, je te le rappelle dans 2 jours')}
 else if(a==='bke'){const d=+b.dataset.d;if(BKD.includes(d)){S.bkEvery=d;S.snooze=0;save();render();sheet();toast('Rappel : tous les '+d+' jours');return}}
 else if(a==='sx'){setSx(b.dataset.n)}
-else if(a==='gm'){setGm(M.includes(b.dataset.m)||[MG,C1,C2].includes(b.dataset.m)?b.dataset.m:'Tous')}
+else if(a==='gm'){setGm(b.dataset.m)}
+else if(a==='gv'){setGv(b.dataset.v)}
+else if(a==='gc'){setGc(b.dataset.v)}
 else if(a==='gnew'){if(S.gyms.length>=20){alert('20 salles maximum.');return}const n=prompt('Nom de ta salle (ex. : la ville ou le quartier)','Ma salle');if(!n||!cname(n))return;openSheet({gtpl:cname(n).slice(0,40)});return}
-else if(a==='gsel'){S.gym=S.gyms.some(g=>g.id===b.dataset.id)?b.dataset.id:null;if(!S.gym&&gm===MG)setGm('Tous')}
+else if(a==='gsel'){S.gym=S.gyms.some(g=>g.id===b.dataset.id)?b.dataset.id:null;if(!S.gym)setGv('tout')}
 else if(a==='gren'){const g=gymCur();if(!g)return;const n=prompt('Nouveau nom de la salle',g.name);if(!n||!cname(n))return;g.name=cname(n).slice(0,40)}
-else if(a==='gdel'){const g=gymCur();if(!g||!confirm('Supprimer la salle « '+g.name+' » ? Ses machines cochées et ses réglages seront perdus. Tes séances restent dans l’historique.'))return;S.gyms=S.gyms.filter(x=>x.id!==g.id);S.gym=S.gyms[0]?S.gyms[0].id:null;setGm('Tous')}
+else if(a==='gdel'){const g=gymCur();if(!g||!confirm('Supprimer la salle « '+g.name+' » ? Ses machines cochées et ses réglages seront perdus. Tes séances restent dans l’historique.'))return;S.gyms=S.gyms.filter(x=>x.id!==g.id);S.gym=S.gyms[0]?S.gyms[0].id:null;setGv('tout')}
 else if(a==='gtog'){const g=gymCur(),n=cname(b.dataset.n);if(!g||!n)return;const i=g.eq.findIndex(x=>norm(x)===norm(n));if(i>=0)g.eq.splice(i,1);else if(g.eq.length<600)g.eq.push(n);save();$('#gl').innerHTML=glist();const c=document.querySelector('.card.gym');if(c)c.outerHTML=gymCard();return}
 else if(a==='editsess'){if(S.current){alert('Termine ou annule d’abord la séance en cours.');return}const x=S.sessions.find(y=>y.id===b.dataset.id);if(!x)return;S.editBak=JSON.parse(JSON.stringify(x));x.edit=true;S.current=x.id;setTab('seance');window.scrollTo(0,0)}
 else if(a==='start'||a==='startr'){const r=a==='startr'?S.routines[k]:null;if(a==='startr'&&!r)return;const n={id:uid(),date:Date.now(),exercises:r?r.exercises.map(x=>newEx(x)):[]},g=gymCur();if(g){n.g=g.id;n.gn=g.name}S.sessions.push(n);S.current=n.id}
