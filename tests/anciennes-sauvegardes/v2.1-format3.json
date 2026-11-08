@@ -1,0 +1,23 @@
+{
+ "app": "fluxe-suivi",
+ "format": 3,
+ "version": "2.1",
+ "exportedAt": "2026-11-01T10:00:00.000Z",
+ "data": {
+  "sessions": [
+   {"id": "mx9k1a", "date": 1761900000000, "mod": 1761903000000, "dur": 60, "g": "salle1", "gn": "On Air Lyon", "exercises": [
+    {"name": "Tractions", "sets": [{"kg": "0", "reps": "10", "done": true}, {"kg": "0", "reps": "8", "done": true, "w": true}]}
+   ]},
+   {"id": "mx9k1b", "date": 1761990000000, "dur": 35, "exercises": [
+    {"name": "Rowing barre", "sets": [{"kg": "60", "reps": "12", "done": true}]}
+   ]}
+  ],
+  "routines": [{"name": "Dos", "exercises": ["Tractions", "Rowing barre"]}],
+  "current": null,
+  "notes": {},
+  "rests": {},
+  "trash": [{"at": 1761950000000, "s": {"id": "mx9k0z", "date": 1761800000000, "exercises": [{"name": "Curl", "sets": [{"kg": "12", "reps": "10"}]}]}}],
+  "gyms": [{"id": "salle1", "name": "On Air Lyon", "chain": "on-air", "eq": ["Tractions", "SkiErg"], "notes": {"k:tractions": "Prise large"}}],
+  "gym": "salle1"
+ }
+}
