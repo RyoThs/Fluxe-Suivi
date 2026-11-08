@@ -1,0 +1,18 @@
+{
+ "sessions": [
+  {"id": "mv1a2b3c", "date": 1760000000000, "dur": 52, "exercises": [
+   {"name": "Squat", "sets": [{"kg": "100", "reps": "8", "done": true}, {"kg": "100", "reps": "7", "done": true}]},
+   {"name": "Presse à cuisses", "sets": [{"kg": 180, "reps": 10}]}
+  ]},
+  {"id": "mv1a2b3d", "date": 1760200000000, "dur": 41, "exercises": [
+   {"name": "Développé couché", "sets": [{"kg": "80", "reps": "10", "done": true}]},
+   {"name": "Tapis de course", "cardio": true, "sets": [{"min": "15", "km": "2.5", "kcal": "180"}]}
+  ]}
+ ],
+ "routines": [{"name": "Jambes", "exercises": ["Squat", "Presse à cuisses"]}],
+ "current": null,
+ "notes": {"k:squat": "Barre haute"},
+ "rests": {"k:squat": 150},
+ "rest": 90,
+ "lastBackup": 1760300000000
+}

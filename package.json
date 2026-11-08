@@ -1,0 +1,11 @@
+{
+  "name": "fluxe-suivi",
+  "private": true,
+  "description": "Fluxe Suivi : carnet de musculation (PWA). Ce fichier sert seulement aux tests automatiques.",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 \"tests/*.test.js\""
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
