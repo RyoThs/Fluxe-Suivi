@@ -3,12 +3,13 @@ import {LIB,M,MU,ONAIR,OTHERS,TG} from '../catalogue.js';
 import {pk,setPk} from '../etat.js';
 import {$,cname,esc,fmtN,norm} from '../outils.js';
 import {names} from '../calculs.js';
-import {MG,gymCur,inGym,vis} from '../salle.js';
+import {gymCur,inGym,vis} from '../salle.js';
 import {thumb} from '../icones.js';
 import {fillData,viewData} from './ecran-sauvegarde.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o){if(!pk)history.pushState({fx:1},'');setPk(o);sheet()}
-export function openPk(){const g=gymCur();openSheet({q:'',m:g&&g.eq.length?MG:'Tous'})}
+/* Choix d'exercice : v = 'salle' ou 'tout', m = muscle ('Tous' ou Pectoraux…) */
+export function openPk(){const g=gymCur();openSheet({q:'',v:g&&g.eq.length?'salle':'tout',m:'Tous'})}
 export function openTool(){openSheet({tool:1,kg:'',bar:20})}
 export function closePk(){setPk(null);sheet();if(history.state&&history.state.fx)history.back()}
 window.addEventListener('popstate',()=>{if(pk){setPk(null);sheet()}});
@@ -21,18 +22,18 @@ if(pk.data){el.innerHTML=top('Sauvegarde')+viewData();fillData();return}
 if(pk.imp){const d=pk.imp,n=d.sessions.filter(x=>x.id!==d.current).length;el.innerHTML=top('Importer')+`<div class="card"><div class="hist-date">Fichier valide ✓</div><div class="mu">${n} séance${n>1?'s':''}, ${d.routines.length} routine${d.routines.length>1?'s':''}${d.gyms.length?', '+d.gyms.length+' salle'+(d.gyms.length>1?'s':''):''}.</div></div>
 <div class="card"><button class="btn" data-act="imerge">Fusionner (conseillé)</button><p class="mu">Ajoute les séances qui manquent sur ce téléphone et garde la version la plus récente de chaque séance. Rien n’est effacé.</p></div>
 <div class="card"><button class="sec" data-act="irepl">Tout remplacer</button><p class="mu">Les données de ce téléphone sont remplacées par celles du fichier. Une version de secours est créée juste avant.</p></div>`;return}
-if(pk.gtpl){if(!pk.others)el.innerHTML=top('Nouvelle salle')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » : par quoi veux-tu commencer ? Tu pourras cocher ou décocher chaque machine ensuite dans le Guide.</p>
-<h2>⭐ Mon enseigne prioritaire</h2>
-<button class="pi prio" data-act="gtpl" data-t="on-air"><div class="pt"><b>On Air</b><span>${esc(ONAIR.info)}</span><small>${ONAIR.groups.map(g=>esc(g.t)+' ('+g.eq().length+')'+(g.on?'':' : à cocher toi-même')).join(' · ')}</small></div></button>
-<h2>Ou partir de zéro</h2>
-<button class="pi" data-act="gtpl" data-t="vide"><div class="pt"><b>Je coche moi-même</b><span>Liste vide, idéal pour faire le tour de la salle</span></div></button>
-<button class="pi" data-act="gtpl" data-t="base"><div class="pt"><b>Salle essentielle</b><span>Barres, haltères, poulies et machines guidées, sans les marques spécialisées</span></div></button>
-<button class="pi" data-act="gtpl" data-t="tout"><div class="pt"><b>Salle très équipée</b><span>Toutes les machines du Guide (Hammer Strength, Eleiko…), tu décocheras celles qui manquent</span></div></button>
-<button class="sec" data-act="gothers" style="margin-top:8px">Autres enseignes (Basic-Fit, Fitness Park…)</button>`;
-if(pk.others)el.innerHTML=top('Autres enseignes')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » · Choisis ton enseigne : ses machines probables seront cochées, et tu retrouveras toutes les machines des autres enseignes dans le « Catalogue autres enseignes » du Guide. Catalogue séparé d’On Air : ces modèles ne contiennent jamais les machines exclusives On Air. Machines probables d’après ce que chaque enseigne annonce publiquement : vérifie sur place et décoche ce qui manque.</p>
-${OTHERS.map(c=>`<button class="pi" data-act="gtpl" data-t="${c.id}"><div class="pt"><b>${esc(c.name)}</b><span>${esc(c.info)}</span><small>Marques annoncées : ${esc(c.brands)}</small></div></button>`).join('')}`;return}
+if(pk.gtpl){
+const btn=(c,cl)=>`<button class="pi${cl||''}" data-act="gtpl" data-t="${c.id}"><div class="pt"><b>${esc(c.name)}</b><span>${esc(c.brands)}</span></div></button>`;
+el.innerHTML=top('Nouvelle salle')+`<p class="mu" style="margin-left:4px">« ${esc(pk.gtpl)} » : choisis ton enseigne, ses machines probables seront cochées. Tu ajusteras ensuite dans le Guide (+ / ✓).</p>
+<h2>⭐ Enseigne prioritaire</h2>${btn(ONAIR,' prio')}
+<h2>Autres enseignes</h2>${OTHERS.map(c=>btn(c)).join('')}
+<h2>Sans enseigne</h2>
+<button class="pi" data-act="gtpl" data-t="vide"><div class="pt"><b>Je coche moi-même</b><span>Liste vide, pour faire le tour de la salle</span></div></button>
+<button class="pi" data-act="gtpl" data-t="base"><div class="pt"><b>Salle essentielle</b><span>Barres, haltères, poulies, machines guidées</span></div></button>
+<button class="pi" data-act="gtpl" data-t="tout"><div class="pt"><b>Salle très équipée</b><span>Toutes les machines, tu décoches ce qui manque</span></div></button>`;return}
 if(pk.tool){el.innerHTML=top('Disques')+`<p class="mu" style="margin-left:4px">Charge totale (barre comprise)</p><input id="dq" inputmode="decimal" maxlength="6" placeholder="Ex. 82,5" value="${esc(pk.kg)}" autocomplete="off" aria-label="Charge totale en kg"><div class="chips">${[20,15,10].map(b=>`<button class="chip${pk.bar===b?' on':''}" data-act="bar" data-b="${b}">Barre ${b} kg</button>`).join('')}</div><div id="dr">${discs()}</div>`;return}
-el.innerHTML=top('Exercices')+`<input id="pq" placeholder="Rechercher ou créer" value="${esc(pk.q)}" autocomplete="off" aria-label="Rechercher"><div class="chips">${['Tous',...(gymCur()?[MG]:[]),...M].map(m=>`<button class="chip${pk.m===m?' on':''}" data-act="pm" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div><div id="pl">${plist()}</div>`;
+const vues=gymCur()?`<div class="seg" role="group">${[['salle','Ma salle'],['tout','Toutes']].map(([v,x])=>`<button class="${pk.v===v?'on':''}" data-act="pv" data-v="${v}" aria-pressed="${pk.v===v}">${x}</button>`).join('')}</div>`:'';
+el.innerHTML=top('Exercices')+vues+`<input id="pq" placeholder="Rechercher ou créer" value="${esc(pk.q)}" autocomplete="off" aria-label="Rechercher"><div class="chips">${['Tous',...M].map(m=>`<button class="chip${pk.m===m?' on':''}" data-act="pm" data-m="${esc(m)}">${m==='Tous'?'Tous les muscles':esc(m)}</button>`).join('')}</div><div id="pl">${plist()}</div>`;
 }
 /* Calculateur de disques : disques à mettre de chaque côté de la barre */
 export function discs(){
@@ -45,9 +46,10 @@ return `<div class="card"><div class="mu">Pour chaque côté de la barre :</div>
 }
 export function plist(){
 const q=norm(pk.q),own=names().filter(n=>!MU[n]).map(n=>[n,'Perso']);
-const l=[...LIB,...own].filter(([n,m])=>vis(n)&&(pk.m==='Tous'||(pk.m===MG?inGym(n):m===pk.m))&&norm(n).includes(q));
-const mk=(n,m,t)=>`<button class="pi" data-act="padd" data-n="${esc(n)}">${thumb(n)}<div class="pt"><b>${t}</b><span>${esc(m)}</span></div></button>`;
+const sal=pk.v==='salle'&&gymCur();
+const l=[...LIB,...own].filter(([n,m])=>vis(n)&&(!sal||inGym(n))&&(pk.m==='Tous'||m===pk.m)&&norm(n).includes(q));
+const mk=(n,m,t,tg)=>`<button class="pi" data-act="padd" data-n="${esc(n)}">${thumb(n)}<div class="pt"><b>${t}</b><span>${esc(m)}${tg?` <em class="mk">${esc(tg)}</em>`:''}</span></div></button>`;
 const nv=cname(pk.q);
-const h=l.map(([n,m])=>mk(n,m+(TG[n]?' · '+TG[n]:''),esc(n))).join('')+(nv&&q&&![...LIB,...own].some(([n])=>norm(n)===q)?mk(nv,'Exercice perso','Créer « '+esc(nv)+' »'):'');
-return h||(pk.m===MG?'<p class="empty">Aucune machine de ta salle ne correspond. Choisis « Tous » pour tout voir.</p>':'<p class="empty">Aucun résultat.</p>');
+const h=l.map(([n,m])=>mk(n,m,esc(n),TG[n])).join('')+(nv&&q&&![...LIB,...own].some(([n])=>norm(n)===q)?mk(nv,'Exercice perso','Créer « '+esc(nv)+' »'):'');
+return h||(sal?'<p class="empty">Aucune machine de ta salle ne correspond. Choisis « Toutes » pour tout voir.</p>':'<p class="empty">Aucun résultat.</p>');
 }
