@@ -32,7 +32,8 @@ groups:[
 {t:'Hammer Strength Select (guidées)',on:1,eq:()=>XO.filter(x=>x[2]==='Hammer Strength Select').map(x=>x[0])},
 {t:'Panatta Freeweight Special (grands clubs)',on:0,eq:()=>XO.filter(x=>x[2]==='Panatta').map(x=>x[0])},
 {t:'Poids libres, poulies et machines guidées',on:1,eq:()=>pickLib(['','Machine guidée','Poulie'])},
-{t:'Cardio Life Fitness',on:1,eq:()=>[...CARDIO,'PowerMill Climber']}]};
+{t:'Cardio Life Fitness',on:1,eq:()=>[...CARDIO,'PowerMill Climber']},
+{t:'Haltérophilie (barres Eleiko)',on:0,eq:()=>pickLib(['Eleiko'])}]};
 /* Catalogue séparé : les autres enseignes (jamais les machines exclusives On Air) */
 export const OTHERS=[
 {id:'basic-fit',name:'Basic-Fit',brands:'Matrix, Technogym dans certains clubs',info:'Poids libres, machines guidées, multi-stations et cardio.',eq:BASE},
@@ -50,6 +51,7 @@ export const OTHERCAT={groups:[
 {t:'Poids libres, poulies et machines guidées',eq:()=>pickLib(['','Machine guidée','Poulie'])},
 {t:'Cardio',eq:()=>CARDIO},
 {t:'Cross-training',eq:()=>CROSS},
-{t:'Hammer Strength à disques',eq:()=>pickLib(['Hammer Strength'])}]};
+{t:'Hammer Strength à disques',eq:()=>pickLib(['Hammer Strength'])},
+{t:'Haltérophilie (barres Eleiko)',eq:()=>pickLib(['Eleiko'])}]};
 /* pour chaque machine du catalogue « autres enseignes » : quelles enseignes l'annoncent */
 let WHO=null;export const whoHas=n=>{if(!WHO){WHO=Object.create(null);OTHERS.forEach(c=>c.eq().forEach(x=>{(WHO[x]=WHO[x]||[]).includes(c.name)||WHO[x].push(c.name)}))}return WHO[n]||[]};
