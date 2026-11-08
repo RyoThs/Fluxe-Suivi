@@ -37,7 +37,14 @@ test('création de salle : toutes les enseignes sur un seul écran', async () =>
   assert.deepEqual(choix, ['on-air', 'basic-fit', 'fitness-park', 'neoness', 'orange-bleue', 'keepcool', 'vide', 'base', 'tout']);
 });
 
-test('salle On Air : ouvre le catalogue On Air, puis Ma salle / Toutes / Catalogues se combinent avec le muscle', async () => {
+test('aucune machine n’est introuvable : chacune est dans au moins un catalogue', async () => {
+  const { pathToFileURL } = require('node:url');
+  const { LIB, ONAIR, OTHERCAT } = await import(pathToFileURL(require('node:path').join(__dirname, '..', 'js', 'catalogue.js')).href);
+  const dedans = new Set([...ONAIR.groups, ...OTHERCAT.groups].flatMap(g => g.eq()));
+  assert.deepEqual(LIB.map(x => x[0]).filter(n => !dedans.has(n)), []);
+});
+
+test('salle On Air : ouvre le catalogue On Air ; Ma salle / Catalogues se combinent avec le muscle', async () => {
   const p = await A.page();
   await creerSalle(p, 'on-air');
   assert.equal(await p.$eval('[data-act=gv].on', e => e.dataset.v), 'cat');
@@ -46,20 +53,19 @@ test('salle On Air : ouvre le catalogue On Air, puis Ma salle / Toutes / Catalog
   await p.click('[data-act=gm][data-m=Dos]');
   const muscles = await p.$$eval('#gl .gi .pt span', l => [...new Set(l.map(s => s.firstChild.textContent.trim()))]);
   assert.deepEqual(muscles, ['Dos'], 'le filtre muscle marche aussi dans un catalogue');
+  assert.deepEqual(await p.$$eval('[data-act=gv]', l => l.map(b => b.textContent)), ['Ma salle', 'Catalogues'], 'plus de « Toutes »');
   await p.click('[data-act=gv][data-v=salle]');
-  const salle = await nb(p, '#gl .gi');
-  await p.click('[data-act=gv][data-v=tout]');
-  assert.ok(await nb(p, '#gl .gi') >= salle);
+  assert.ok(await nb(p, '#gl .gi') > 0);
   await p.click('[data-act=gv][data-v=cat]');
   await p.click('[data-act=gc][data-v="Catalogue autres enseignes"]');
   assert.ok(await nb(p, '#gl small.who') > 0, 'on voit quelles enseignes ont la machine');
   assert.deepEqual(p.erreurs, []);
 });
 
-test('cocher / décocher une machine depuis la vue Toutes met à jour Ma salle', async () => {
+test('salle vide : le Guide ouvre les catalogues ; cocher / décocher met à jour Ma salle', async () => {
   const p = await A.page();
   await creerSalle(p, 'vide');
-  assert.equal(await p.$eval('[data-act=gv].on', e => e.dataset.v), 'tout');
+  assert.equal(await p.$eval('[data-act=gv].on', e => e.dataset.v), 'cat');
   await p.click('#gl [data-act=gtog][data-n="Squat"]');
   assert.deepEqual((await donnees(p)).gyms[0].eq, ['Squat']);
   await p.click('[data-act=gv][data-v=salle]');
@@ -72,7 +78,6 @@ test('cocher / décocher une machine depuis la vue Toutes met à jour Ma salle',
 test('les machines exclusives On Air restent cachées dans une salle d’une autre enseigne', async () => {
   const p = await A.page();
   await creerSalle(p, 'fitness-park');
-  await p.click('[data-act=gv][data-v=tout]');
   const noms = await p.$$eval('#gl .gi b', l => l.map(x => x.textContent));
   assert.ok(!noms.some(n => /Select|Super /.test(n)));
 });

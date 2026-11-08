@@ -65,7 +65,7 @@ if(a==='tempty'){if(!confirm('Vider la corbeille ? Ces éléments seront effacé
 if(a==='gtpl'){const name=pk.gtpl,t=b.dataset.t,id=uid();
 const ch=CHAINS.find(c=>c.id===t);
 const eq=ch?defOf(ch):t==='tout'?LIB.filter(x=>!XS.has(x[0])).map(x=>x[0]):t==='base'?LIB.filter(x=>!['Hammer Strength','Eleiko','Life Fitness'].includes(x[2])).map(x=>x[0]):[];
-S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;setTab('aide');setGm('Tous');if(ch){setGv('cat');setGc(ch.id==='on-air'?C1:C2)}else setGv(eq.length?'salle':'tout');save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
+S.gyms.push(ch?{id,name,eq,notes:{},chain:ch.id}:{id,name,eq,notes:{}});S.gym=id;setTab('aide');setGm('Tous');if(ch){setGv('cat');setGc(ch.id==='on-air'?C1:C2)}else if(eq.length)setGv('salle');else{setGv('cat');setGc(C1)}save();closePk();render();toast('Salle « '+name+' » créée ✓');return}
 if(a==='closepk'){closePk();return}
 if(a==='pick'){openPk();return}
 if(a==='tool'){openTool();return}
@@ -82,9 +82,9 @@ else if(a==='gm'){setGm(b.dataset.m)}
 else if(a==='gv'){setGv(b.dataset.v)}
 else if(a==='gc'){setGc(b.dataset.v)}
 else if(a==='gnew'){if(S.gyms.length>=20){alert('20 salles maximum.');return}const n=prompt('Nom de ta salle (ex. : la ville ou le quartier)','Ma salle');if(!n||!cname(n))return;openSheet({gtpl:cname(n).slice(0,40)});return}
-else if(a==='gsel'){S.gym=S.gyms.some(g=>g.id===b.dataset.id)?b.dataset.id:null;if(!S.gym)setGv('tout')}
+else if(a==='gsel'){S.gym=S.gyms.some(g=>g.id===b.dataset.id)?b.dataset.id:null;}
 else if(a==='gren'){const g=gymCur();if(!g)return;const n=prompt('Nouveau nom de la salle',g.name);if(!n||!cname(n))return;g.name=cname(n).slice(0,40)}
-else if(a==='gdel'){const g=gymCur();if(!g||!confirm('Supprimer la salle « '+g.name+' » ? Ses machines cochées et ses réglages seront perdus. Tes séances restent dans l’historique.'))return;S.gyms=S.gyms.filter(x=>x.id!==g.id);S.gym=S.gyms[0]?S.gyms[0].id:null;setGv('tout')}
+else if(a==='gdel'){const g=gymCur();if(!g||!confirm('Supprimer la salle « '+g.name+' » ? Ses machines cochées et ses réglages seront perdus. Tes séances restent dans l’historique.'))return;S.gyms=S.gyms.filter(x=>x.id!==g.id);S.gym=S.gyms[0]?S.gyms[0].id:null}
 else if(a==='gtog'){const g=gymCur(),n=cname(b.dataset.n);if(!g||!n)return;const i=g.eq.findIndex(x=>norm(x)===norm(n));if(i>=0)g.eq.splice(i,1);else if(g.eq.length<600)g.eq.push(n);save();$('#gl').innerHTML=glist();const c=document.querySelector('.card.gym');if(c)c.outerHTML=gymCard();return}
 else if(a==='editsess'){if(S.current){alert('Termine ou annule d’abord la séance en cours.');return}const x=S.sessions.find(y=>y.id===b.dataset.id);if(!x)return;S.editBak=JSON.parse(JSON.stringify(x));x.edit=true;S.current=x.id;setTab('seance');window.scrollTo(0,0)}
 else if(a==='start'||a==='startr'){const r=a==='startr'?S.routines[k]:null;if(a==='startr'&&!r)return;const n={id:uid(),date:Date.now(),exercises:r?r.exercises.map(x=>newEx(x)):[]},g=gymCur();if(g){n.g=g.id;n.gn=g.name}S.sessions.push(n);S.current=n.id}
