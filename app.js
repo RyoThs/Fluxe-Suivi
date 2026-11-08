@@ -1,5 +1,6 @@
 (function(){
-const KEY='muscu-v1',VER='2.1.1'; /* ne pas changer KEY : c'est la clé où sont tes données */
+const KEY='muscu-v1',VER='2.2.0'; /* ne pas changer KEY : c'est la clé où sont tes données */
+const BKD=[3,7,14,30];
 const FORMAT=3,J30=30*864e5; /* FORMAT : version du fichier de sauvegarde · J30 : durée de la corbeille */
 const M=['Pectoraux','Dos','Épaules','Bras','Jambes','Fessiers','Abdos','Corps entier','Cardio'];
 const T={h:'Hammer Strength',s:'Machine guidée',p:'Poulie',e:'Eleiko',l:'Life Fitness'};
@@ -55,6 +56,7 @@ if(d.notes&&typeof d.notes==='object')for(const [k,v] of Object.entries(d.notes)
 if(d.rests&&typeof d.rests==='object')for(const [k,v] of Object.entries(d.rests).slice(0,1000)){if(/^k:.{1,60}$/.test(k)&&num(v)!==null&&v>=15&&v<=600)o.rests[k]=Math.round(v)}
 const r=num(d.rest);if(r!==null&&r>=15&&r<=600)o.rest=Math.round(r);
 for(const k of ['lastBackup','snooze']){const v=num(d[k]);if(v!==null&&v>0)o[k]=v}
+if(BKD.includes(d.bkEvery))o.bkEvery=d.bkEvery;
 /* Corbeille : séances (s) et routines (r) supprimées, gardées 30 jours */
 o.trash=[];
 if(Array.isArray(d.trash))for(const t of d.trash.slice(0,500)){if(!t||typeof t!=='object')continue;const at=num(t.at);if(at===null||at<=0)continue;
@@ -165,10 +167,17 @@ if(r>=12)return{kg:kg+g,txt:fmtN(kg+g)+' kg × 8',why:'12 reps ou plus la derni�
 if(r>=8)return{kg,txt:fmtN(kg)+' kg × '+(r+1),why:'même charge, une répétition de plus'};
 return{kg,txt:fmtN(kg)+' kg × 8',why:'même charge, vise 8 répétitions'};
 }
+/* ===== Rappel de sauvegarde =====
+   Le rappel apparaît quand le dernier fichier est trop ancien (délai réglable)
+   OU quand 5 séances ou plus ne sont dans aucun fichier. « Plus tard » le cache 2 jours. */
+function unsaved(){const t=S.lastBackup||0;return done().filter(x=>(x.mod||x.date)>t).length}
+function bkDue(){const n=Date.now(),u=unsaved();if(!u)return false;return !S.lastBackup||n-S.lastBackup>=(S.bkEvery||7)*864e5||u>=5}
+function bkLine(){const u=unsaved();if(!done().length)return '';
+return u?`<span class="bk warn">${u} séance${u>1?'s':''} pas encore dans un fichier</span>`:'<span class="bk ok">✓ Tout est sauvegardé</span>'}
 function backupCard(){
-const n=Date.now();
-if(!done().length||n-(S.lastBackup||0)<6048e5||n-(S.snooze||0)<1728e5)return '';
-return `<div class="card"><div class="hist-date">Pense à sauvegarder</div><div class="mu">${S.lastBackup?'Dernière sauvegarde : '+esc(fmtDate(S.lastBackup)):'Aucune sauvegarde pour l’instant'}. Tes données ne sont que sur ce téléphone : envoie le fichier dans Fichiers, iCloud Drive ou par mail.</div><div class="dat"><button class="btn" data-act="file">Sauvegarder</button><button class="sec" data-act="snz">Plus tard</button></div></div>`;
+if(!bkDue()||Date.now()-(S.snooze||0)<1728e5)return '';
+const u=unsaved();
+return `<div class="card bkc"><div class="hist-date">🛟 Pense à sauvegarder</div><div class="mu">${u>1?u+' séances ne sont':'1 séance n’est'} que sur ce téléphone. ${S.lastBackup?'Dernier fichier : '+esc(fmtDate(S.lastBackup))+'.':'Tu n’as encore jamais fait de fichier.'} Si le téléphone est perdu, le fichier est le seul moyen de les retrouver.</div><div class="dat"><button class="btn" data-act="file">Sauvegarder</button><button class="sec" data-act="snz">Plus tard</button></div></div>`;
 }
 function render(){
 if(S.current&&!cur())S.current=null;
@@ -249,7 +258,7 @@ ${e.sets.map((x,j)=>{if(!x.w)wi++;const p=x.w?null:pv[wi],pr=x.done&&!x.w&&b>0&&
 }
 function viewHisto(){
 const l=done().sort((a,b)=>b.date-a.date);
-const nt=S.trash.length,tools=`<h2>Mes données</h2><p class="mu" style="margin-left:4px">Sauvegarde, versions de secours et corbeille : tout est au même endroit.</p><button class="sec" data-act="data" style="margin-bottom:14px">🛟 Sauvegarde et récupération${nt?' · '+nt+' dans la corbeille':''}</button>`;
+const nt=S.trash.length,tools=`<h2>Mes données</h2><p class="mu" style="margin-left:4px">Sauvegarde, versions de secours et corbeille : tout est au même endroit.</p><button class="sec" data-act="data" style="margin-bottom:14px">🛟 Sauvegarde et récupération${nt?' · '+nt+' dans la corbeille':''}</button>${done().length?'<p class="mu" style="margin:-6px 0 14px 4px">'+bkLine()+'</p>':''}`;
 if(!l.length)return `<h1>Historique</h1><p class="empty">Tes séances terminées apparaîtront ici.</p>${tools}`;
 return `<h1>Historique</h1><p class="sub">${l.length} séance${l.length>1?'s':''}</p>
 ${l.map(s=>`<div class="card"><div class="ex-head"><div><div class="hist-date">${esc(fmtDate(s.date))}</div><div class="mu">${nset(s)} séries · ${fmt(vol(s))} kg${s.dur?' · '+s.dur+' min':''}${s.gn?' · '+esc(s.gn):''}</div></div><div><button class="del" style="color:var(--accent)" data-act="editsess" data-id="${esc(s.id)}">Modifier</button><button class="del" data-act="delsess" data-id="${esc(s.id)}">Supprimer</button></div></div>
@@ -449,9 +458,9 @@ function toTrash(o){S.trash.unshift(Object.assign({at:Date.now()},o));if(S.trash
 function viewData(){
 const tr=S.trash.map((t,x)=>{const left=Math.max(1,Math.ceil((t.at+J30-Date.now())/864e5));return `<div class="vr"><div><b>${t.s?esc(fmtDate(t.s.date)):'Routine « '+esc(t.r.name)+' »'}</b><span>${t.s?nset(t.s)+' séries · '+fmt(vol(t.s))+' kg · ':''}effacée définitivement dans ${left} j</span></div><button class="del" style="color:var(--accent)" data-act="trest" data-x="${x}">Restaurer</button></div>`}).join('');
 return `<p class="mu" style="margin-left:4px">Tes séances sont enregistrées uniquement sur ce téléphone. Trois protections les gardent à l’abri.</p>
-<div class="card"><div class="hist-date">1. Fichier de sauvegarde</div><div class="mu">${S.lastBackup?'Dernière sauvegarde : '+esc(fmtDate(S.lastBackup)):'Aucune sauvegarde pour l’instant'}. Le fichier te permet aussi de changer de téléphone (iPhone ↔ Android).</div>
+<div class="card"><div class="hist-date">1. Fichier de sauvegarde</div><div class="mu">${S.lastBackup?'Dernière sauvegarde : '+esc(fmtDate(S.lastBackup)):'Aucune sauvegarde pour l’instant'}. Le fichier te permet aussi de changer de téléphone (iPhone ↔ Android).</div>${bkLine()?'<p class="mu" style="margin:8px 0 10px">'+bkLine()+'</p>':''}
 <button class="btn" data-act="file">Sauvegarder (Fichiers, iCloud, mail…)</button>
-<div class="dat" style="margin:10px 0 0"><button class="sec" data-act="imp">Importer un fichier</button><button class="sec" data-act="paste">Coller du texte</button></div><button class="ghost" data-act="export">Copier les données en texte</button></div>
+<div class="dat" style="margin:10px 0 0"><button class="sec" data-act="imp">Importer un fichier</button><button class="sec" data-act="paste">Coller du texte</button></div><button class="ghost" data-act="export">Copier les données en texte</button><div class="mu" style="margin-top:12px">Me le rappeler si le dernier fichier a plus de :</div><div class="chips" style="margin:8px 0 0;flex-wrap:wrap;overflow:visible">${BKD.map(d=>`<button class="chip${(S.bkEvery||7)===d?' on':''}" data-act="bke" data-d="${d}">${d} jours</button>`).join('')}</div><div class="mu" style="margin-top:6px">…ou dès que 5 séances ne sont pas sauvegardées.</div></div>
 <div class="card"><div class="hist-date">2. Versions de secours</div><div class="mu">Copies automatiques sur ce téléphone : une par jour (les 5 dernières), plus une avant chaque import ou restauration.</div><div id="vl"><p class="mu">Chargement…</p></div><button class="ghost" data-act="snapnow">Créer une version maintenant</button></div>
 <div class="card"><div class="ex-head"><div class="hist-date">3. Corbeille</div>${S.trash.length?'<button class="del" data-act="tempty">Vider</button>':''}</div><div class="mu">Les séances et routines supprimées restent ici 30 jours.</div>${tr||'<p class="mu">La corbeille est vide.</p>'}</div>
 <div class="card"><div class="hist-date">État du stockage</div><div class="mu" id="st">Vérification…</div></div>`;
@@ -527,7 +536,8 @@ else if(a==='rest'){const o=[60,90,120,180,240];S.rest=o[(o.indexOf(S.rest||90)+
 else if(a==='rex'){S.rests=S.rests||{};const n=s.exercises[i].name,c=restFor(n);S.rests[K(n)]=RS[(RS.indexOf(c)+1)%RS.length]}
 else if(a==='wu'){const x=s.exercises[i].sets[j];if(x){if(x.w)delete x.w;else x.w=true}}
 else if(a==='sug'){const sg=suggest(s.exercises[i].name);if(sg)s.exercises[i].sets.forEach(x=>{if(!x.done&&!x.w)x.kg=String(Math.round(sg.kg*100)/100)})}
-else if(a==='snz'){S.snooze=Date.now()}
+else if(a==='snz'){S.snooze=Date.now();toast('D’accord, je te le rappelle dans 2 jours')}
+else if(a==='bke'){const d=+b.dataset.d;if(BKD.includes(d)){S.bkEvery=d;S.snooze=0;save();render();sheet();toast('Rappel : tous les '+d+' jours');return}}
 else if(a==='sx'){sx=b.dataset.n}
 else if(a==='gm'){gm=M.includes(b.dataset.m)||[MG,C1,C2].includes(b.dataset.m)?b.dataset.m:'Tous'}
 else if(a==='gnew'){if(S.gyms.length>=20){alert('20 salles maximum.');return}const n=prompt('Nom de ta salle (ex. : la ville ou le quartier)','Ma salle');if(!n||!cname(n))return;openSheet({gtpl:cname(n).slice(0,40)});return}
