@@ -9,14 +9,37 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v15'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v16'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
 const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
 
 const FICHIERS = [
-  './', 'index.html', 'manifest.json', 'app.js?v=2.2.1',
+  './', 'index.html', 'manifest.json', 'css/app.css?v=2.3.0', 'js/main.js?v=2.3.0',
+  // les autres morceaux du code (chargés par js/main.js)
+  'js/actions.js',
+  'js/calculs.js',
+  'js/catalogue.js',
+  'js/config.js',
+  'js/donnees.js',
+  'js/etat.js',
+  'js/icones.js',
+  'js/installation.js',
+  'js/minuteur.js',
+  'js/outils.js',
+  'js/rappel.js',
+  'js/rendu.js',
+  'js/salle.js',
+  'js/sauvegarde.js',
+  'js/veille.js',
+  'js/versions.js',
+  'js/vues/ecran-sauvegarde.js',
+  'js/vues/guide.js',
+  'js/vues/historique.js',
+  'js/vues/panneaux.js',
+  'js/vues/seance.js',
+  'js/vues/stats.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'icons/apple-touch-icon-v2.png', 'icons/favicon.png'
 ];

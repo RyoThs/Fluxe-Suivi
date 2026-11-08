@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { demarrer, donner, donnees, seance, lire, VIDE } = require('./outils');
 
-const VER = lire('app.js').match(/VER='([\d.]+)'/)[1];
+const VER = lire('js/config.js').match(/VER='([\d.]+)'/)[1];
 const ANCIENS = path.join(__dirname, 'anciennes-sauvegardes');
 let A;
 test.before(async () => { A = await demarrer(); });

@@ -6,11 +6,11 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 ## Ce qui est vérifié
 | Fichier | Ce qu'il protège |
 |---|---|
-| `01-fichiers.test.js` | Mêmes numéros de version partout, clé de stockage `muscu-v1` inchangée, fichiers hors ligne présents |
+| `01-fichiers.test.js` | Mêmes numéros de version partout, clé `muscu-v1` inchangée, chaque fichier du code existe, est utilisé et disponible hors ligne, vérificateur eslint sans erreur |
 | `02-donnees.test.js` | Les séances se chargent, se nettoient et survivent au redémarrage |
 | `03-sauvegarde.test.js` | Fichier de sauvegarde, aller-retour, anciens formats, fusion, fichier invalide refusé |
 | `04-corbeille-et-rappel.test.js` | Corbeille 30 jours, rappel de sauvegarde |
-| `05-mise-a-jour.test.js` | Réparation automatique d'une vieille version, sans boucle |
+| `05-mise-a-jour.test.js` | Réparation automatique d'une vieille version (y compris l'ancienne page qui demande `app.js`), sans boucle |
 
 `anciennes-sauvegardes/` : exemples de fichiers des anciennes versions (on en ajoute, on n'en supprime jamais).
 

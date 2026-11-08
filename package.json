@@ -3,9 +3,11 @@
   "private": true,
   "description": "Fluxe Suivi : carnet de musculation (PWA). Ce fichier sert seulement aux tests automatiques.",
   "scripts": {
-    "test": "node --test --test-concurrency=1 \"tests/*.test.js\""
+    "test": "node --test --test-concurrency=1 \"tests/*.test.js\"",
+    "verifier": "eslint js"
   },
   "devDependencies": {
+    "eslint": "10.1.0",
     "playwright": "1.63.0"
   }
 }
