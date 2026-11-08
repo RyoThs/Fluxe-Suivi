@@ -69,11 +69,28 @@ test('une séance faite dans l’app est bien enregistrée et survit au redémar
   assert.deepEqual(p.erreurs, []);
 });
 
-test('données illisibles : elles doivent être mises de côté avant d’être écrasées', { todo: 'faiblesse trouvée le 2026-11-08, pas encore corrigée' }, async () => {
+test('données illisibles : une copie est gardée avant d’être écrasée, et un message prévient', async () => {
   const p = await A.page();
-  const casse = '{"sessions":[{"id":"a","date":1,"exercises":[]}';
+  const casse = '{"sessions":[{"id":"a","date":1,"exercises":[]}'; // fichier coupé en plein milieu
   await donner(p, casse);
+  await p.waitForTimeout(300);
+  assert.match(await p.$eval('#warn', e => e.hidden ? '' : e.textContent), /illisibles/);
+  await p.click('[data-act=start]'); // premier geste : l'app enregistre par-dessus
+  assert.equal(await p.evaluate(k => localStorage.getItem(k + '-illisible'), KEY), casse, 'copie dans le téléphone');
+  /* et une deuxième copie dans les versions de secours (IndexedDB) */
+  await p.click('[data-act=cancel]').catch(() => {});
+  await p.click('nav [data-tab=histo]');
+  await p.click('[data-act=data]');
+  await p.waitForTimeout(300);
+  const versions = await p.$$eval('#vl .vr span', l => l.map(x => x.textContent));
+  assert.ok(versions.some(v => v.startsWith('Données illisibles')), 'versions : ' + versions.join(' / '));
+  assert.deepEqual(p.erreurs, []);
+});
+
+test('premier lancement normal : aucune copie « illisible » ni message', async () => {
+  const p = await A.page();
+  await p.waitForSelector('nav');
   await p.click('[data-act=start]');
-  const gardee = await p.evaluate(k => localStorage.getItem(k + '-brut'), KEY);
-  assert.equal(gardee, casse);
+  assert.equal(await p.evaluate(k => localStorage.getItem(k + '-illisible'), KEY), null);
+  assert.equal(await p.$eval('#warn', e => e.hidden), true);
 });
