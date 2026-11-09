@@ -126,6 +126,11 @@ test('la lecture de la liste FICHIERS ignore les commentaires (une apostrophe dr
   assert.deepEqual(listeFichiersSW(exemple), ['./', 'index.html', 'icons/favicon.png', 'js/config.js']);
 });
 
+test('la lecture de la liste FICHIERS garde une adresse https:// entière', () => {
+  const exemple = "const FICHIERS = [\n  'a.js', 'https://exemple.fr/b.js', // commentaire\n  'c.js'\n];";
+  assert.deepEqual(listeFichiersSW(exemple), ['a.js', 'https://exemple.fr/b.js', 'c.js']);
+});
+
 test('manifest.json : les captures d’écran existent, à la bonne taille, légères, et hors du pré-cache', () => {
   const m = JSON.parse(lire('manifest.json'));
   assert.ok(Array.isArray(m.screenshots) && m.screenshots.length >= 2, 'au moins 2 captures');

@@ -20,7 +20,7 @@ function lire(f) { return fs.readFileSync(path.join(RACINE, f), 'utf8'); }
 function listeFichiersSW(texte = lire('sw.js')) {
   const bloc = (texte.match(/const FICHIERS = \[([\s\S]*?)\];/) || [])[1];
   if (bloc === undefined) throw new Error('liste FICHIERS introuvable dans sw.js');
-  const sansCommentaires = bloc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const sansCommentaires = bloc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1'); // « https:// » n'est pas un commentaire
   return (sansCommentaires.match(/'([^']+)'/g) || []).map(s => s.slice(1, -1));
 }
 
