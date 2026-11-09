@@ -50,4 +50,6 @@ Ensuite : `npm test` doit être au vert, puis on fusionne dans `main`.
 | `icons/` | Les icônes et l'image de démarrage |
 | `app.js` | Ancien fichier gardé pour réparer les vieilles pages déjà installées |
 | `tests/` | Les tests automatiques |
+| `screenshots/` | Captures d'écran (données de démonstration) montrées à l'installation |
+| `docs/TEST-APPAREILS.md` | Liste à cocher pour tester une version sur le téléphone |
 | `docs/STOCKAGE.md` | Tout ce que l'app range dans le téléphone (clés, base de secours, caches) |

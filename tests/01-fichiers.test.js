@@ -125,3 +125,20 @@ test('la lecture de la liste FICHIERS ignore les commentaires (une apostrophe dr
   const exemple = "const FICHIERS = [\n  './', 'index.html', // la page de l'app\n  /* les icônes de l'app */ 'icons/favicon.png',\n  // aujourd'hui : 'pas-un-fichier.js'\n  'js/config.js'\n];";
   assert.deepEqual(listeFichiersSW(exemple), ['./', 'index.html', 'icons/favicon.png', 'js/config.js']);
 });
+
+test('manifest.json : les captures d’écran existent, à la bonne taille, légères, et hors du pré-cache', () => {
+  const m = JSON.parse(lire('manifest.json'));
+  assert.ok(Array.isArray(m.screenshots) && m.screenshots.length >= 2, 'au moins 2 captures');
+  for (const c of m.screenshots) {
+    const f = path.join(RACINE, c.src);
+    assert.ok(fs.existsSync(f), `capture manquante : ${c.src}`);
+    const png = fs.readFileSync(f);
+    assert.equal(png.toString('latin1', 1, 4), 'PNG', `${c.src} n’est pas un PNG`);
+    assert.equal(c.sizes, `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, `taille annoncée de ${c.src}`);
+    assert.ok(png.length < 250 * 1024, `${c.src} pèse plus de 250 Ko`);
+    assert.equal(c.type, 'image/png');
+    assert.equal(c.form_factor, 'narrow');
+    assert.ok(typeof c.label === 'string' && c.label.length > 5, `légende de ${c.src}`);
+    assert.ok(!FICHIERS.includes(c.src), `${c.src} ne doit pas être dans le pré-cache (sw.js)`);
+  }
+});
