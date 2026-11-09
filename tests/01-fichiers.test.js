@@ -6,11 +6,11 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { lire, RACINE } = require('./outils');
+const { lire, listeFichiersSW, RACINE } = require('./outils');
 
 const html = lire('index.html'), sw = lire('sw.js'), config = lire('js/config.js');
 const VER = (config.match(/VER='([\d.]+)'/) || [])[1];
-const FICHIERS = sw.match(/const FICHIERS = \[([\s\S]*?)\];/)[1].match(/'([^']+)'/g).map(s => s.slice(1, -1));
+const FICHIERS = listeFichiersSW(sw);
 
 /* Tous les fichiers .js du dossier js/ */
 const tousLesModules = (dir = 'js') => fs.readdirSync(path.join(RACINE, dir), { withFileTypes: true })
@@ -119,4 +119,9 @@ test('la sécurité de la page n’autorise que les polices de l’app', () => {
   assert.ok(csp, 'règle de sécurité (CSP) introuvable');
   assert.match(csp, /font-src 'self';/);
   assert.doesNotMatch(csp, /https?:/, 'aucun site extérieur dans la CSP');
+});
+
+test('la lecture de la liste FICHIERS ignore les commentaires (une apostrophe droite comme « l\'app » ne casse rien)', () => {
+  const exemple = "const FICHIERS = [\n  './', 'index.html', // la page de l'app\n  /* les icônes de l'app */ 'icons/favicon.png',\n  // aujourd'hui : 'pas-un-fichier.js'\n  'js/config.js'\n];";
+  assert.deepEqual(listeFichiersSW(exemple), ['./', 'index.html', 'icons/favicon.png', 'js/config.js']);
 });

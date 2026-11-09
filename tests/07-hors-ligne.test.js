@@ -1,7 +1,7 @@
 /* Hors ligne : la police vient de l'app elle-même (plus de Google Fonts), sans erreur de sécurité. */
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { demarrer } = require('./outils');
+const { demarrer, lire, listeFichiersSW } = require('./outils');
 
 let A;
 test.before(async () => { A = await demarrer(); });
@@ -24,8 +24,7 @@ test('la police Barlow Condensed se charge depuis fonts/, sans aucun appel à un
 
 /* ===== Pré-cache strict (v2.4.2) : l'installation hors ligne est « tout ou rien » ===== */
 const vm = require('node:vm');
-const { lire } = require('./outils');
-const FICHIERS = lire('sw.js').match(/const FICHIERS = \[([\s\S]*?)\];/)[1].match(/'([^']+)'/g).map(s => s.slice(1, -1));
+const FICHIERS = listeFichiersSW();
 
 /* Lance sw.js dans un faux navigateur, puis déclenche son installation.
    « manquant » = un fichier que le serveur ne trouve pas. Renvoie ce qui s'est passé. */

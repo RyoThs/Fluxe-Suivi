@@ -42,7 +42,7 @@ const FICHIERS = [
   'js/vues/stats.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'icons/apple-touch-icon-v2.png', 'icons/favicon.png',
-  // la police Barlow Condensed, hébergée avec le reste du projet (jamais d’apostrophe droite dans cette liste : les tests la lisent)
+  // la police Barlow Condensed, hébergée dans l'app (plus de Google Fonts)
   'fonts/barlow-condensed-500.woff2', 'fonts/barlow-condensed-600.woff2',
   'fonts/barlow-condensed-700.woff2', 'fonts/barlow-condensed-800.woff2'
 ];

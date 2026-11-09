@@ -14,6 +14,16 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=
 
 function lire(f) { return fs.readFileSync(path.join(RACINE, f), 'utf8'); }
 
+/* Liste FICHIERS de sw.js (les fichiers gardés hors ligne).
+   Les commentaires (sur une ligne ou en bloc) sont retirés avant de lire les noms entre apostrophes :
+   une apostrophe dans un commentaire (« l'app ») ne fausse donc plus la liste. */
+function listeFichiersSW(texte = lire('sw.js')) {
+  const bloc = (texte.match(/const FICHIERS = \[([\s\S]*?)\];/) || [])[1];
+  if (bloc === undefined) throw new Error('liste FICHIERS introuvable dans sw.js');
+  const sansCommentaires = bloc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  return (sansCommentaires.match(/'([^']+)'/g) || []).map(s => s.slice(1, -1));
+}
+
 /* Serveur web minimal : sert les fichiers du projet sur un port libre */
 function serveur() {
   return new Promise(ok => {
@@ -67,4 +77,4 @@ function seance(id, ilYa = 1, extra = {}) {
 }
 const VIDE = { sessions: [], routines: [], current: null, notes: {}, rests: {} };
 
-module.exports = { demarrer, donner, donnees, seance, lire, VIDE, KEY, JOUR, RACINE };
+module.exports = { demarrer, donner, donnees, seance, lire, listeFichiersSW, VIDE, KEY, JOUR, RACINE };
