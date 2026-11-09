@@ -35,7 +35,7 @@ Le numéro de version doit être changé à **3 endroits** (les tests vérifient
 
 1. `js/config.js` : la valeur `VER='…'`.
 2. `index.html` : la balise `app-version`, le lien `css/app.css?v=…` et le lien `js/main.js?v=…`.
-3. `sw.js` : le nom du cache `VERSION` (par exemple `'v18'` devient `'v19'`) et les deux liens `css/app.css?v=…` et `js/main.js?v=…` de la liste `FICHIERS`.
+3. `sw.js` : le nom du cache `VERSION` (par exemple `'v19'` devient `'v20'`) et les deux liens `css/app.css?v=…` et `js/main.js?v=…` de la liste `FICHIERS`.
 
 Ensuite : `npm test` doit être au vert, puis on fusionne dans `main`.
 

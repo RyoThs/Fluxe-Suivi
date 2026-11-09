@@ -30,7 +30,7 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 ## Caches du service worker (copie de l'app pour le hors ligne)
 | Nom | Rôle | Fichier qui l'utilise |
 |---|---|---|
-| `fluxe-suivi-v…` (ex. `fluxe-suivi-v18`) | Copie hors ligne de la version actuelle. Les anciennes `fluxe-suivi-…` sont supprimées à la mise à jour | `sw.js`, `js/main.js`, `app.js` |
+| `fluxe-suivi-v…` (ex. `fluxe-suivi-v19` en v2.4.2) | Copie hors ligne de la version actuelle. Les anciennes `fluxe-suivi-…` sont supprimées à la mise à jour | `sw.js`, `js/main.js`, `app.js` |
 | `fluxe-v10`, `fluxe-v6`, `fluxe-v5`, `muscu-v7`, `muscu-v6`, `muscu-v5`, `muscu-v4`, `muscu-v2`, `muscu-v1` | Anciens noms de cache des toutes premières versions. **Seulement lus** en secours, jamais supprimés ni écrits | `sw.js` (`ANCIENS_CACHES`) |
 
 Les données de l'app ne sont **jamais** dans les caches : vider un cache ne fait rien perdre.
