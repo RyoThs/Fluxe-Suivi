@@ -79,3 +79,44 @@ test('manifest.json est un JSON valide avec ses icônes', () => {
   assert.ok(m.name && Array.isArray(m.icons) && m.icons.length);
   for (const i of m.icons) assert.ok(fs.existsSync(path.join(RACINE, i.src)), `icône manquante : ${i.src}`);
 });
+
+/* ===== Police hébergée dans l'app (v2.4.2) : plus aucun appel à Google Fonts ===== */
+/* Tous les fichiers du projet, sauf les tests, les outils installés et l'historique Git */
+const EXCLUS = new Set(['tests', 'node_modules', '.git', 'test-results']);
+const fichiersDuProjet = (dir = '') => fs.readdirSync(path.join(RACINE, dir), { withFileTypes: true })
+  .flatMap(e => EXCLUS.has(e.name) && !dir ? [] : e.isDirectory() ? fichiersDuProjet(path.posix.join(dir, e.name)) : [path.posix.join(dir, e.name)]);
+const POLICES = fs.readdirSync(path.join(RACINE, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => 'fonts/' + f);
+
+test('aucun fichier du projet ne contacte Google Fonts (« googleapis », « gstatic »)', () => {
+  for (const f of fichiersDuProjet()) {
+    const contenu = fs.readFileSync(path.join(RACINE, f), 'latin1');
+    assert.ok(!contenu.includes('googleapis'), `${f} contient « googleapis »`);
+    assert.ok(!contenu.includes('gstatic'), `${f} contient « gstatic »`);
+  }
+});
+
+test('la police Barlow Condensed est dans fonts/, disponible hors ligne, avec sa licence', () => {
+  assert.deepEqual(POLICES.sort(), [500, 600, 700, 800].map(w => `fonts/barlow-condensed-${w}.woff2`));
+  for (const f of POLICES) {
+    assert.ok(fs.statSync(path.join(RACINE, f)).size > 1000, `${f} est vide`);
+    assert.ok(FICHIERS.includes(f), `${f} manque dans FICHIERS de sw.js`);
+  }
+  assert.ok(fs.existsSync(path.join(RACINE, 'fonts/OFL.txt')), 'fonts/OFL.txt (licence) manquant');
+  assert.match(lire('fonts/OFL.txt'), /SIL OPEN FONT LICENSE Version 1\.1/);
+});
+
+test('css/app.css déclare chaque police locale (font-display: swap) et garde une police de repli', () => {
+  const css = lire('css/app.css');
+  for (const f of POLICES) assert.ok(css.includes(`url(../${f})`), `${f} non déclarée dans css/app.css`);
+  const faces = css.match(/@font-face\{[^}]*\}/g) || [];
+  assert.equal(faces.length, POLICES.length);
+  for (const ff of faces) assert.match(ff, /font-display:swap/);
+  assert.match(css, /--num:'Barlow Condensed',[^;]*sans-serif/, 'police de repli système');
+});
+
+test('la sécurité de la page n’autorise que les polices de l’app', () => {
+  const csp = (html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/) || [])[1];
+  assert.ok(csp, 'règle de sécurité (CSP) introuvable');
+  assert.match(csp, /font-src 'self';/);
+  assert.doesNotMatch(csp, /https?:/, 'aucun site extérieur dans la CSP');
+});

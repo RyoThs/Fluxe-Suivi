@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
 const RACINE = path.join(__dirname, '..');
 const KEY = 'muscu-v1'; // clé de stockage de l'app : ne doit JAMAIS changer
 const JOUR = 864e5;
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 
 function lire(f) { return fs.readFileSync(path.join(RACINE, f), 'utf8'); }
 

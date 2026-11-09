@@ -41,7 +41,10 @@ const FICHIERS = [
   'js/vues/seance.js',
   'js/vues/stats.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
-  'icons/apple-touch-icon-v2.png', 'icons/favicon.png'
+  'icons/apple-touch-icon-v2.png', 'icons/favicon.png',
+  // la police Barlow Condensed, hébergée avec le reste du projet (jamais d’apostrophe droite dans cette liste : les tests la lisent)
+  'fonts/barlow-condensed-500.woff2', 'fonts/barlow-condensed-600.woff2',
+  'fonts/barlow-condensed-700.woff2', 'fonts/barlow-condensed-800.woff2'
 ];
 
 // Un cache appartient à Fluxe Suivi uniquement s'il porte son préfixe.
@@ -82,9 +85,8 @@ const sansVieilleCopie = req => { try { return new Request(req, { cache: 'no-cac
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  const garder = url.origin === location.origin ||
-    url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
-  if (!garder) return;
+  // Seuls les fichiers de l'app elle-même sont gérés (plus aucun site extérieur).
+  if (url.origin !== location.origin) return;
 
   e.respondWith(
     // cache: 'no-cache' = toujours demander au serveur si le fichier a changé (évite les vieilles copies du téléphone)
