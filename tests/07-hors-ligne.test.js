@@ -77,3 +77,43 @@ test('dans un vrai navigateur, le service worker s’installe et garde tous les 
   assert.equal(res.length, FICHIERS.length, 'nombre de fichiers gardés hors ligne');
   for (const f of FICHIERS.filter(f => f.startsWith('fonts/'))) assert.ok(res.some(u => u.endsWith(f)), `${f} absent du cache`);
 });
+
+/* ===== Scénario complet (v2.4.2) : 1re visite avec réseau, puis mode avion ===== */
+const { donnees, seance, VIDE, KEY } = require('./outils');
+
+test('mode avion : après une 1re visite, l’app s’ouvre sans réseau, avec sa police et les données intactes', async () => {
+  const p = await A.page({ serviceWorkers: 'allow' });
+  // 1re visite avec réseau : on attend que le service worker soit prêt et pilote la page
+  await p.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise(ok => navigator.serviceWorker.addEventListener('controllerchange', ok, { once: true }));
+  });
+  // Une séance enregistrée sur le téléphone (sans recharger : rien ne passe par le réseau ici)
+  const donneesAvant = { ...VIDE, sessions: [seance('avion', 1)] };
+  await p.evaluate(([k, d]) => localStorage.setItem(k, JSON.stringify(d)), [KEY, donneesAvant]);
+
+  // Mode avion, puis l'app est rouverte
+  await p.context().setOffline(true);
+  p.erreurs.length = 0;
+  await p.reload();
+  await p.waitForSelector('nav');
+
+  // L'écran Séance s'affiche
+  assert.equal(await p.$eval('nav button[data-tab=seance]', b => b.getAttribute('aria-current')), 'true');
+  assert.match(await p.$eval('h1', e => e.textContent), /Entraînement/);
+  // La police Barlow Condensed (graisse 800 des titres) vient bien de la copie hors ligne
+  const police = await p.evaluate(async () => {
+    await document.fonts.ready;
+    await document.fonts.load('800 20px "Barlow Condensed"');
+    const face = [...document.fonts].find(f => f.family.replace(/"/g, '') === 'Barlow Condensed' && f.weight === '800');
+    return { check: document.fonts.check('800 20px "Barlow Condensed"'), statut: face && face.status };
+  });
+  assert.deepEqual(police, { check: true, statut: 'loaded' });
+  // Les données sont intactes, et la séance apparaît dans l'historique
+  assert.deepEqual((await donnees(p)).sessions.map(s => s.id), ['avion']);
+  await p.click('nav button[data-tab=histo]');
+  assert.match(await p.textContent('#app'), /Squat/);
+  // Aucune erreur JavaScript, aucun fichier introuvable, aucun blocage de sécurité (CSP)
+  assert.deepEqual(p.erreurs, []);
+  await p.context().setOffline(false);
+});
