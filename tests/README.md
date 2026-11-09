@@ -11,7 +11,7 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 | `03-sauvegarde.test.js` | Fichier de sauvegarde, aller-retour, anciens formats, fusion, fichier invalide refusé |
 | `04-corbeille-et-rappel.test.js` | Corbeille 30 jours, rappel de sauvegarde |
 | `05-mise-a-jour.test.js` | Réparation automatique d'une vieille version (y compris l'ancienne page qui demande `app.js`), sans boucle |
-| `07-hors-ligne.test.js` | La police Barlow Condensed se charge depuis `fonts/`, sans site extérieur |
+| `07-hors-ligne.test.js` | La police Barlow Condensed se charge depuis `fonts/`, sans site extérieur ; installation hors ligne « tout ou rien » (échoue si un fichier manque) |
 
 `anciennes-sauvegardes/` : exemples de fichiers des anciennes versions (on en ajoute, on n'en supprime jamais).
 

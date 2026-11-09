@@ -21,3 +21,60 @@ test('la police Barlow Condensed se charge depuis fonts/, sans aucun appel à un
   assert.deepEqual(exterieurs, []);
   assert.deepEqual(p.erreurs, [], 'aucune erreur (ni blocage par la sécurité de la page)');
 });
+
+/* ===== Pré-cache strict (v2.4.2) : l'installation hors ligne est « tout ou rien » ===== */
+const vm = require('node:vm');
+const { lire } = require('./outils');
+const FICHIERS = lire('sw.js').match(/const FICHIERS = \[([\s\S]*?)\];/)[1].match(/'([^']+)'/g).map(s => s.slice(1, -1));
+
+/* Lance sw.js dans un faux navigateur, puis déclenche son installation.
+   « manquant » = un fichier que le serveur ne trouve pas. Renvoie ce qui s'est passé. */
+async function installer(manquant) {
+  const ecouteurs = {}, gardes = new Set();
+  let attendu = null, skip = false;
+  const telecharger = async f => { if (f === manquant) throw new TypeError('404 ' + f); gardes.add(f); };
+  const cache = {
+    add: telecharger,
+    addAll: async liste => { for (const f of liste) if (f === manquant) throw new TypeError('404 ' + f); for (const f of liste) gardes.add(f); },
+    put: async () => {}, match: async () => undefined,
+  };
+  const self = { addEventListener: (type, fn) => { ecouteurs[type] = fn; }, skipWaiting: () => { skip = true; }, clients: { claim: async () => {} } };
+  const caches = { open: async () => cache, keys: async () => [], delete: async () => true };
+  vm.runInNewContext(lire('sw.js'), { self, caches, location: { origin: 'http://127.0.0.1' }, URL, Request, Response, fetch: async () => { throw new Error('hors ligne'); } });
+  ecouteurs.install({ waitUntil: p => { attendu = p; } });
+  const reussi = await attendu.then(() => true, () => false);
+  return { reussi, skip, gardes };
+}
+
+test('installation hors ligne : si un fichier manque, elle échoue (aucune erreur avalée)', async () => {
+  const r = await installer('fonts/barlow-condensed-800.woff2');
+  assert.equal(r.reussi, false, 'l’installation aurait dû échouer : une erreur a été avalée');
+  assert.equal(r.skip, false, 'une version incomplète ne doit jamais remplacer l’ancienne');
+});
+
+test('installation hors ligne : quand tout est là, chaque fichier de la liste est gardé', async () => {
+  const r = await installer(null);
+  assert.equal(r.reussi, true);
+  assert.equal(r.skip, true);
+  assert.deepEqual([...r.gardes].sort(), [...FICHIERS].sort());
+});
+
+test('sw.js installe la liste d’un seul bloc (cache.addAll), sans « .catch » qui cache les erreurs', () => {
+  const install = lire('sw.js').match(/addEventListener\('install',[\s\S]*?\n\}\);/)[0];
+  assert.match(install, /\.addAll\(FICHIERS\)/);
+  assert.doesNotMatch(install, /\.catch\(/);
+});
+
+test('dans un vrai navigateur, le service worker s’installe et garde tous les fichiers', async () => {
+  const p = await A.page({ serviceWorkers: 'allow' });
+  const res = await p.evaluate(async () => {
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const nom = (await caches.keys()).find(n => n.startsWith('fluxe-suivi-'));
+    const gardes = (await (await caches.open(nom)).keys()).map(r => r.url);
+    await reg.unregister();
+    return gardes;
+  });
+  assert.equal(res.length, FICHIERS.length, 'nombre de fichiers gardés hors ligne');
+  for (const f of FICHIERS.filter(f => f.startsWith('fonts/'))) assert.ok(res.some(u => u.endsWith(f)), `${f} absent du cache`);
+});

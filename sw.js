@@ -51,10 +51,11 @@ const FICHIERS = [
 const estUnCacheFluxeSuivi = nom => nom.startsWith(PREFIXE);
 
 self.addEventListener('install', e => {
-  // On ajoute chaque fichier séparément : si une icône manque, le reste est quand même gardé.
+  // Tout ou rien : si un seul fichier manque, l'installation échoue et l'ancienne version
+  // (complète) reste en place. Ainsi le téléphone n'a jamais une copie hors ligne à trous.
   e.waitUntil(
     caches.open(VERSION)
-      .then(c => Promise.all(FICHIERS.map(f => c.add(f).catch(() => {}))))
+      .then(c => c.addAll(FICHIERS))
       .then(() => self.skipWaiting())
   );
 });
