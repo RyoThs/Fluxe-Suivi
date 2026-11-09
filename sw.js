@@ -9,14 +9,14 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v18'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v19'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
 const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
 
 const FICHIERS = [
-  './', 'index.html', 'manifest.json', 'css/app.css?v=2.4.1', 'js/main.js?v=2.4.1',
+  './', 'index.html', 'manifest.json', 'css/app.css?v=2.4.2', 'js/main.js?v=2.4.2',
   // les autres morceaux du code (chargés par js/main.js)
   'js/actions.js',
   'js/calculs.js',
@@ -41,17 +41,21 @@ const FICHIERS = [
   'js/vues/seance.js',
   'js/vues/stats.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
-  'icons/apple-touch-icon-v2.png', 'icons/favicon.png'
+  'icons/apple-touch-icon-v2.png', 'icons/favicon.png',
+  // la police Barlow Condensed, hébergée dans l'app (plus de Google Fonts)
+  'fonts/barlow-condensed-500.woff2', 'fonts/barlow-condensed-600.woff2',
+  'fonts/barlow-condensed-700.woff2', 'fonts/barlow-condensed-800.woff2'
 ];
 
 // Un cache appartient à Fluxe Suivi uniquement s'il porte son préfixe.
 const estUnCacheFluxeSuivi = nom => nom.startsWith(PREFIXE);
 
 self.addEventListener('install', e => {
-  // On ajoute chaque fichier séparément : si une icône manque, le reste est quand même gardé.
+  // Tout ou rien : si un seul fichier manque, l'installation échoue et l'ancienne version
+  // (complète) reste en place. Ainsi le téléphone n'a jamais une copie hors ligne à trous.
   e.waitUntil(
     caches.open(VERSION)
-      .then(c => Promise.all(FICHIERS.map(f => c.add(f).catch(() => {}))))
+      .then(c => c.addAll(FICHIERS))
       .then(() => self.skipWaiting())
   );
 });
@@ -82,9 +86,8 @@ const sansVieilleCopie = req => { try { return new Request(req, { cache: 'no-cac
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  const garder = url.origin === location.origin ||
-    url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
-  if (!garder) return;
+  // Seuls les fichiers de l'app elle-même sont gérés (plus aucun site extérieur).
+  if (url.origin !== location.origin) return;
 
   e.respondWith(
     // cache: 'no-cache' = toujours demander au serveur si le fichier a changé (évite les vieilles copies du téléphone)

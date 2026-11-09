@@ -15,5 +15,10 @@
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/seance.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Séance en cours : séries, charges et suggestion de progression" },
+    { "src": "screenshots/historique.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Historique de toutes tes séances" },
+    { "src": "screenshots/stats.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Stats : volume par semaine et progression par exercice" }
   ]
 }

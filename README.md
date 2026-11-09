@@ -1,26 +1,55 @@
-# Fluxe Suivi — ressources de marque
+# Fluxe Suivi
 
-Ce dossier contient les ressources graphiques de Fluxe Suivi et une configuration Expo de référence.
+Fluxe Suivi est un carnet de musculation qui s'utilise sur le téléphone.
+C'est une « application web installable » (PWA) : elle s'ouvre dans Safari, puis
+s'ajoute à l'écran d'accueil comme une vraie application, et fonctionne aussi
+**sans connexion** une fois installée.
 
-## Contenu
-- `assets/icons/icon.png` : icône principale pour un projet Expo.
-- `assets/icons/icon-1024.png` : master PNG 1024 × 1024.
-- `assets/icons/favicon.png` : favicon web 64 × 64.
-- `assets/android/adaptive-icon.png` : image de premier plan Android 432 × 432.
-- `assets/splash/splash.png` : visuel de démarrage 1242 × 2688.
-- `assets/logo/fluxe-suivi-logo-*.png` : déclinaisons PNG.
-- `assets/logo/fluxe-suivi-logo.svg` : conteneur SVG avec PNG intégré.
+## Ce que fait l'application
+- **Séance** : tu choisis tes exercices, tu notes tes séries (charge, répétitions ; durée, distance et calories pour le cardio) et tu coches ce qui est fait. Un minuteur de repos se lance entre les séries.
+- **Historique** : toutes tes séances passées.
+- **Stats** : tes chiffres et tes records.
+- **Guide des machines** (bouton `?`) : ta salle, ses machines et tes notes de réglage.
+- **Sauvegarde** : un fichier de sauvegarde à garder en lieu sûr, et une corbeille de 30 jours.
 
-## Installation dans un projet Expo existant
-1. Copier le dossier `assets/` à la racine du projet.
-2. Fusionner les réglages utiles de `app.json` dans le `app.json` existant (ne pas écraser les autres paramètres du projet).
-3. Vérifier les chemins des fichiers.
-4. Reconstruire l'application pour appliquer les icônes natives.
+Tes données restent **sur ton téléphone** (stockage du navigateur). Rien n'est envoyé sur Internet.
 
-## Important — format vectoriel
-Le fichier SVG inclus encapsule l'image PNG. Il est compatible avec les outils qui acceptent un SVG, mais **ce n'est pas un tracé vectoriel éditable** : le symbole multicolore est toujours une image raster. Pour un véritable SVG vectoriel, il faut redessiner/tracer les rubans du logo en chemins SVG ou les reprendre depuis le fichier source vectoriel original, s'il existe.
+## Installer sur iPhone
+1. Ouvre l'adresse de l'application dans **Safari** (pas dans un autre navigateur).
+2. Touche le bouton **Partager** (le carré avec une flèche vers le haut).
+3. Choisis **Sur l'écran d'accueil**, puis **Ajouter**.
+4. Lance Fluxe Suivi depuis sa nouvelle icône. Ouvre-la une fois avec du réseau : elle se garde alors en mémoire pour marcher hors ligne.
 
-## À vérifier avant publication
-- Tester l'icône à petite taille sur un appareil réel.
-- Vérifier les marges de sécurité et le rendu iOS/Android.
-- Pour une publication App Store, contrôler les exigences actuelles d'Apple et générer une build native de test.
+## Lancer les tests
+Les tests automatiques vérifient que tout fonctionne avant qu'une mise à jour arrive sur le téléphone.
+```
+npm ci
+npx playwright install chromium
+npm test
+```
+Résultat attendu : tous les tests passent (`fail 0`). GitHub les relance tout seul à chaque proposition de modification.
+Le détail est expliqué dans `tests/README.md`.
+
+## Publier une nouvelle version
+Le numéro de version doit être changé à **3 endroits** (les tests vérifient qu'ils correspondent) :
+
+1. `js/config.js` : la valeur `VER='…'`.
+2. `index.html` : la balise `app-version`, le lien `css/app.css?v=…` et le lien `js/main.js?v=…`.
+3. `sw.js` : le nom du cache `VERSION` (par exemple `'v19'` devient `'v20'`) et les deux liens `css/app.css?v=…` et `js/main.js?v=…` de la liste `FICHIERS`.
+
+Ensuite : `npm test` doit être au vert, puis on fusionne dans `main`.
+
+## Où trouver quoi
+| Fichier ou dossier | Rôle |
+|---|---|
+| `index.html` | La page de l'application |
+| `css/app.css` | Les styles (thème clair uniquement) |
+| `js/` | Le code, découpé en petits fichiers (voir `js/README.md`) |
+| `sw.js` | Le « service worker » : garde une copie de l'app pour le hors ligne |
+| `manifest.json` | Nom, couleurs et icônes de l'application installée |
+| `icons/` | Les icônes et l'image de démarrage |
+| `app.js` | Ancien fichier gardé pour réparer les vieilles pages déjà installées |
+| `tests/` | Les tests automatiques |
+| `screenshots/` | Captures d'écran (données de démonstration) montrées à l'installation |
+| `docs/TEST-APPAREILS.md` | Liste à cocher pour tester une version sur le téléphone |
+| `docs/STOCKAGE.md` | Tout ce que l'app range dans le téléphone (clés, base de secours, caches) |

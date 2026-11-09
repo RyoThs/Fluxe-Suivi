@@ -1,4 +1,10 @@
 /* Fluxe Suivi — styles. Thème clair fixe : c'est le seul thème autorisé (jamais de thème sombre). */
+/* Police Barlow Condensed hébergée dans l'app (dossier fonts/, licence SIL OFL 1.1 : fonts/OFL.txt).
+   Plus aucun appel à Google : l'app s'affiche pareil hors ligne. Si la police ne charge pas, la police système de repli prend le relais. */
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/barlow-condensed-500.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/barlow-condensed-600.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../fonts/barlow-condensed-700.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:800;font-display:swap;src:url(../fonts/barlow-condensed-800.woff2) format('woff2')}
 :root{--bg:#f3f5fb;--surface:#fff;--raise:#eef1fa;--ink:#0b1022;--muted:#5b6482;--line:#dfe4f1;--accent:#4f46e5;--on:#06091a;--grad:linear-gradient(135deg,#5eead4,#818cf8 55%,#c084fc);--grad-text:linear-gradient(135deg,#0d9488,#4f46e5 55%,#9333ea);--tint:rgba(79,70,229,.1);--ok:#0f9d6b;--danger:#be123c;--shadow:0 6px 20px rgba(11,16,34,.08);--num:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-font-smoothing:antialiased}
