@@ -5,6 +5,7 @@ import {S,pk,save,toast} from './etat.js';
 import {norm} from './outils.js';
 import {render} from './rendu.js';
 import {openSheet,sheet} from './vues/panneaux.js';
+import {avertir} from './dialogue.js';
 /* ===== Sauvegarde vers un fichier (format versionné) et partage ===== */
 export const pack=()=>JSON.stringify({app:'fluxe-suivi',format:FORMAT,version:VER,exportedAt:new Date().toISOString(),data:S},null,1);
 export function saveFile(){
@@ -18,9 +19,9 @@ download(txt,name,okd);
 function download(txt,name,okd){const u=URL.createObjectURL(new Blob([txt],{type:'application/json'}));const l=document.createElement('a');l.href=u;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);okd();toast('Fichier de sauvegarde téléchargé ✓')}
 /* ===== Import : on vérifie le fichier, puis on propose Fusionner ou Remplacer ===== */
 export function imp(t){
-if(typeof t!=='string'||t.length>5e6){alert('Données trop volumineuses.');return}
+if(typeof t!=='string'||t.length>5e6){avertir({icone:'alerte',ton:'ambre',titre:'Données trop volumineuses',texte:'Ce n’est pas une sauvegarde Fluxe. Rien n’a été modifié.'});return}
 let d=null;try{d=clean(unwrap(JSON.parse(t)))}catch(e){}
-if(!d){alert('Ce fichier n’est pas une sauvegarde Fluxe valide. Rien n’a été modifié.');return}
+if(!d){avertir({icone:'alerte',ton:'ambre',titre:'Fichier non reconnu',texte:'Ce fichier n’est pas une sauvegarde Fluxe valide. Rien n’a été modifié.'});return}
 openSheet({imp:d});
 }
 /* Fusion : rien n'est effacé. Pour une même séance (même id), la version modifiée le plus récemment gagne.

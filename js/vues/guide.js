@@ -11,6 +11,7 @@ import {S} from '../etat.js';
 import {esc,norm} from '../outils.js';
 import {catCur,catName,chainOf,gymCur,inGym,vis} from '../salle.js';
 import {thumb} from '../icones.js';
+import {ico} from '../pictos.js';
 
 export let gq='',gm='Tous',gv='cat';
 export function setGq(v){gq=v}
@@ -22,7 +23,7 @@ const pluriel=(n,mot)=>n+' '+mot+(n>1?'s':'');
 
 /* Cartes « Ton enseigne » : utilisées dans le Guide (sans salle) et dans le panneau « Nouvelle salle / Changer » */
 export function ensCards(actuelle){
-  const carte=(id,nom,detail,nb)=>`<button class="${id===actuelle?'on':''}" data-act="gens" data-t="${esc(id)}"><b>${id==='on-air'?'⭐ ':''}${esc(nom)}</b><span>${esc(detail)}</span><em>${pluriel(nb,'machine')}</em></button>`;
+  const carte=(id,nom,detail,nb)=>`<button class="${id===actuelle?'on':''}" data-act="gens" data-t="${esc(id)}"><b>${id==='on-air'?ico('etoile'):''}${esc(nom)}</b><span>${esc(detail)}</span><em>${pluriel(nb,'machine')}</em></button>`;
   return `<div class="ens">${CHAINS.map(c=>carte(c.id,c.name,c.brands,catOf(c).length)).join('')}${carte('autre','Autre salle','Toutes les machines de la bibliothèque',catOf(null).length)}</div>
 <p class="note">Listes probables, d’après ce que chaque enseigne annonce. Toutes les machines sont cochées au départ : décoche celles que ton club n’a pas.</p>`;
 }
@@ -54,7 +55,7 @@ export function gymCard(){
   const g=gymCur();if(!g)return '';
   const ch=chainOf(g),nb=g.eq.length;
   const autres=S.gyms.length>1?`<div class="chips">${S.gyms.map(x=>`<button class="chip${x.id===S.gym?' on':''}" data-act="gsel" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}</div>`:'';
-  return `<div class="card gym"><div class="hist-date">${ch&&ch.id==='on-air'?'⭐ ':'🏋️ '}${esc(g.name)}</div>
+  return `<div class="card gym"><div class="hist-date">${ico(ch&&ch.id==='on-air'?'etoile':'salle')}${esc(g.name)}</div>
 <div class="mu">${ch&&ch.name!==g.name?esc(ch.name)+' · ':''}${pluriel(nb,'machine')} cochée${nb>1?'s':''} dans ta salle</div>${autres}
 <div class="lk"><button class="del" style="color:var(--accent)" data-act="gchg" aria-label="Changer d’enseigne">Changer</button><button class="del" style="color:var(--accent)" data-act="gren">Renommer</button><button class="del" style="color:var(--accent)" data-act="gnew">+ Salle</button><button class="del" data-act="gdel">Supprimer</button></div></div>`;
 }

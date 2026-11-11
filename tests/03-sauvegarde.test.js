@@ -117,13 +117,10 @@ test('un fichier qui n’est pas une sauvegarde est refusé et rien ne change', 
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [seance('garde', 1)] });
   const avant = await donnees(p);
-  let alerte = '';
-  p.removeAllListeners('dialog');
-  p.on('dialog', async d => { alerte = d.message(); await d.accept(); });
   await ecranSauvegarde(p);
   await p.setInputFiles('#fi', fichierTemp('photo.json', '{"bonjour": true}'));
   await p.waitForTimeout(300);
-  assert.match(alerte, /pas une sauvegarde Fluxe valide/);
+  assert.match((await p.vus()).join(' | '), /pas une sauvegarde Fluxe valide/);
   assert.deepEqual(await donnees(p), avant);
 });
 

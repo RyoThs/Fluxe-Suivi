@@ -46,15 +46,24 @@ async function demarrer() {
   return {
     url: srv.url,
     /* Ouvre une page neuve (stockage vide). Les erreurs JavaScript sont relevées dans p.erreurs. */
-    async page(opts = {}) {
+    /* Ouvre une page neuve (stockage vide). Les erreurs JavaScript sont relevées dans p.erreurs.
+       auto: true (par défaut) → les fenêtres de l'app répondent toutes seules :
+         p.reponses.push(true | false | 'texte') programme les réponses (rien = bouton principal),
+         await p.vus() donne les titres et messages des fenêtres apparues.
+       auto: false → les fenêtres s'affichent vraiment, le test clique dedans. */
+    async page({ auto = true, ...opts } = {}) {
       const ctx = await nav.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, serviceWorkers: 'block', ...opts });
+      if (auto) await ctx.addInitScript(() => { window.__fxAuto = []; window.__fxVus = []; });
       const p = await ctx.newPage();
       p.erreurs = [];
       p.on('pageerror', e => p.erreurs.push(e.message));
       p.on('console', m => { if (m.type() === 'error') p.erreurs.push(m.text()); });
-      /* Réponses aux fenêtres confirm/prompt : p.reponses.push(true | false | 'texte') */
-      p.reponses = [];
-      p.on('dialog', async d => { const r = p.reponses.shift(); if (r === false) await d.dismiss(); else await d.accept(typeof r === 'string' ? r : undefined); });
+      p.on('dialog', d => d.accept()); // filet : l'app n'utilise plus les fenêtres du téléphone
+      let attente = Promise.resolve();
+      p.reponses = { push: (...v) => { attente = attente.then(() => p.evaluate(a => window.__fxAuto.push(...a), v)); } };
+      p.vus = () => p.evaluate(() => window.__fxVus || []);
+      /* les réponses programmées arrivent dans la page AVANT le clic */
+      for (const f of ['click', 'setInputFiles', 'fill']) { const orig = p[f].bind(p); p[f] = async (...a) => { await attente; return orig(...a); }; }
       await p.goto(srv.url);
       return p;
     },
