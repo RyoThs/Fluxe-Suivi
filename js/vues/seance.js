@@ -1,7 +1,7 @@
 /* Fluxe Suivi — Écran Séance : séance en cours, exercices, séries, cardio. */
 import {MU,TG} from '../catalogue.js';
 import {S,cur} from '../etat.js';
-import {e1,esc,fmt,fmtDate,fmtT,mins,nset,vol} from '../outils.js';
+import {esc,mieux,fmt,fmtDate,fmtT,mins,nset,vol} from '../outils.js';
 import {best,cline,prevCardio,prevSets,restFor,suggest} from '../calculs.js';
 import {gymCur,noteOf} from '../salle.js';
 import {DB,thumb} from '../icones.js';
@@ -37,6 +37,6 @@ return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.nam
 ${sg?`<button class="sg" data-act="sug" data-i="${i}">💡 ${esc(sg.txt)}<small>${esc(sg.why)}</small></button>`:''}
 <input class="note" data-note="${i}" maxlength="200" placeholder="${gymCur()?'Réglage dans '+esc(gymCur().name)+' (siège, hauteur…)':'Note (réglage du siège, hauteur…)'}" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
 <div class="gr gh"><span>Série</span><span>Précédent</span><span>kg</span><span>Réps</span><span></span></div>
-${e.sets.map((x,j)=>{if(!x.w)wi++;const p=x.w?null:pv[wi],pr=x.done&&!x.w&&b>0&&e1(x)>b+.001;return `<div class="gr${x.done?' ok':''}"><button class="plate${x.w?' wu':''}" data-act="wu" data-i="${i}" data-j="${j}" aria-label="Série ${j+1} : ${x.w?'échauffement':'travail'}, toucher pour changer">${x.w?'É':wi+1}</button><span class="pv">${p?esc(p.kg)+'×'+esc(p.reps):'–'}${pr?'<span class="pr">PR</span>':''}</span><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="kg" value="${esc(x.kg)}" aria-label="kg, série ${j+1}"><input type="text" inputmode="numeric" data-i="${i}" data-j="${j}" data-f="reps" value="${esc(x.reps)}" aria-label="Répétitions, série ${j+1}"><button class="ck" data-act="chk" data-i="${i}" data-j="${j}" aria-pressed="${!!x.done}" aria-label="Valider la série ${j+1}">✓</button></div>`}).join('')}
+${e.sets.map((x,j)=>{if(!x.w)wi++;const p=x.w?null:pv[wi],pr=x.done&&!x.w&&b&&mieux(x,b);return `<div class="gr${x.done?' ok':''}"><button class="plate${x.w?' wu':''}" data-act="wu" data-i="${i}" data-j="${j}" aria-label="Série ${j+1} : ${x.w?'échauffement':'travail'}, toucher pour changer">${x.w?'É':wi+1}</button><span class="pv">${p?esc(p.kg)+'×'+esc(p.reps):'–'}${pr?'<span class="pr">PR</span>':''}</span><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="kg" value="${esc(x.kg)}" aria-label="kg, série ${j+1}"><input type="text" inputmode="numeric" data-i="${i}" data-j="${j}" data-f="reps" value="${esc(x.reps)}" aria-label="Répétitions, série ${j+1}"><button class="ck" data-act="chk" data-i="${i}" data-j="${j}" aria-pressed="${!!x.done}" aria-label="Valider la série ${j+1}">✓</button></div>`}).join('')}
 <button class="ghost" data-act="addset" data-i="${i}">+ Ajouter une série</button><button class="ghost" data-act="rex" data-i="${i}">⏱ Repos pour cet exercice : ${fmtT(restFor(e.name))}</button></section>`;
 }
