@@ -14,7 +14,19 @@ Cardio:['Tapis de course','Marche inclinée','Vélo droit','Vélo semi-allongé'
 }).map(([g,l])=>l.map(n=>{const[a,t]=n.split('|');return[a,g,T[t]||'']})));
 /* Machines exclusives au catalogue On Air (modèles cités par Life Fitness et Panatta) : jamais mélangées aux autres salles */
 const XO=[['Tirage vertical Select','Dos','Hammer Strength Select'],['Leg extension Select','Jambes','Hammer Strength Select'],['Abducteurs Select','Fessiers','Hammer Strength Select'],
-['Tirage vertical convergent (Super Lat Machine)','Dos','Panatta'],['Rowing bas (Super Low Row)','Dos','Panatta'],['Développé vertical (Super Vertical Chest Press)','Pectoraux','Panatta'],['Développé incliné (Super Inclined Chest Press)','Pectoraux','Panatta'],['Développé décliné (Super Declined Chest Press)','Pectoraux','Panatta']];
+['Tirage vertical convergent (Super Lat Machine)','Dos','Panatta'],['Rowing bas (Super Low Row)','Dos','Panatta'],['Développé vertical (Super Vertical Chest Press)','Pectoraux','Panatta'],['Développé incliné (Super Inclined Chest Press)','Pectoraux','Panatta'],['Développé décliné (Super Declined Chest Press)','Pectoraux','Panatta'],
+/* v2.7 : machines citées par Life Fitness (On Air France) et le circuit Panatta de 12 machines (juillet 2026) */
+['Crunch abdominal Select','Abdos','Hammer Strength Select'],
+['Rowing haut (Super High Row)','Dos','Panatta'],['Rowing puissance (Super Power Row)','Dos','Panatta'],['Rowing (Super Rowing)','Dos','Panatta'],
+['Pullover (Super Pullover)','Dos','Panatta'],['Écarté bas (Super Lower Chest Flight)','Pectoraux','Panatta'],
+['Développé horizontal multi (Super Horizontal Multi Press)','Pectoraux','Panatta'],['Développé vertical multi (Super Vertical Multi Press)','Épaules','Panatta'],
+['Presse pectorale Insignia','Pectoraux','Life Fitness Insignia'],['Papillon / oiseau Insignia','Pectoraux','Life Fitness Insignia'],
+['Tirage vertical Insignia','Dos','Life Fitness Insignia'],['Extension lombaires Insignia','Dos','Life Fitness Insignia'],
+['Élévations latérales Insignia','Épaules','Life Fitness Insignia'],['Curl biceps Insignia','Bras','Life Fitness Insignia'],
+['Dips / tractions assistés Insignia','Bras','Life Fitness Insignia'],['Leg extension Insignia','Jambes','Life Fitness Insignia'],
+['Leg curl Insignia','Jambes','Life Fitness Insignia'],['Mollets Insignia','Jambes','Life Fitness Insignia'],
+['Fessiers Insignia','Fessiers','Life Fitness Insignia'],['Abducteurs Insignia','Fessiers','Life Fitness Insignia'],
+['Adducteurs Insignia','Jambes','Life Fitness Insignia'],['Crunch abdominal Insignia','Abdos','Life Fitness Insignia']];
 export const XS=new Set(XO.map(x=>x[0]));LIB.push(...XO);
 export const MU=Object.assign(Object.create(null),Object.fromEntries(LIB.map(x=>[x[0],x[1]])));
 export const TG=Object.assign(Object.create(null),Object.fromEntries(LIB.map(x=>[x[0],x[2]])));
@@ -26,13 +38,14 @@ const CROSS=['Rameur','Assault bike','SkiErg','Kettlebell swing','Farmer walk','
 const pickLib=tags=>LIB.filter(([n,m,t])=>m!=='Cardio'&&!XS.has(n)&&tags.includes(t)).map(x=>x[0]);
 const BASE=()=>[...pickLib(['','Machine guidée','Poulie']),...CARDIO];
 /* ⭐ Catalogue On Air : enseigne prioritaire, catalogue à part, rangé par familles de machines */
-export const ONAIR={id:'on-air',name:'On Air',brands:'Hammer Strength, Life Fitness, Panatta (grands clubs)',info:'Catalogue dédié : Hammer Strength à disques et Select, cardio Life Fitness, espace Panatta dans les grands clubs.',
+export const ONAIR={id:'on-air',name:'On Air',brands:'Hammer Strength, Life Fitness (Insignia, Symbio), Panatta (grands clubs)',info:'Catalogue dédié : Hammer Strength à disques et Select, machines guidées Life Fitness Insignia, cardio Life Fitness, espace Panatta (12 machines) dans les grands clubs.',
 groups:[
 {t:'Hammer Strength à disques',on:1,eq:()=>pickLib(['Hammer Strength'])},
 {t:'Hammer Strength Select (guidées)',on:1,eq:()=>XO.filter(x=>x[2]==='Hammer Strength Select').map(x=>x[0])},
+{t:'Life Fitness Insignia (guidées)',on:1,eq:()=>XO.filter(x=>x[2]==='Life Fitness Insignia').map(x=>x[0])},
 {t:'Panatta Freeweight Special (grands clubs)',on:0,eq:()=>XO.filter(x=>x[2]==='Panatta').map(x=>x[0])},
 {t:'Poids libres, poulies et machines guidées',on:1,eq:()=>pickLib(['','Machine guidée','Poulie'])},
-{t:'Cardio Life Fitness',on:1,eq:()=>[...CARDIO,'PowerMill Climber']},
+{t:'Cardio Life Fitness (Integrity, Symbio)',on:1,eq:()=>[...CARDIO,'PowerMill Climber']},
 {t:'Haltérophilie (barres Eleiko)',on:0,eq:()=>pickLib(['Eleiko'])}]};
 /* Catalogue séparé : les autres enseignes (jamais les machines exclusives On Air) */
 export const OTHERS=[

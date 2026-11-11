@@ -1,5 +1,8 @@
 /* Fluxe Suivi — Pictogrammes des machines (dessins SVG). */
 import {TG} from './catalogue.js';
+import {dessin,DEFS} from './dessins.js';
+/* v2.7 : les dégradés des dessins sont ajoutés UNE fois dans la page */
+if(typeof document!=='undefined'&&document.body&&!document.getElementById('fxP'))document.body.insertAdjacentHTML('afterbegin',DEFS);
 export const DB=`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>`;
 /* Pictogrammes des machines */
 const IC=Object.assign(Object.create(null),{
@@ -24,12 +27,14 @@ if(CI[n])return CI[n];
 const tg=TG[n];
 if(tg==='Poulie')return 'cable';
 if(tg==='Hammer Strength'||tg==='Panatta')return 'plate';
-if(tg==='Machine guidée'||tg==='Hammer Strength Select')return 'stack';
+if(tg==='Machine guidée'||tg==='Hammer Strength Select'||tg==='Life Fitness Insignia')return 'stack';
 if(/haltère|kettlebell|farmer|thruster/i.test(n))return 'dumbbell';
 if(/barre|squat|soulevé|développé|good morning|hip thrust|push press|arraché|épaulé/i.test(n)||tg==='Eleiko')return 'barbell';
 if(/pompes|tractions|dips|gainage|crunch|roue|relevé|fentes|step|nordic|russian|reverse|hyperext/i.test(n))return 'body';
 return 'dumbbell';
 }
 export function thumb(n,sz){
+const d=dessin(n); /* v2.7 : vrai dessin de la machine ou du mouvement ; sinon (exercice perso) le pictogramme */
+if(d)return `<span class="mi art${sz?' '+sz:''}">${d}</span>`;
 return `<span class="mi${sz?' '+sz:''}">${svg(iconOf(n))}</span>`;
 }
