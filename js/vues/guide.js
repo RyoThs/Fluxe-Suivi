@@ -1,65 +1,76 @@
-/* Fluxe Suivi — Écran Guide « ? » : bibliothèque des machines et carte Ma salle.
-   Trois réglages SÉPARÉS (avant, tout était mélangé dans une seule rangée de boutons) :
-   - gv : la vue  → 'salle' (mes machines) ou 'cat' (catalogues d'enseignes, qui contiennent toutes les machines)
-     Sans salle, le Guide montre simplement toutes les machines.
-   - gc : le catalogue affiché quand gv = 'cat' → C1 (⭐ On Air) ou C2 (autres enseignes)
-   - gm : le muscle → 'Tous' ou un muscle (Pectoraux, Dos…), valable dans toutes les vues */
+/* Fluxe Suivi — Écran Guide « ? » : catalogue de machines PAR ENSEIGNE et carte Ma salle.
+   - Sans salle : on choisit son enseigne (cartes), puis toutes ses machines sont cochées d'office.
+   - Avec une salle : interrupteur « Catalogue <enseigne> | Ma salle », rangée de muscles, liste rangée par muscle.
+   Réglages de l'écran :
+   - gv : la vue → 'cat' (tout le catalogue de l'enseigne) ou 'salle' (seulement les machines cochées)
+   - gm : le muscle → 'Tous' ou un muscle (Pectoraux, Dos…)
+   - gq : le texte recherché */
 import {VER} from '../config.js';
-import {C1,C2,LIB,M,ONAIR,OTHERCAT,whoHas} from '../catalogue.js';
+import {CHAINS,LIB,M,catOf} from '../catalogue.js';
 import {S} from '../etat.js';
 import {esc,norm} from '../outils.js';
-import {chainOf,gymCur,inGym,vis} from '../salle.js';
+import {catCur,catName,chainOf,gymCur,inGym,vis} from '../salle.js';
 import {thumb} from '../icones.js';
 
-export let gq='',gm='Tous',gv='salle',gc=C1;
+export let gq='',gm='Tous',gv='cat';
 export function setGq(v){gq=v}
 export function setGm(v){gm=M.includes(v)?v:'Tous'}
-export function setGv(v){gv=v==='cat'?'cat':'salle'}
-export function setGc(v){gc=v===C2?C2:C1}
+export function setGv(v){gv=v==='salle'?'salle':'cat'}
 
-/* Une ligne de la bibliothèque : dessin, nom, muscle, étiquette de marque, bouton ✓ / + */
+const L=Object.fromEntries(LIB.map(x=>[x[0],x]));
+const pluriel=(n,mot)=>n+' '+mot+(n>1?'s':'');
+
+/* Cartes « Ton enseigne » : utilisées dans le Guide (sans salle) et dans le panneau « Nouvelle salle / Changer » */
+export function ensCards(actuelle){
+  const carte=(id,nom,detail,nb)=>`<button class="${id===actuelle?'on':''}" data-act="gens" data-t="${esc(id)}"><b>${id==='on-air'?'⭐ ':''}${esc(nom)}</b><span>${esc(detail)}</span><em>${pluriel(nb,'machine')}</em></button>`;
+  return `<div class="ens">${CHAINS.map(c=>carte(c.id,c.name,c.brands,catOf(c).length)).join('')}${carte('autre','Autre salle','Toutes les machines de la bibliothèque',catOf(null).length)}</div>
+<p class="note">Listes probables, d’après ce que chaque enseigne annonce. Toutes les machines sont cochées au départ : décoche celles que ton club n’a pas.</p>`;
+}
+
+/* Une ligne : dessin, nom, muscle, étiquette de marque, et (avec une salle) le bouton ✓ / + */
 function row([n,m,tg]){
   const g=gymCur(),on=g&&inGym(n);
-  const who=gv==='cat'&&gc===C2&&whoHas(n).length?`<small class="who">${esc(whoHas(n).join(' · '))}</small>`:'';
   const btn=g?`<button class="tg${on?' on':''}" data-act="gtog" data-n="${esc(n)}" aria-pressed="${!!on}" aria-label="${on?'Retirer de':'Ajouter à'} ${esc(g.name)} : ${esc(n)}">${on?'✓':'+'}</button>`:'';
-  return `<div class="gi${on?' in':''}">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(m)}${tg?` <em class="mk">${esc(tg)}</em>`:''}</span>${who}</div>${btn}</div>`;
+  return `<div class="gi${on?' in':''}">${thumb(n,'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(m)}${tg?` <em class="mk">${esc(tg)}</em>`:''}</span></div>${btn}</div>`;
+}
+
+/* Liste rangée par muscle (titres « Pectoraux 19 », « Dos 24 »…) ; si un muscle est choisi, une seule liste */
+function parMuscle(l){
+  if(gm!=='Tous')return l.map(row).join('');
+  return M.map(m=>{const x=l.filter(r=>r[1]===m);return x.length?`<h2 class="cg">${m}<small>${x.length}</small></h2>${x.map(row).join('')}`:''}).join('');
 }
 
 export function glist(){
-  const g=gymCur();
-  const q=norm(gq),garde=([n,m])=>norm(n).includes(q)&&(gm==='Tous'||m===gm);
-  /* Catalogue d'enseigne : rangé par familles de machines */
-  if(g&&gv==='cat'){
-    const L=n=>LIB.find(x=>x[0]===n),seen=new Set();
-    return (gc===C1?ONAIR:OTHERCAT).groups.map(gr=>{
-      const l=gr.eq().filter(n=>!seen.has(n)&&seen.add(n)).map(L).filter(Boolean).filter(garde);
-      return l.length?`<h2 class="cg">${esc(gr.t)}<small>${l.length}</small></h2>${l.map(row).join('')}`:'';
-    }).join('')||'<p class="empty">Aucune machine pour ce choix.</p>';
-  }
-  const l=LIB.filter(x=>vis(x[0])&&(!g||inGym(x[0]))&&garde(x)); /* sans salle : toutes les machines */
-  if(l.length)return l.map(row).join('');
-  return `<p class="empty">${g&&!g.eq.length?'Aucune machine cochée pour l’instant. Va dans « Catalogues » et touche + sur les machines de ta salle.':'Aucune machine pour ce choix.'}</p>`;
+  const g=gymCur(),q=norm(gq);
+  const noms=!g?LIB.map(x=>x[0]):gv==='salle'?g.eq:catCur();
+  const l=noms.map(n=>L[n]).filter(r=>r&&vis(r[0])&&norm(r[0]).includes(q)&&(gm==='Tous'||r[1]===gm));
+  if(l.length)return parMuscle(l);
+  if(g&&gv==='salle'&&!g.eq.length)return '<p class="empty">Aucune machine cochée. Va dans le catalogue et touche + sur les machines de ta salle.</p>';
+  return '<p class="empty">Aucune machine pour ce choix.</p>';
 }
 
-/* Carte « Ma salle » en haut du Guide */
+/* Carte de la salle active */
 export function gymCard(){
-  const g=gymCur();
-  if(!S.gyms.length)return `<div class="card gym"><div class="hist-date">🏋️ Ma salle</div><div class="mu">Crée ta salle : tu coches ses machines, tu ne vois qu’elles pendant ta séance, et tes réglages (siège, hauteur…) lui sont propres.</div><button class="btn" data-act="gnew">Créer ma salle</button></div>`;
-  const ch=chainOf(g),nb=g?g.eq.length:0;
-  return `<div class="card gym"><div class="hist-date">🏋️ ${g?esc(g.name):'Aucune salle choisie'}</div>
-<div class="mu">${g?`${nb} machine${nb>1?'s':''}${ch?' · modèle '+esc(ch.name)+', à vérifier sur place':''}`:'Choisis la salle où tu t’entraînes.'}</div>
-<div class="chips">${S.gyms.map(x=>`<button class="chip${x.id===S.gym?' on':''}" data-act="gsel" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}<button class="chip" data-act="gsel" data-id="">Aucune</button><button class="chip" data-act="gnew">+ Nouvelle</button></div>
-${g?`<div class="lk"><button class="del" style="color:var(--accent)" data-act="gren">Renommer</button><button class="del" data-act="gdel">Supprimer</button></div>`:''}</div>`;
+  const g=gymCur();if(!g)return '';
+  const ch=chainOf(g),nb=g.eq.length;
+  const autres=S.gyms.length>1?`<div class="chips">${S.gyms.map(x=>`<button class="chip${x.id===S.gym?' on':''}" data-act="gsel" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}</div>`:'';
+  return `<div class="card gym"><div class="hist-date">${ch&&ch.id==='on-air'?'⭐ ':'🏋️ '}${esc(g.name)}</div>
+<div class="mu">${ch&&ch.name!==g.name?esc(ch.name)+' · ':''}${pluriel(nb,'machine')} cochée${nb>1?'s':''} dans ta salle</div>${autres}
+<div class="lk"><button class="del" style="color:var(--accent)" data-act="gchg" aria-label="Changer d’enseigne">Changer</button><button class="del" style="color:var(--accent)" data-act="gren">Renommer</button><button class="del" style="color:var(--accent)" data-act="gnew">+ Salle</button><button class="del" data-act="gdel">Supprimer</button></div></div>`;
 }
 
-/* Interrupteur à plusieurs positions (une seule active) */
-const seg=(act,cur,l)=>`<div class="seg" role="group">${l.map(([v,t])=>`<button class="${cur===v?'on':''}" data-act="${act}" data-v="${esc(v)}" aria-pressed="${cur===v}">${esc(t)}</button>`).join('')}</div>`;
+/* Interrupteur « Catalogue <enseigne> · n | Ma salle · n » (mis à jour à chaque coche) */
+export function segGuide(){
+  const g=gymCur();if(!g)return '';
+  return `<div class="seg" id="gvseg" role="group">${[['cat',catName()+' · '+catCur().filter(vis).length],['salle','Ma salle · '+g.eq.length]].map(([v,t])=>`<button class="${gv===v?'on':''}" data-act="gv" data-v="${v}" aria-pressed="${gv===v}">${esc(t)}</button>`).join('')}</div>`;
+}
 
 export function viewGuide(){
   const g=gymCur();
-  const vues=g?seg('gv',gv,[['salle','Ma salle'],['cat','Catalogues']]):'';
-  const cats=g&&gv==='cat'?`<div class="chips cats">${[[C1,'⭐ On Air'],[C2,'Autres enseignes']].map(([v,t])=>`<button class="chip${gc===v?' on':''}" data-act="gc" data-v="${esc(v)}">${t}</button>`).join('')}</div>`:'';
   const muscles=`<div class="chips">${['Tous',...M].map(m=>`<button class="chip${gm===m?' on':''}" data-act="gm" data-m="${esc(m)}">${m==='Tous'?'Tous les muscles':esc(m)}</button>`).join('')}</div>`;
-  return `<h1>Guide</h1><p class="sub">Repère les machines de ta salle. Chaque dessin montre le type de machine.</p>${gymCard()}
-${vues}${cats}<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine">${muscles}<div id="gl">${glist()}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
+  const recherche=`<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine">`;
+  const pied=`<p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
+  if(!g)return `<h1>Ton enseigne</h1><p class="sub">Choisis ta salle de sport : tu verras uniquement ses machines.</p>${ensCards()}
+<h2>Toutes les machines</h2>${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
+  return `<h1>Guide</h1>${gymCard()}${segGuide()}${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
 }

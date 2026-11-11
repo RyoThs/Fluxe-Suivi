@@ -132,3 +132,13 @@ h2.cg small{font-family:var(--body);font-size:13px;font-weight:600;color:var(--m
 .chips.cats .chip.on{background:var(--tint);color:var(--accent);border-color:var(--accent)}
 em.mk{display:inline-block;font-style:normal;font-size:11px;font-weight:600;line-height:1.5;padding:0 7px;margin-left:4px;border-radius:999px;background:var(--raise);color:var(--muted);vertical-align:1px;white-space:nowrap}
 .card.gym .lk{display:flex;gap:18px}
+/* Catalogue par enseigne (v2.5) : cartes « Ton enseigne » */
+.ens{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 6px}
+.ens button{text-align:left;padding:14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);min-height:96px;color:var(--ink)}
+.ens button.on{border:2px solid var(--accent);background:var(--tint)}
+.ens b{display:block;font-size:17px}
+.ens span{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.ens em{display:block;font-style:normal;font-weight:700;color:var(--accent);margin-top:8px;font-size:14px}
+.note{font-size:12px;color:var(--muted);margin:4px 4px 14px}
+.card.gym .lk{flex-wrap:wrap;gap:2px 0;margin:6px -10px 0}
+.card.gym .lk .del{padding:6px 9px}
