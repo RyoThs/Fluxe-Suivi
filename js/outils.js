@@ -17,5 +17,4 @@ export const fmtT=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
 export const mins=t=>Math.max(0,Math.floor((Date.now()-t)/60000));
 export const cname=v=>String(v).replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,60); /* même règle que le nettoyage des données */
 export const K=n=>'k:'+norm(n).slice(0,60);
-export const RS=[60,90,120,180,240];
 export const fmtN=n=>String(Math.round(n*100)/100).replace('.',',');

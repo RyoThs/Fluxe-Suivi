@@ -66,7 +66,7 @@ test('toucher à côté ou appuyer sur Échap = annuler (sans risque)', async ()
   assert.equal((await donnees(p)).sessions.length, 1);
 });
 
-test('terminer la séance : récapitulatif, puis « Créer une routine ? » avec le nom à taper', async () => {
+test('terminer la séance : récapitulatif, puis enregistrement direct (plus de question « routine »)', async () => {
   const p = await A.page({ auto: false });
   await p.click('[data-act=start]');
   await p.click('[data-act=pick]');
@@ -75,21 +75,17 @@ test('terminer la séance : récapitulatif, puis « Créer une routine ? » avec
   await p.fill('[data-f=reps][data-i="0"][data-j="0"]', '8');
   await p.click('[data-act=chk]');
   await p.click('[data-act=finish]');
-  let f = await fenetre(p);
+  const f = await fenetre(p);
   assert.equal(f.titre, 'Terminer la séance ?');
   assert.match(f.texte, /1 exercice.*1 série.*800 kg/s);
   assert.deepEqual(f.boutons, ['Terminer et enregistrer', 'Continuer la séance']);
   await p.click('.dlg [data-r=ok]');
-  await p.waitForSelector('.dlg .dlg-in');
-  f = await fenetre(p);
-  assert.equal(f.titre, 'Créer une routine ?');
-  await p.fill('.dlg .dlg-in', 'Jambes du lundi');
-  await p.click('.dlg [data-r=ok]');
-  await p.waitForTimeout(100);
+  await p.waitForTimeout(150);
+  assert.equal(await p.$('.dlg'), null, 'aucune autre fenêtre');
   const d = await donnees(p);
   assert.equal(d.current, null);
   assert.equal(d.sessions.length, 1);
-  assert.deepEqual(d.routines, [{ name: 'Jambes du lundi', exercises: ['Squat'] }]);
+  assert.equal(d.routines.length, 0);
   assert.deepEqual(p.erreurs, []);
 });
 
@@ -106,8 +102,6 @@ test('séries remplies mais non validées : liste, puis « Les garder comme fait
   assert.match(f.texte, /Squat\s*90 kg × 10/);
   assert.deepEqual(f.boutons, ['La garder comme faite', 'Revenir à la séance']);
   await p.click('.dlg [data-r=ok]');
-  await p.waitForSelector('.dlg .dlg-in'); // routine ?
-  await p.click('.dlg [data-r=non]');
   await p.waitForTimeout(100);
   const d = await donnees(p);
   assert.equal(d.sessions[0].exercises[0].sets[0].reps, '10');

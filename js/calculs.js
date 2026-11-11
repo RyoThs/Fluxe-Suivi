@@ -8,7 +8,8 @@ return null;
 }
 /* meilleur 1RM estimé déjà réalisé sur un exercice (sert au badge PR) */
 export function best(name){return done().reduce((m,s)=>{const e=s.exercises.find(e=>norm(e.name)===norm(name));return e?e.sets.filter(ok).reduce((a,x)=>mieux(x,a)?x:a,m):m},null)} /* meilleure série déjà faite (ou null) */
-export function newEx(name){if(MU[name]==='Cardio')return{name,cardio:true,sets:[{min:'',km:'',kcal:'',done:false}]};const p=prevSets(name);return{name,sets:(p||[{kg:'',reps:''}]).map(x=>({kg:x.kg,reps:x.reps,done:false}))}}
+/* Nouvel exercice dans la séance. « plan » = séries prévues par une routine ; sinon on reprend celles de la dernière fois */
+export function newEx(name,plan){if(MU[name]==='Cardio')return{name,cardio:true,sets:(plan&&plan.length?plan:[{}]).map(x=>({min:x.min||'',km:x.km||'',kcal:x.kcal||'',done:false}))};const p=plan&&plan.length?plan:prevSets(name);return{name,sets:(p||[{kg:'',reps:''}]).map(x=>{const t={kg:x.kg,reps:x.reps,done:false};if(x.w)t.w=true;return t})}}
 export function names(){const st=new Set();S.sessions.forEach(s=>s.exercises.forEach(e=>st.add(e.name)));return [...st]}
 export const restFor=n=>(S.rests&&S.rests[K(n)])||S.rest||90;
 /* Suggestion de charge (double progression) d'après la meilleure série de la dernière séance */

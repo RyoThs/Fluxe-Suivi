@@ -26,6 +26,12 @@ jobs:
       - name: Installer l’outil de test
         run: npm ci
       - name: Installer le navigateur de test
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
+      # Paquets système (polices…) : souvent déjà présents sur GitHub. Si les serveurs Ubuntu sont en panne,
+      # on continue quand même : s'il manquait vraiment quelque chose, les tests échoueraient clairement.
+      - name: Installer les paquets système du navigateur (si possible)
+        timeout-minutes: 4
+        continue-on-error: true
+        run: npx playwright install-deps chromium
       - name: Lancer les tests
         run: npm test

@@ -12,9 +12,6 @@ const l=done(),now=Date.now(),w0=wk(now),W=7*864e5;
 const d0=new Date().setHours(0,0,0,0),today=S.sessions.filter(x=>x.date>=d0).reduce((a,x)=>a+vol(x),0);
 const weeks=[...Array(8)].map((_,k)=>{const t=w0-(7-k)*W;const v=l.filter(s=>wk(s.date)===t).reduce((a,s)=>a+vol(s),0);return{t,v}});
 const mx=Math.max(1,...weeks.map(x=>x.v));
-/* Records : poids réellement soulevé (la série la plus lourde, hors échauffement), avec sa date */
-const bs=Object.create(null);l.forEach(s=>s.exercises.filter(e=>!e.cardio).forEach(e=>e.sets.filter(ok).forEach(x=>{const k=e.name;if(!bs[k]||mieux(x,bs[k]))bs[k]={...x,t:s.date}})));
-const rec=Object.entries(bs).sort((a,b)=>mieux(b[1],a[1])?1:-1).slice(0,8);
 const nm=[...new Set(l.flatMap(s=>s.exercises.filter(e=>!e.cardio&&e.sets.some(ok)).map(e=>e.name)))];
 if(!sx||!nm.includes(sx))sx=nm[0]||null;
 const pts=sx?l.slice().sort((a,b)=>a.date-b.date).map(s=>{const e=s.exercises.find(e=>e.name===sx);return{t:s.date,v:e?e.sets.filter(ok).reduce((a,x)=>Math.max(a,+x.kg||0),0):0}}).filter(p=>p.v>0).slice(-12):[];
@@ -28,5 +25,24 @@ return `<h1>Stats</h1><p class="sub">Ta progression</p>
 <div class="card"><div class="hist-date">Volume par semaine</div><div class="mu">en kg, 8 dernières semaines</div><div class="chart" role="img" aria-label="Volume hebdomadaire">${weeks.map(x=>`<div><i style="height:${Math.round(x.v/mx*100)}px"></i>${new Date(x.t).getDate()}/${new Date(x.t).getMonth()+1}</div>`).join('')}</div></div>
 <div class="card"><div class="hist-date">Progression par exercice</div><div class="mu">charge la plus lourde (kg), 12 dernières séances</div>${nm.length?`<div class="chips">${nm.map(n=>`<button class="chip${n===sx?' on':''}" data-act="sx" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div><div class="chart" role="img" aria-label="Progression de ${esc(sx)}">${pts.map(p=>`<div><small>${fmtN(p.v)}</small><i style="height:${Math.round(p.v/pm*100)}px"></i>${new Date(p.t).getDate()}/${new Date(p.t).getMonth()+1}</div>`).join('')}</div>`:'<p class="empty" style="margin:12px">Termine une séance pour voir ta progression.</p>'}</div>
 <div class="card"><div class="hist-date">Répartition par groupe</div><div class="mu">volume des 30 derniers jours</div>${Object.entries(gv).sort((a,b)=>b[1]-a[1]).map(([g,v])=>`<div class="mg"><span>${esc(g)}</span><div><i style="width:${Math.round(v/gt*100)}%"></i></div><b>${Math.round(v/gt*100)}%</b></div>`).join('')||'<p class="empty" style="margin:12px">Pas encore de données.</p>'}</div>
-${cardio7}<div class="card"><div class="hist-date">Records</div><div class="mu">charge la plus lourde soulevée (hors échauffement)</div>${rec.map(([n,x])=>`<div class="rec"><div>${esc(n)}<br><span>${esc(x.reps)} répétition${+x.reps>1?'s':''} · ${new Date(x.t).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span></div><b>${fmtN(+x.kg||0)} kg</b></div>`).join('')||'<p class="empty" style="margin:12px">Pas encore de records.</p>'}</div>`;
+${cardio7}${records(l)}`;
+}
+/* Records : 3 onglets
+   - max   : charge la plus lourde soulevée (hors échauffement)
+   - serie : meilleure série = poids × répétitions sur une seule série
+   - vol   : volume sur une séance = poids × répétitions, additionné sur toutes les séries de l'exercice */
+let rx='max';
+export function setRx(v){rx=['max','serie','vol'].includes(v)?v:'max'}
+const jour=t=>new Date(t).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+function records(l){
+const bs=Object.create(null);
+l.forEach(s=>s.exercises.filter(e=>!e.cardio).forEach(e=>{const k=e.name,ss=e.sets.filter(ok);if(!ss.length)return;
+ if(rx==='vol'){const v=ss.reduce((a,x)=>a+(+x.kg||0)*(+x.reps||0),0);if(v>0&&(!bs[k]||v>bs[k].v))bs[k]={v,d:ss.length+' série'+(ss.length>1?'s':''),t:s.date};return}
+ ss.forEach(x=>{
+  if(rx==='serie'){const v=(+x.kg||0)*(+x.reps||0);if(v>0&&(!bs[k]||v>bs[k].v))bs[k]={v,d:fmtN(+x.kg||0)+' kg × '+x.reps,t:s.date}}
+  else if(!bs[k]||mieux(x,bs[k].x))bs[k]={x,v:+x.kg||0,d:x.reps+' répétition'+(+x.reps>1?'s':''),t:s.date}})}));
+const rec=Object.entries(bs).sort((a,b)=>rx==='max'?(mieux(b[1].x,a[1].x)?1:-1):b[1].v-a[1].v).slice(0,8);
+const sous={max:'Charge la plus lourde soulevée (hors échauffement)',serie:'Poids × répétitions sur une seule série',vol:'Poids × répétitions × séries, sur une séance'}[rx];
+const seg=`<div class="seg rec-seg" role="group" aria-label="Type de record">${[['max','Poids max'],['serie','Meilleure série'],['vol','Volume']].map(([v,t])=>`<button class="${rx===v?'on':''}" data-act="rx" data-v="${v}" aria-pressed="${rx===v}">${t}</button>`).join('')}</div>`;
+return `<div class="card"><div class="hist-date">Records</div>${seg}<div class="mu">${sous}</div>${rec.map(([n,r])=>`<div class="rec"><div>${esc(n)}<br><span>${esc(r.d)} · ${jour(r.t)}</span></div><b>${rx==='max'?fmtN(r.v):fmt(r.v)} kg</b></div>`).join('')||'<p class="empty" style="margin:12px">Pas encore de records.</p>'}</div>`;
 }
