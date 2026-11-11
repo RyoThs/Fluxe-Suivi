@@ -5,6 +5,7 @@ import {render} from './rendu.js';
 import {snapStart} from './versions.js';
 import './actions.js'; /* boutons et saisie */
 import './installation.js'; /* bouton Installer */
+import './ecran.js'; /* pas de zoom, portrait */
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
    Elle force la mise à jour du service worker, vide SES caches (jamais tes données : elles sont ailleurs) et recharge.
    Une seule tentative par minute, pour ne jamais tourner en boucle. */
