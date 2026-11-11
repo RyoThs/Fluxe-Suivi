@@ -94,6 +94,7 @@ nav button[aria-current=true]{background:var(--grad);color:var(--on)}
 .mi.lg{width:76px;height:76px;border-radius:16px}
 .mi.sm{width:40px;height:40px;border-radius:10px}
 .mi svg{width:62%;height:62%}
+.mi.art{background:#eef1fa}.mi.art svg{width:100%;height:100%}
 .mi img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .pt{flex:1;min-width:0;text-align:left}
 .pt b,.pt span,.pt small{display:block}
