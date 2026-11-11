@@ -42,16 +42,6 @@ export const OTHERS=[
 {id:'orange-bleue',name:'L’Orange Bleue',brands:'BH, Bodytone',info:'Machines guidées, poids libres et cardio (tapis, vélos, elliptiques, rameurs).',eq:BASE},
 {id:'keepcool',name:'Keepcool',brands:'machines à air comprimé, Technogym dans certains clubs',info:'Machines guidées, poids libres, cardio ; espace « Lady Corner » dans plusieurs clubs.',eq:BASE}];
 export const CHAINS=[ONAIR,...OTHERS];
-/* machines cochées par défaut à la création d'une salle */
-export const defOf=c=>[...new Set(c.groups?c.groups.filter(g=>g.on).flatMap(g=>g.eq()):c.eq())];
-/* Deux catalogues distincts dans « Ma salle » :
-   ⭐ Catalogue On Air (prioritaire) et Catalogue autres enseignes (toutes les autres réunies en un seul catalogue) */
-export const C1='⭐ Catalogue On Air',C2='Catalogue autres enseignes';
-export const OTHERCAT={groups:[
-{t:'Poids libres, poulies et machines guidées',eq:()=>pickLib(['','Machine guidée','Poulie'])},
-{t:'Cardio',eq:()=>CARDIO},
-{t:'Cross-training',eq:()=>CROSS},
-{t:'Hammer Strength à disques',eq:()=>pickLib(['Hammer Strength'])},
-{t:'Haltérophilie (barres Eleiko)',eq:()=>pickLib(['Eleiko'])}]};
-/* pour chaque machine du catalogue « autres enseignes » : quelles enseignes l'annoncent */
-let WHO=null;export const whoHas=n=>{if(!WHO){WHO=Object.create(null);OTHERS.forEach(c=>c.eq().forEach(x=>{(WHO[x]=WHO[x]||[]).includes(c.name)||WHO[x].push(c.name)}))}return WHO[n]||[]};
+/* Catalogue d'une enseigne : TOUTES ses machines (elles sont toutes cochées à la création de la salle,
+   l'utilisateur décoche ce que son club n'a pas). Sans enseigne (« Autre salle ») : toute la bibliothèque, sauf les exclusivités On Air. */
+export const catOf=c=>c?[...new Set(c.groups?c.groups.flatMap(g=>g.eq()):c.eq())]:LIB.filter(x=>!XS.has(x[0])).map(x=>x[0]);
