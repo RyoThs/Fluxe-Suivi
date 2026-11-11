@@ -14,6 +14,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `calculs.js` | Calculs sur l'historique : séries précédentes, records, suggestion de charge |
 | `catalogue.js` | Exercices, machines, enseignes (On Air et autres) |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
+| `routines.js` | Routines : création depuis l’Historique, brouillon de modification (séries, poids, reps, blocs cardio), démarrage |
 | `icones.js` | Vignettes des machines : le dessin si il existe, sinon un pictogramme |
 | `dessins.js` | Dessins des machines et des mouvements (v2.7) : pièces communes + un dessin par exercice |
 | `rappel.js` | Rappel de sauvegarde |

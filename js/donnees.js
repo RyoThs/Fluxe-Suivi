@@ -11,6 +11,7 @@ if(!/^[A-Za-z0-9_-]{1,40}$/.test(id)||date===null)return null;
 const n={id,date,exercises:[]},dur=num(s.dur),mod=num(s.mod);
 if(dur!==null&&dur>=0&&dur<=1440)n.dur=Math.round(dur);
 if(mod!==null&&mod>0)n.mod=mod; /* date de dernière modification : sert à la fusion */
+if(typeof s.rt==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(s.rt))n.rt=s.rt; /* routine de départ */
 if(typeof s.g==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(s.g)){n.g=s.g;const gn=str(s.gn,40);if(gn)n.gn=gn} /* salle de la séance */
 for(const e of s.exercises.slice(0,60)){
 if(!e||typeof e!=='object'||!Array.isArray(e.sets))continue;
@@ -21,24 +22,40 @@ n.exercises.push(cd?{name,cardio:true,sets}:{name,sets});
 }
 return n;
 }
+/* Une routine : {id, name, exercises:[noms], sets:[[{kg,reps,w?}…] ou [{min,km,kcal}…] (cardio) par exercice]}.
+   « sets » est facultatif (anciennes routines) : sans lui, la séance reprend les séries de la dernière fois. */
+function cleanRoutine(r){
+const str=(v,n)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,n):'';
+const val=v=>{if(typeof v==='number')v=String(v);return typeof v==='string'&&/^\d{0,5}(\.\d{0,3})?$/.test(v)?v:''};
+if(!r||typeof r!=='object'||!Array.isArray(r.exercises))return null;
+const name=str(r.name,60),ex=[],sets=[],plan=Array.isArray(r.sets);
+r.exercises.slice(0,60).forEach((x,i)=>{const n=str(x,60);if(!n)return;ex.push(n);
+ const l=plan&&Array.isArray(r.sets[i])?r.sets[i].slice(0,30).filter(y=>y&&typeof y==='object').map(y=>{if('min' in y||'km' in y||'kcal' in y)return{min:val(y.min),km:val(y.km),kcal:val(y.kcal)};const t={kg:val(y.kg),reps:val(y.reps)};if(y.w===true)t.w=true;return t}):[];sets.push(l)});
+if(!name||!ex.length)return null;
+const o={name,exercises:ex};
+if(typeof r.id==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(r.id))o.id=r.id;
+if(plan)o.sets=sets;
+return o;
+}
 export function clean(d){
 if(!d||typeof d!=='object'||!Array.isArray(d.sessions))return null;
 const str=(v,n)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,n):'';
 const num=v=>typeof v==='number'&&isFinite(v)?v:null;
 const o={sessions:[],routines:[],current:null,notes:{},rests:{}},ids=new Set(),eb=cleanSession(d.editBak);
 for(const s of d.sessions.slice(0,5000)){const c=cleanSession(s);if(!c||ids.has(c.id))continue;ids.add(c.id);if(s.edit===true&&eb&&eb.id===c.id&&d.current===c.id){c.edit=true;o.editBak=eb}o.sessions.push(c)}
-if(Array.isArray(d.routines))for(const r of d.routines.slice(0,200)){if(!r||typeof r!=='object'||!Array.isArray(r.exercises))continue;const name=str(r.name,60),ex=r.exercises.slice(0,60).map(x=>str(x,60)).filter(Boolean);if(name&&ex.length)o.routines.push({name,exercises:ex})}
+if(Array.isArray(d.routines))for(const r of d.routines.slice(0,200)){const c=cleanRoutine(r);if(c)o.routines.push(c)}
 if(typeof d.current==='string'&&ids.has(d.current))o.current=d.current;
 if(d.notes&&typeof d.notes==='object')for(const [k,v] of Object.entries(d.notes).slice(0,1000)){const t=str(v,200);if(/^k:.{1,60}$/.test(k)&&t)o.notes[k]=t}
 if(d.rests&&typeof d.rests==='object')for(const [k,v] of Object.entries(d.rests).slice(0,1000)){if(/^k:.{1,60}$/.test(k)&&num(v)!==null&&v>=15&&v<=600)o.rests[k]=Math.round(v)}
 const r=num(d.rest);if(r!==null&&r>=15&&r<=600)o.rest=Math.round(r);
 for(const k of ['lastBackup','snooze']){const v=num(d[k]);if(v!==null&&v>0)o[k]=v}
 if(BKD.includes(d.bkEvery))o.bkEvery=d.bkEvery;
+if(d.nv===true)o.nv=true; /* vibration de fin de repos coupée */
 /* Corbeille : séances (s) et routines (r) supprimées, gardées 30 jours */
 o.trash=[];
 if(Array.isArray(d.trash))for(const t of d.trash.slice(0,500)){if(!t||typeof t!=='object')continue;const at=num(t.at);if(at===null||at<=0)continue;
 if(t.s){const c=cleanSession(t.s);if(c)o.trash.push({at,s:c})}
-else if(t.r&&typeof t.r==='object'&&Array.isArray(t.r.exercises)){const name=str(t.r.name,60),ex=t.r.exercises.slice(0,60).map(x=>str(x,60)).filter(Boolean);if(name&&ex.length)o.trash.push({at,r:{name,exercises:ex}})}}
+else if(t.r){const c=cleanRoutine(t.r);if(c)o.trash.push({at,r:c})}}
 /* Ma salle : salles de l'utilisateur, machines présentes, notes de réglage propres à chaque salle */
 o.gyms=[];
 if(Array.isArray(d.gyms))for(const g of d.gyms.slice(0,20)){if(!g||typeof g!=='object')continue;const id=str(g.id,40),name=str(g.name,40);if(!/^[A-Za-z0-9_-]{1,40}$/.test(id)||!name||o.gyms.some(x=>x.id===id))continue;
