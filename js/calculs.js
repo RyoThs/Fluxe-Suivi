@@ -1,13 +1,13 @@
 /* Fluxe Suivi — Calculs sur l'historique : séries précédentes, records, suggestion de charge, cardio. */
 import {MU} from './catalogue.js';
 import {S,done} from './etat.js';
-import {K,dn,e1,fmtN,norm,ok} from './outils.js';
+import {K,dn,e1,fmtN,mieux,norm,ok} from './outils.js';
 export function prevSets(name){
 for(const s of done().sort((a,b)=>b.date-a.date)){const e=s.exercises.find(e=>norm(e.name)===norm(name));if(e){const l=e.sets.filter(ok);if(l.length)return l}}
 return null;
 }
 /* meilleur 1RM estimé déjà réalisé sur un exercice (sert au badge PR) */
-export function best(name){return done().reduce((m,s)=>{const e=s.exercises.find(e=>norm(e.name)===norm(name));return e?e.sets.filter(ok).reduce((a,x)=>Math.max(a,e1(x)||0),m):m},0)}
+export function best(name){return done().reduce((m,s)=>{const e=s.exercises.find(e=>norm(e.name)===norm(name));return e?e.sets.filter(ok).reduce((a,x)=>mieux(x,a)?x:a,m):m},null)} /* meilleure série déjà faite (ou null) */
 export function newEx(name){if(MU[name]==='Cardio')return{name,cardio:true,sets:[{min:'',km:'',kcal:'',done:false}]};const p=prevSets(name);return{name,sets:(p||[{kg:'',reps:''}]).map(x=>({kg:x.kg,reps:x.reps,done:false}))}}
 export function names(){const st=new Set();S.sessions.forEach(s=>s.exercises.forEach(e=>st.add(e.name)));return [...st]}
 export const restFor=n=>(S.rests&&S.rests[K(n)])||S.rest||90;
