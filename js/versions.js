@@ -30,6 +30,6 @@ return true;
 /* Au démarrage : copie du jour + récupération unique des anciennes copies gardées dans le localStorage */
 export async function snapStart(){
 try{if(!localStorage.getItem('fx-old-done')){for(const k of [KEY+'-sauvegarde',KEY+'-brut']){const o=localStorage.getItem(k);if(o)await snap('old',o)}localStorage.setItem('fx-old-done','1')}}catch(e){}
-if(load.bad){await snap('bad',load.bad);warn('bad','⚠ Les données enregistrées sur ce téléphone étaient illisibles. Une copie a été gardée à part. Si tu as un fichier de sauvegarde, importe-le : Historique → 🛟 Sauvegarde → Importer un fichier.')}
+if(load.bad){await snap('bad',load.bad);warn('bad','⚠ Les données enregistrées sur ce téléphone étaient illisibles. Une copie a été gardée à part. Si tu as un fichier de sauvegarde, importe-le : Historique → Sauvegarde et récupération → Importer un fichier.')}
 if(done().length)snap('auto');
 }
