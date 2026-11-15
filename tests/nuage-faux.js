@@ -30,6 +30,7 @@ function installer() {
       if (meta) d.m = { j: meta.j, mod: meta.mod, t: ++s.t };
       ecr(s);
     },
+    async signaler(uid, d) { await pause(); hors(); const s = S0(); s.erreurs = s.erreurs || []; s.erreurs.push({ uid, ...d }); ecr(s); },
     async supprimerCompte(m) { await pause(); const s = S0(); const u = s.user; const c = u && s.comptes[u.email]; if (!c || c.m !== m) throw err('auth/invalid-credential'); delete s.comptes[u.email]; delete s.data[u.uid]; s.user = null; ecr(s); },
   };
 }

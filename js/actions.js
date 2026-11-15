@@ -3,7 +3,7 @@
    seance.js (séance en cours), routines.js, repos.js (chrono), donnees.js (sauvegarde, corbeille),
    salle.js (Ma salle), ecrans.js (filtres et panneaux), nuage.js (Sauvegarde en ligne).
    Un geste qui renvoie true demande à l'app d'enregistrer puis de redessiner l'écran. */
-import {S, cur, pk, save, setTab} from './etat.js';
+import {S, cur, pk, save, setTab, toast} from './etat.js';
 import {$, K, cname} from './outils.js';
 import {avertir} from './dialogue.js';
 import {gymCur} from './salle.js';
@@ -19,6 +19,7 @@ import {gestes as donnees} from './gestes/donnees.js';
 import {gestes as salle} from './gestes/salle.js';
 import {gestes as ecrans} from './gestes/ecrans.js';
 import {gestes as nuage} from './gestes/nuage.js';
+import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
 const GESTES = Object.assign(Object.create(null), seance, routines, repos, donnees, salle, ecrans, nuage);
 export const nomsGestes = () => Object.keys(GESTES);
@@ -104,6 +105,10 @@ document.addEventListener('submit', ev => {
 });
 /* case « Vibration courte à la fin du repos » */
 document.addEventListener('change', ev => {
+  if (ev.target.id === 'erenv') {
+    setEnvoiAuto(ev.target.checked);
+    return;
+  }
   if (ev.target.id === 'vib') {
     if (ev.target.checked) delete S.nv;
     else S.nv = true;
@@ -150,7 +155,13 @@ document.addEventListener('click', ev => {
     return;
   }
   const g = GESTES[a];
-  if (g && g({a, b, s, i, j, k}) !== true) return;
+  try {
+    if (g && g({a, b, s, i, j, k}) !== true) return;
+  } catch (e) {
+    noter(e, 'Le bouton « ' + (b.textContent.trim().replace(/\s+/g, ' ').slice(0, 40) || a) + ' » n’a pas marché');
+    toast('Un problème est survenu. Il a été noté (Mes données → Rapport d’erreurs).');
+    return;
+  }
   save();
   render();
 });

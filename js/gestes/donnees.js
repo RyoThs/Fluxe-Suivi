@@ -12,6 +12,7 @@ import {fillData} from '../vues/ecran-sauvegarde.js';
 import {tStop} from '../minuteur.js';
 import {VB, snap} from '../versions.js';
 import {imp, merge, pack, saveFile} from '../sauvegarde.js';
+import {effacer} from '../erreurs.js';
 const importer = ({a, b, s, i, j, k}) => {
   const d = pk.imp;
   if (!d) return;
@@ -218,5 +219,20 @@ export const gestes = {
       return;
     }
     return true;
+  },
+  /* Rapport d'erreurs : vider le journal du téléphone (ce qui a déjà été envoyé reste chez le créateur de l'app) */
+  erclr: () => {
+    confirmer({
+      icone: 'corbeille',
+      ton: 'bleu',
+      titre: 'Effacer le journal d’erreurs ?',
+      texte: 'Le journal de ce téléphone sera vidé. Tes séances ne sont pas touchées.',
+      ok: 'Effacer',
+      non: 'Garder',
+    }).then(ok => {
+      if (!ok) return;
+      effacer();
+      sheet();
+    });
   },
 };
