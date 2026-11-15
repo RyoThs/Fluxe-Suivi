@@ -1,7 +1,7 @@
 # Inventaire du stockage de Fluxe Suivi
 
 Ce fichier liste **tout ce que Fluxe Suivi range dans le téléphone**.
-Un test automatique (`tests/08-stockage.test.js`) lit le code (`js/` et `app.js`) et échoue si une clé
+Un test automatique (`tests/10-stockage.test.js`) lit le code (`js/` et `app.js`) et échoue si une clé
 utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-` ou `fluxe-suivi-`.
 
 **Règle d'or : on ne renomme jamais une clé.** Surtout pas `muscu-v1` : c'est là que sont toutes tes séances.

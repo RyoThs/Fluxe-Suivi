@@ -13,8 +13,17 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 | `05-mise-a-jour.test.js` | Réparation automatique d'une vieille version (y compris l'ancienne page qui demande `app.js`), sans boucle |
 | `06-bibliotheque.test.js` | Bibliothèque des machines (Guide et choix d'exercice) : vue, catalogue et muscle sont des réglages séparés |
 | `07-hors-ligne.test.js` | La police Barlow Condensed se charge depuis `fonts/`, sans site extérieur ; installation hors ligne « tout ou rien » (échoue si un fichier manque) ; mode avion après une 1re visite : écran Séance, bonne police, données intactes, aucune erreur |
-| `08-stockage.test.js` | Chaque clé de stockage du code est listée dans `docs/STOCKAGE.md` et commence par `muscu-v1`, `fx-` ou `fluxe-suivi-` |
+| `08-records.test.js` | Records : le poids réellement soulevé (pas d'estimation), échauffement exclu, demi-kilos |
+| `09-fenetres.test.js` | Fenêtres de l'app (à la place des fenêtres grises du téléphone) : textes, boutons, Échap = Annuler |
+| `10-stockage.test.js` | Chaque clé de stockage du code est listée dans `docs/STOCKAGE.md` et commence par `muscu-v1`, `fx-` ou `fluxe-suivi-` |
+| `11-dessins.test.js` | Dessins des machines et des mouvements |
+| `12-routines-repos-records.test.js` | Routines détaillées (séries, poids, reps, blocs cardio), temps de repos, chrono réglable, vibration sans son, 3 records |
+| `13-ecran.test.js` | Pas de zoom, message « Tourne ton téléphone » à l'horizontale |
+| `14-gestes.test.js` | Chaque bouton (`data-act`) a son geste dans `js/gestes/`, parcours complet |
+| `15-courbes.test.js` | Courbes de progression : charge max, 1RM estimé, volume, vue « Toutes », périodes |
+| `16-sauvegarde-en-ligne.test.js` | Sauvegarde en ligne avec un faux serveur (`nuage-faux.js`) : compte, envoi, 2e appareil, hors ligne, suppression, e-mail de vérification, sécurité |
 
+`outils.js` : serveur et navigateur partagés par les tests. `nuage-faux.js` : faux serveur Firebase.
 `anciennes-sauvegardes/` : exemples de fichiers des anciennes versions (on en ajoute, on n'en supprime jamais).
 
 ## Lancer les tests sur un ordinateur
