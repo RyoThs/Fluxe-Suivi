@@ -23,7 +23,8 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `versions.js` | Versions de secours (IndexedDB) |
 | `minuteur.js`, `veille.js`, `installation.js` | Minuteur de repos, écran allumé, bouton Installer |
 | `rendu.js` | Affiche l'onglet actif |
-| `actions.js` | Réagit aux boutons et à la saisie |
+| `actions.js` | Aiguillage : reçoit la saisie et les boutons, et envoie chaque bouton au bon fichier de `gestes/` |
+| `gestes/…` | Ce que fait chaque bouton, rangé par thème : `seance.js`, `routines.js`, `repos.js` (chrono), `donnees.js` (sauvegarde, corbeille), `salle.js`, `ecrans.js` (filtres, panneaux) |
 | `vues/…` | Un fichier par écran : séance, historique, stats, guide, panneaux, écran sauvegarde |
 
 Les styles sont dans `../css/app.css`.
@@ -32,4 +33,5 @@ Les styles sont dans `../css/app.css`.
 1. **Une variable appartient à son fichier.** Un autre fichier peut la lire, mais la modifie seulement par sa fonction dédiée (`setS`, `setTab`, `setPk`, `setGm`…). Le vérificateur l'impose.
 2. **Nouveau fichier** : l'importer depuis un autre fichier ET l'ajouter à la liste `FICHIERS` de `sw.js` (sinon pas de hors ligne). Les tests le vérifient.
 3. **Nouvelle version** : changer le numéro dans `js/config.js`, dans `index.html` (3 endroits) et dans `sw.js` (`VERSION` + 2 liens). Les tests vérifient que tout correspond.
-4. Avant de fusionner : `npm test` doit être ✅ (GitHub le fait tout seul).
+4. **Nouveau bouton** : lui donner un `data-act`, puis écrire son geste dans le bon fichier de `gestes/`. Un test vérifie qu'aucun bouton n'est oublié.
+5. Avant de fusionner : `npm test` doit être ✅ (GitHub le fait tout seul).
