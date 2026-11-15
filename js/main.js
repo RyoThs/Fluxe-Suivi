@@ -9,6 +9,7 @@ import './installation.js'; /* bouton Installer */
 import './ecran.js'; /* pas de zoom, portrait */
 import {demarrerNuage, surNuage} from './nuage.js';
 import {carteNuage} from './vues/nuage.js';
+import {sheet} from './vues/panneaux.js';
 import {surErreur} from './erreurs.js';
 import {carteErreurs} from './vues/erreurs.js';
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
@@ -52,13 +53,21 @@ if ('serviceWorker' in navigator) {
 render();
 /* Sauvegarde en ligne : seule sa carte est redessinée (jamais l'écran entier pendant une saisie) ;
    si des séances sont arrivées d'un autre appareil, l'écran est rafraîchi quand aucun champ n'est en cours de saisie. */
+let statutAvant = null;
 surNuage(o => {
   const c = document.querySelector('#nuage');
   if (c) c.outerHTML = carteNuage();
-  if (o.recu) {
+  const change = o.statut !== undefined && o.statut !== statutAvant;
+  if (o.statut !== undefined) statutAvant = o.statut;
+  const saisie = () => {
     const a = document.activeElement;
-    if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) render();
-  }
+    return a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName);
+  };
+  /* connexion, séances reçues ou état changé (ex. « À jour ») : la fenêtre « Mes données » ouverte est redessinée
+     (ligne « Tout est sauvegardé en ligne »), sauf pendant une saisie */
+  if ((o.recu || change) && document.querySelector('#sheet.on #nuage') && !saisie()) sheet();
+  /* séances reçues, ou tout vient d'être envoyé alors que le rappel « Pense à sauvegarder » est affiché */
+  if ((o.recu || (o.statut === 'ok' && document.querySelector('.card.bkc'))) && !saisie()) render();
 });
 demarrerNuage();
 /* Rapport d'erreurs : la carte se met à jour quand une erreur est notée ou envoyée */

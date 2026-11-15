@@ -248,3 +248,18 @@ test('Confidentialité : adresse de contact pour supprimer son compte par e-mail
   assert.match(c, /depuis l’adresse de ton compte/);
   assert.match(lire('sw.js'), /'confidentialite\.html'/);
 });
+
+test('rappel « Pense à sauvegarder » : affiché sans compte, caché quand tout est envoyé en ligne', async () => {
+  const p = await appareil({ ...VIDE, sessions: [1, 2, 3, 4, 5, 6].map(n => seance('s' + n, n)), lastBackup: 1 });
+  assert.ok(await p.$('.card.bkc'), 'rappel visible sans compte');
+  await ouvrir(p);
+  assert.match(await p.textContent('#sheet'), /6 séances pas encore dans un fichier/);
+  await p.fill('#nm', 'yo@test.fr'); await p.fill('#np', 'motdepasse1');
+  await p.click('[data-act=nok]'); await aJour(p);
+  assert.match(await p.textContent('#sheet'), /Tout est sauvegardé en ligne/);
+  await p.click('[data-act=closepk]');
+  await p.click('nav [data-tab=seance]');
+  assert.equal(await p.$('.card.bkc'), null, 'plus de rappel une fois tout en ligne');
+  assert.ok(await p.$('[data-act=start]'));
+  assert.deepEqual(p.erreurs, []);
+});
