@@ -1,0 +1,4 @@
+# Remise en forme automatique (npm run ranger) : seulement le code de l'app dans js/.
+# config.js et nuage-config.js restent écrits à la main (des tests lisent leur texte).
+js/config.js
+js/nuage-config.js

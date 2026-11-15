@@ -1,0 +1,35 @@
+# Historique des versions de Fluxe Suivi
+
+Une ligne par version : ce qui a changé pour l'utilisateur, et la branche GitHub qui garde **cette version exacte**.
+Pour revenir à une ancienne version, il suffit de demander, par exemple : « reviens à la version 2.9.0 ».
+Le retour se fait à partir de la branche `sauvegarde-v…`. Tes séances ne sont jamais touchées.
+
+| Version | Date | Ce qui a changé | Copie gardée |
+|---|---|---|---|
+| **3.1.2** | 2026-11-15 | Rangement, rien de visible : README à jour, tests renumérotés de 01 à 16, code remis en forme, cet historique | (version actuelle) |
+| 3.1.1 | 2026-11-15 | Page Confidentialité : adresse de contact `fluxe.suivi@outlook.fr` pour supprimer son compte par e-mail | `sauvegarde-v3.1.1` |
+| 3.1.0 | 2026-11-15 | E-mail « Vérifie ton adresse » à la création du compte, avec les boutons Renvoyer et C'est fait | `sauvegarde-v3.1.0` |
+| 3.0.0 | 2026-11-15 | **Sauvegarde en ligne** facultative (Firebase) : compte, envoi automatique, plusieurs appareils, hors ligne, suppression du compte, page Confidentialité | `sauvegarde-v3.0.0` |
+| 2.9.0 | 2026-11-15 | **Courbes de progression** : Charge max, 1RM estimé, Volume ; vue « Toutes » (volume, séries, durée) ; 3 mois / 1 an / Tout | `sauvegarde-v2.9.0` |
+| 2.8.2 | 2026-11-15 | Rangement : le code des boutons est réparti par thème (`js/gestes/`) | `sauvegarde-v2.8.2` |
+| 2.8.1 | 2026-11-11 | Zoom bloqué, message « Tourne ton téléphone » à l'horizontale | `sauvegarde-v2.8.1` |
+| 2.8.0 | 2026-11-11 | **Routines détaillées** (séries, poids, reps, cardio), chrono réglable pendant le repos, vibration discrète, 3 records | `sauvegarde-v2.8.0` |
+| 2.7.0 | 2026-11-11 | Dessins de toutes les machines et de tous les exercices | `sauvegarde-v2.7.0` |
+| 2.6.0 | 2026-11-11 | Fenêtres de l'app et icônes au trait (fini les fenêtres grises du téléphone) | `sauvegarde-v2.6.0` |
+| 2.5.0 | 2026-11-11 | Catalogue de machines par enseigne, tout coché d'office | `sauvegarde-v2.5.0` |
+| 2.4.3 | 2026-11-11 | Records : poids réellement soulevé, et non plus une estimation | `sauvegarde-v2.4.3` |
+| 2.4.2 | 2026-11-09 | Hors ligne fiable : police dans l'app, mise en mémoire complète | `sauvegarde-v2.4.2` |
+| 2.4.1 | 2026-11-08 | Guide : Ma salle et Catalogues | `sauvegarde-v2.4.1` |
+| 2.4.0 | 2026-11-08 | Bibliothèque de machines simplifiée | `sauvegarde-v2.4.0` |
+| 2.3.0 | 2026-11-08 | Code découpé en petits fichiers, styles à part | `sauvegarde-v2.3.0` |
+| 2.2.1 | 2026-11-08 | Des données illisibles sont mises à l'abri avant d'être écrasées | `sauvegarde-v2.2.1` |
+| 2.2.0 | 2026-11-08 | Rappel de sauvegarde amélioré | `sauvegarde-v2.2.0` |
+| 2.1.1 | 2026-11-06 | La mise à jour se répare toute seule sur iPhone | `sauvegarde-v2.1.1` |
+| 2.1 | 2026-11-06 | Versions de secours, corbeille, fusion de fichiers, début de « Ma salle » | — |
+| 2.0 | — | Version de départ | `sauvegarde-v2.0` |
+
+## Comment une version est publiée
+1. Une copie de la version en ligne est gardée (branche `sauvegarde-v…`).
+2. Le numéro change à 3 endroits (`js/config.js`, `index.html`, `sw.js`). Un test vérifie qu'ils correspondent.
+3. GitHub relance tous les tests. On ne publie que s'ils sont tous verts.
+4. Une ligne est ajoutée en haut de ce fichier.
