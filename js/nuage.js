@@ -380,6 +380,18 @@ export const supprimerCompte = mdp =>
     return true;
   });
 
+/* ===== Rapport d'erreurs : une erreur de l'app envoyée au créateur (voir erreurs.js) ===== */
+export async function signaler(doc) {
+  if (!E.uid || !navigator.onLine) return false;
+  try {
+    await charger();
+    await api.signaler(E.uid, doc);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 /* ===== Quand synchroniser ===== */
 let minuteur = 0,
   dernierRegard = 0;

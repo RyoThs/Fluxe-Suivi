@@ -5,6 +5,7 @@ import {$, esc, fmt, fmtDate, nset, vol} from '../outils.js';
 import {bkLine} from '../rappel.js';
 import {VB, WHY} from '../versions.js';
 import {carteNuage} from './nuage.js';
+import {carteErreurs} from './erreurs.js';
 import {connecte} from '../nuage.js';
 /* ===== Écran « Sauvegarde » ===== */
 export function viewData() {
@@ -20,6 +21,7 @@ export function viewData() {
 <div class="dat" style="margin:10px 0 0"><button class="sec" data-act="imp">Importer un fichier</button><button class="sec" data-act="paste">Coller du texte</button></div><button class="ghost" data-act="export">Copier les données en texte</button><div class="mu" style="margin-top:12px">Me le rappeler si le dernier fichier a plus de :</div><div class="chips" style="margin:8px 0 0;flex-wrap:wrap;overflow:visible">${BKD.map(d => `<button class="chip${(S.bkEvery || 7) === d ? ' on' : ''}" data-act="bke" data-d="${d}">${d} jours</button>`).join('')}</div><div class="mu" style="margin-top:6px">…ou dès que 5 séances ne sont pas sauvegardées.</div></div>
 <div class="card"><div class="hist-date">2. Versions de secours</div><div class="mu">Copies automatiques sur ce téléphone : une par jour (les 5 dernières), plus une avant chaque import ou restauration.</div><div id="vl"><p class="mu">Chargement…</p></div><button class="ghost" data-act="snapnow">Créer une version maintenant</button></div>
 <div class="card"><div class="ex-head"><div class="hist-date">3. Corbeille</div>${S.trash.length ? '<button class="del" data-act="tempty">Vider</button>' : ''}</div><div class="mu">Les séances et routines supprimées restent ici 30 jours.</div>${tr || '<p class="mu">La corbeille est vide.</p>'}</div>
+${carteErreurs()}
 <div class="card"><div class="hist-date">État du stockage</div><div class="mu" id="st">Vérification…</div></div>`;
 }
 export async function fillData() {

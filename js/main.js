@@ -1,4 +1,5 @@
 /* Fluxe Suivi — Point de départ : vérifie la version, lance les copies de secours, affiche l'app. */
+import './erreurs.js'; /* en premier : note les erreurs dès le démarrage */
 import {VER} from './config.js';
 import {warn} from './etat.js';
 import {render} from './rendu.js';
@@ -8,6 +9,8 @@ import './installation.js'; /* bouton Installer */
 import './ecran.js'; /* pas de zoom, portrait */
 import {demarrerNuage, surNuage} from './nuage.js';
 import {carteNuage} from './vues/nuage.js';
+import {surErreur} from './erreurs.js';
+import {carteErreurs} from './vues/erreurs.js';
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
    Elle force la mise à jour du service worker, vide SES caches (jamais tes données : elles sont ailleurs) et recharge.
    Une seule tentative par minute, pour ne jamais tourner en boucle. */
@@ -58,3 +61,8 @@ surNuage(o => {
   }
 });
 demarrerNuage();
+/* Rapport d'erreurs : la carte se met à jour quand une erreur est notée ou envoyée */
+surErreur(() => {
+  const c = document.querySelector('#erreurs');
+  if (c) c.outerHTML = carteErreurs();
+});

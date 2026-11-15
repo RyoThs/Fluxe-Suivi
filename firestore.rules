@@ -12,6 +12,20 @@ service cloud.firestore {
         && (!('j' in request.resource.data) || (request.resource.data.j is string && request.resource.data.j.size() < 500000))
         && (!('del' in request.resource.data) || request.resource.data.del == true);
     }
+    // Rapport d'erreurs (v3.2) : un compte connecté peut ENVOYER une erreur signée de son uid.
+    // Personne ne peut les relire depuis l'app : seul le propriétaire du projet les voit dans la console.
+    match /erreurs/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'titre', 'msg', 'ou', 'ver', 'app', 'n', 'quand', 't'])
+        && request.resource.data.titre is string && request.resource.data.titre.size() <= 120
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 300
+        && request.resource.data.ou is string && request.resource.data.ou.size() <= 120
+        && request.resource.data.ver is string && request.resource.data.ver.size() <= 20
+        && request.resource.data.app is string && request.resource.data.app.size() <= 60
+        && request.resource.data.n is int && request.resource.data.quand is number;
+      allow read, update, delete: if false;
+    }
     // tout le reste est interdit
     match /{autre=**} {
       allow read, write: if false;

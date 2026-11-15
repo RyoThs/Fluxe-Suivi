@@ -16,6 +16,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |
 | `nuage.js`, `nuage-config.js` | Sauvegarde en ligne (facultative) : compte, envoi et réception des séances, sans réseau compris. Le pont Firebase est dans `../lib/` et n'est chargé que si un compte est utilisé |
+| `erreurs.js` | Rapport d'erreurs : journal sur le téléphone, envoi automatique (avec un compte) ou par e-mail |
 | `routines.js` | Routines : création depuis l’Historique, brouillon de modification (séries, poids, reps, blocs cardio), démarrage |
 | `ecran.js` | Écran fixe : pas de zoom, message « Tourne ton téléphone » à l’horizontale |
 | `icones.js` | Vignettes des machines : le dessin si il existe, sinon un pictogramme |

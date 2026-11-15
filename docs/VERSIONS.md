@@ -6,7 +6,8 @@ Le retour se fait à partir de la branche `sauvegarde-v…`. Tes séances ne son
 
 | Version | Date | Ce qui a changé | Copie gardée |
 |---|---|---|---|
-| **3.1.2** | 2026-11-15 | Rangement, rien de visible : README à jour, tests renumérotés de 01 à 16, code remis en forme, cet historique | (version actuelle) |
+| **3.2.0** | 2026-11-15 | **Rapport d’erreurs** : journal sur le téléphone, envoi automatique au créateur (avec un compte) ou par e-mail ; un écran qui plante affiche un message au lieu de rester vide | (version actuelle) |
+| 3.1.2 | 2026-11-15 | Rangement, rien de visible : README à jour, tests renumérotés de 01 à 16, code remis en forme, cet historique | `sauvegarde-v3.1.2` |
 | 3.1.1 | 2026-11-15 | Page Confidentialité : adresse de contact `fluxe.suivi@outlook.fr` pour supprimer son compte par e-mail | `sauvegarde-v3.1.1` |
 | 3.1.0 | 2026-11-15 | E-mail « Vérifie ton adresse » à la création du compte, avec les boutons Renvoyer et C'est fait | `sauvegarde-v3.1.0` |
 | 3.0.0 | 2026-11-15 | **Sauvegarde en ligne** facultative (Firebase) : compte, envoi automatique, plusieurs appareils, hors ligne, suppression du compte, page Confidentialité | `sauvegarde-v3.0.0` |
