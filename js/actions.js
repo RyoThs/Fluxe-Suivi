@@ -1,7 +1,7 @@
 /* Fluxe Suivi — Réactions aux gestes : saisie au clavier et boutons (data-act).
    Ce fichier ne fait que l'aiguillage. Le travail de chaque bouton est rangé par thème dans js/gestes/ :
    seance.js (séance en cours), routines.js, repos.js (chrono), donnees.js (sauvegarde, corbeille),
-   salle.js (Ma salle), ecrans.js (filtres et panneaux).
+   salle.js (Ma salle), ecrans.js (filtres et panneaux), nuage.js (Sauvegarde en ligne).
    Un geste qui renvoie true demande à l'app d'enregistrer puis de redessiner l'écran. */
 import {S,cur,pk,save,setTab} from './etat.js';
 import {$,K,cname} from './outils.js';
@@ -18,8 +18,9 @@ import {gestes as repos} from './gestes/repos.js';
 import {gestes as donnees} from './gestes/donnees.js';
 import {gestes as salle} from './gestes/salle.js';
 import {gestes as ecrans} from './gestes/ecrans.js';
+import {gestes as nuage} from './gestes/nuage.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
-const GESTES=Object.assign(Object.create(null),seance,routines,repos,donnees,salle,ecrans);
+const GESTES=Object.assign(Object.create(null),seance,routines,repos,donnees,salle,ecrans,nuage);
 export const nomsGestes=()=>Object.keys(GESTES);
 $('#fi').addEventListener('change',ev=>{const f=ev.target.files[0];if(!f)return;if(f.size>5e6){avertir({icone:'alerte',ton:'ambre',titre:'Fichier trop lourd',texte:'Ce fichier dépasse 5 Mo : ce n’est pas une sauvegarde Fluxe.'});ev.target.value='';return}const r=new FileReader();r.onload=()=>imp(String(r.result));r.readAsText(f);ev.target.value=''});
 document.addEventListener('input',ev=>{
@@ -41,6 +42,8 @@ v=['reps','kcal'].includes(t.dataset.f)?v.replace(/\./g,'').slice(0,4):(v.match(
 if(v!==t.value.replace(',','.'))t.value=v;
 x[t.dataset.f]=v;x.t=true;save();
 });
+/* formulaire « Sauvegarde en ligne » : la touche Entrée ne recharge jamais la page (le bouton fait le travail) */
+document.addEventListener('submit',ev=>{ev.preventDefault()});
 /* case « Vibration courte à la fin du repos » */
 document.addEventListener('change',ev=>{if(ev.target.id==='vib'){if(ev.target.checked)delete S.nv;else S.nv=true;save()}});
 document.addEventListener('click',ev=>{

@@ -12,7 +12,7 @@ async run(mode,f){const db=await this.open();return new Promise((ok,ko)=>{const 
 all(){return this.run('readonly',st=>st.getAll()).then(l=>(l||[]).sort((a,b)=>b.at-a.at))},
 put(v){return this.run('readwrite',st=>st.put(v))},
 del(at){return this.run('readwrite',st=>st.delete(at))}};
-export const WHY={auto:'Copie automatique',imp:'Avant un import',rest:'Avant une restauration',man:'Créée à la main',old:'Ancienne copie (avant v2.1)',bad:'Données illisibles (copie gardée)'};
+export const WHY={auto:'Copie automatique',imp:'Avant un import',rest:'Avant une restauration',man:'Créée à la main',old:'Ancienne copie (avant v2.1)',bad:'Données illisibles (copie gardée)',nuage:'Avant la 1re connexion en ligne'};
 let lastAt=0;
 export async function snap(why,raw){
 try{

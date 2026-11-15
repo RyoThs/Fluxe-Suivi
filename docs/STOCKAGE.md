@@ -15,6 +15,7 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 | `muscu-v1-sauvegarde` | Ancienne copie de secours (avant la v2.1). Seulement lue une fois, pour la ranger dans les versions de secours | `js/versions.js` |
 | `fx-no` | Tu as fermé le bandeau « Installer » : il ne revient plus | `js/installation.js` |
 | `fx-test` | Petit essai d'écriture au démarrage (vérifie que le téléphone accepte d'enregistrer), effacé aussitôt | `js/etat.js` |
+| `fluxe-suivi-nuage-v1` | Sauvegarde en ligne (v3.0) : compte connecté (identifiant et e-mail, **jamais le mot de passe**) et ce qui a déjà été envoyé. Absent si on n'a pas de compte. Jamais dans le fichier de sauvegarde | `js/nuage.js` |
 | `fx-old-done` | Les anciennes copies (`muscu-v1-sauvegarde`, `muscu-v1-brut`) ont déjà été rangées dans les versions de secours | `js/versions.js` |
 
 ## sessionStorage (effacé quand l'app est fermée)
@@ -26,6 +27,11 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 | Base | Rôle | Fichier qui l'utilise |
 |---|---|---|
 | `fluxe-suivi-secours` | Versions de secours de tes données (magasin `v`) : 1 copie automatique par jour (5 gardées) et une copie avant chaque import ou restauration (4 gardées) | `js/versions.js` |
+
+## Stockage créé par Firebase (seulement avec un compte « Sauvegarde en ligne »)
+| Nom | Rôle |
+|---|---|
+| `firebaseLocalStorageDb` (IndexedDB) | Garde la connexion au compte, pour ne pas avoir à se reconnecter à chaque ouverture. Créé et géré par Firebase lui-même (son nom ne peut pas être changé) ; vidé à la déconnexion |
 
 ## Caches du service worker (copie de l'app pour le hors ligne)
 | Nom | Rôle | Fichier qui l'utilise |

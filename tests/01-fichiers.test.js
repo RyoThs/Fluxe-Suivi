@@ -87,8 +87,10 @@ const fichiersDuProjet = (dir = '') => fs.readdirSync(path.join(RACINE, dir), { 
   .flatMap(e => EXCLUS.has(e.name) && !dir ? [] : e.isDirectory() ? fichiersDuProjet(path.posix.join(dir, e.name)) : [path.posix.join(dir, e.name)]);
 const POLICES = fs.readdirSync(path.join(RACINE, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => 'fonts/' + f);
 
+/* Exception unique : les fichiers officiels de Firebase (lib/firebase-…/) parlent forcément aux serveurs de Google
+   (« googleapis »). Ils ne sont chargés que si l'utilisateur crée un compte « Sauvegarde en ligne » (v3.0). */
 test('aucun fichier du projet ne contacte Google Fonts (« googleapis », « gstatic »)', () => {
-  for (const f of fichiersDuProjet()) {
+  for (const f of fichiersDuProjet().filter(f => !/^lib\/firebase-[\d.]+\//.test(f))) {
     const contenu = fs.readFileSync(path.join(RACINE, f), 'latin1');
     assert.ok(!contenu.includes('googleapis'), `${f} contient « googleapis »`);
     assert.ok(!contenu.includes('gstatic'), `${f} contient « gstatic »`);

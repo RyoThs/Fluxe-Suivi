@@ -6,7 +6,7 @@
      o.icone  : nom d'icône (voir pictos.js)      o.ton : 'rouge' | 'vert' | 'ambre' | 'bleu'
      o.titre  : titre court                        o.texte : phrase d'explication (texte simple)
      o.corps  : HTML déjà sécurisé (récap, liste)  o.ok / o.non / o.lien : textes des boutons
-     o.danger : bouton principal rouge             o.champ : {valeur, max, label} pour une saisie
+     o.danger : bouton principal rouge             o.champ : {valeur, max, label, mdp} pour une saisie (mdp : mot de passe caché)
    confirmer(o) → true seulement si l'utilisateur touche le bouton principal
    saisir(o)    → le texte saisi, ou null
    avertir(o)   → un message avec un seul bouton « Compris »
@@ -37,7 +37,7 @@ function afficher(o){
   return new Promise(fin=>{
     const avant=document.activeElement;
     const bt=(r,txt,cl)=>txt?`<button type="button" class="${cl}" data-r="${r}">${esc(txt)}</button>`:'';
-    const champ=o.champ?`<input class="dlg-in" value="${esc(o.champ.valeur||'')}" ${o.champ.max?`maxlength="${o.champ.max}"`:''} aria-label="${esc(o.champ.label||o.titre)}" autocomplete="off">`:'';
+    const champ=o.champ?`<input class="dlg-in"${o.champ.mdp?' type="password" autocomplete="current-password"':' autocomplete="off"'} value="${esc(o.champ.valeur||'')}" ${o.champ.max?`maxlength="${o.champ.max}"`:''} aria-label="${esc(o.champ.label||o.titre)}">`:'';
     const fond=document.createElement('div');
     fond.className='dlg-fond';
     fond.innerHTML=`<div class="dlg" role="${o.danger?'alertdialog':'dialog'}" aria-modal="true" aria-labelledby="dlg-t">
@@ -56,7 +56,7 @@ ${o.texte?`<p>${esc(o.texte)}</p>`:''}${o.corps||''}${champ}
 }
 
 export const confirmer=o=>demander(o).then(r=>r==='ok');
-export const saisir=o=>demander({ok:'Enregistrer',non:'Annuler',...o,champ:{valeur:o.valeur||'',max:o.max,label:o.label}}).then(r=>r&&r.r==='ok'?r.valeur:null);
+export const saisir=o=>demander({ok:'Enregistrer',non:'Annuler',...o,champ:{valeur:o.valeur||'',max:o.max,label:o.label,mdp:o.mdp}}).then(r=>r&&r.r==='ok'?r.valeur:null);
 export const avertir=o=>demander({icone:'info',ton:'bleu',...o,ok:o.ok||'Compris'}).then(()=>{});
 /* petit récapitulatif en pastilles : ['52 min', '3 exercices'] */
 export const pastilles=l=>`<div class="recap">${l.filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;
