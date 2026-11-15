@@ -241,3 +241,10 @@ test('e-mail de vérification : envoyé à la création, « Renvoyer », puis «
   assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('fluxe-suivi-nuage-v1')).verifie), true);
   assert.deepEqual(p.erreurs, []);
 });
+
+test('Confidentialité : adresse de contact pour supprimer son compte par e-mail', () => {
+  const c = lire('confidentialite.html');
+  assert.match(c, /mailto:fluxe\.suivi@outlook\.fr\?subject=Suppression/);
+  assert.match(c, /depuis l’adresse de ton compte/);
+  assert.match(lire('sw.js'), /'confidentialite\.html'/);
+});
