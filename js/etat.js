@@ -9,7 +9,10 @@ export function setPk(o){pk=o}
 const MSG_SAVE='⚠ Impossible d’enregistrer sur ce navigateur : tes séances seront perdues à la fermeture. Ouvre Fluxe depuis l’icône de l’écran d’accueil (pas en navigation privée) et fais une sauvegarde.';
 let saveFail=false;const wm={};
 export function warn(k,m){wm[k]=m;const t=Object.values(wm).filter(Boolean).join(' '),w=document.querySelector('#warn');w.textContent=t;w.hidden=!t}
-export function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(saveFail){saveFail=false;warn('save','')}}catch(e){if(!saveFail){saveFail=true;warn('save',MSG_SAVE)}}}
+/* après chaque enregistrement (la Sauvegarde en ligne s'en sert pour savoir quand envoyer) */
+const apres=[];
+export function surSave(f){apres.push(f)}
+export function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(saveFail){saveFail=false;warn('save','')}}catch(e){if(!saveFail){saveFail=true;warn('save',MSG_SAVE)}}apres.forEach(f=>{try{f()}catch(e){}})}
 let tt2=0;
 export function toast(m){const e=document.querySelector('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt2);tt2=setTimeout(()=>e.classList.remove('on'),3200)}
 export const cur=()=>S.sessions.find(x=>x.id===S.current);

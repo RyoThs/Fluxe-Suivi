@@ -1,0 +1,20 @@
+// Fluxe Suivi — Règles de sécurité de la base Firestore (à coller dans la console Firebase : Firestore > Règles).
+// Chaque compte ne peut lire, écrire et supprimer QUE ses propres données (users/{son uid}/...).
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/{col}/{id} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && (col == 's' || (col == 'm' && id == 'etat'))
+        && request.resource.data.keys().hasOnly(['j', 'mod', 'del', 't'])
+        && request.resource.data.mod is number
+        && (!('j' in request.resource.data) || (request.resource.data.j is string && request.resource.data.j.size() < 500000))
+        && (!('del' in request.resource.data) || request.resource.data.del == true);
+    }
+    // tout le reste est interdit
+    match /{autre=**} {
+      allow read, write: if false;
+    }
+  }
+}

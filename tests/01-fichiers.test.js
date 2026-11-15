@@ -87,9 +87,12 @@ const fichiersDuProjet = (dir = '') => fs.readdirSync(path.join(RACINE, dir), { 
   .flatMap(e => EXCLUS.has(e.name) && !dir ? [] : e.isDirectory() ? fichiersDuProjet(path.posix.join(dir, e.name)) : [path.posix.join(dir, e.name)]);
 const POLICES = fs.readdirSync(path.join(RACINE, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => 'fonts/' + f);
 
+/* Exception unique : les fichiers officiels de Firebase (lib/firebase-…/) parlent forcément aux serveurs de Google
+   (« googleapis »). Ils ne sont chargés que si l'utilisateur crée un compte « Sauvegarde en ligne » (v3.0). */
 test('aucun fichier du projet ne contacte Google Fonts (« googleapis », « gstatic »)', () => {
-  for (const f of fichiersDuProjet()) {
-    const contenu = fs.readFileSync(path.join(RACINE, f), 'latin1');
+  for (const f of fichiersDuProjet().filter(f => !/^lib\/firebase-[\d.]+\//.test(f))) {
+    let contenu = fs.readFileSync(path.join(RACINE, f), 'latin1');
+    if (f === 'index.html') contenu = contenu.replace(/https:\/\/(identitytoolkit|securetoken|firestore)\.googleapis\.com/g, ''); // Firebase (CSP), vérifié plus bas
     assert.ok(!contenu.includes('googleapis'), `${f} contient « googleapis »`);
     assert.ok(!contenu.includes('gstatic'), `${f} contient « gstatic »`);
   }
@@ -118,7 +121,11 @@ test('la sécurité de la page n’autorise que les polices de l’app', () => {
   const csp = (html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/) || [])[1];
   assert.ok(csp, 'règle de sécurité (CSP) introuvable');
   assert.match(csp, /font-src 'self';/);
-  assert.doesNotMatch(csp, /https?:/, 'aucun site extérieur dans la CSP');
+  /* seule exception (v3.0) : les 3 adresses de Firebase, et seulement pour les échanges de données (connect-src) */
+  const FIREBASE = ['https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://firestore.googleapis.com'];
+  const sites = csp.match(/https?:\/\/[^\s;]+/g) || [];
+  assert.deepEqual(sites.sort(), FIREBASE.slice().sort(), 'aucun autre site extérieur dans la CSP');
+  for (const d of csp.split(';')) if (!/^\s*connect-src /.test(d)) assert.doesNotMatch(d, /https?:/, 'site extérieur hors connect-src : ' + d);
 });
 
 test('la lecture de la liste FICHIERS ignore les commentaires (une apostrophe droite comme « l\'app » ne casse rien)', () => {

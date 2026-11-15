@@ -15,6 +15,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `catalogue.js` | Exercices, machines, enseignes (On Air et autres) |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |
+| `nuage.js`, `nuage-config.js` | Sauvegarde en ligne (facultative) : compte, envoi et réception des séances, sans réseau compris. Le pont Firebase est dans `../lib/` et n'est chargé que si un compte est utilisé |
 | `routines.js` | Routines : création depuis l’Historique, brouillon de modification (séries, poids, reps, blocs cardio), démarrage |
 | `ecran.js` | Écran fixe : pas de zoom, message « Tourne ton téléphone » à l’horizontale |
 | `icones.js` | Vignettes des machines : le dessin si il existe, sinon un pictogramme |
@@ -25,7 +26,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `minuteur.js`, `veille.js`, `installation.js` | Minuteur de repos, écran allumé, bouton Installer |
 | `rendu.js` | Affiche l'onglet actif |
 | `actions.js` | Aiguillage : reçoit la saisie et les boutons, et envoie chaque bouton au bon fichier de `gestes/` |
-| `gestes/…` | Ce que fait chaque bouton, rangé par thème : `seance.js`, `routines.js`, `repos.js` (chrono), `donnees.js` (sauvegarde, corbeille), `salle.js`, `ecrans.js` (filtres, panneaux) |
+| `gestes/…` | Ce que fait chaque bouton, rangé par thème : `seance.js`, `routines.js`, `repos.js` (chrono), `donnees.js` (sauvegarde, corbeille), `salle.js`, `ecrans.js` (filtres, panneaux), `nuage.js` (Sauvegarde en ligne) |
 | `vues/…` | Un fichier par écran : séance, historique, stats, guide, panneaux, écran sauvegarde |
 
 Les styles sont dans `../css/app.css`.

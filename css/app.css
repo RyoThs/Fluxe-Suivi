@@ -228,3 +228,19 @@ svg.courbe{display:block;width:100%;height:auto;overflow:visible;touch-action:pa
 .crec{font-family:var(--body)!important;font-size:12px!important;color:#b45309!important;background:#fef3c7;border-radius:999px;padding:2px 8px}
 .cnote{font-size:12px;color:var(--muted);margin:10px 2px 0}
 .chip.tout:not(.on){border-color:var(--accent);color:var(--accent)}
+/* v3.0 : Sauvegarde en ligne */
+.cl .in{width:100%;font:inherit;font-size:16px;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);margin:6px 0 0}
+.cl .in:focus{outline:2px solid var(--accent);outline-offset:1px}
+.cl label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 0 4px}
+.cl .btn{margin-top:14px}.cl .btn[disabled]{opacity:.6}
+.cl .lnk{display:block;width:100%;text-align:center;margin:12px 0 2px;padding:6px;background:none;color:var(--accent);font-weight:600;font-size:14px}
+.cl .seg{margin:12px 0 4px}
+.cl .ben{list-style:none;margin:10px 0 0;padding:0}.cl .ben li{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:7px 0;color:var(--ink)}
+.cl .ben svg{flex:none;color:var(--ok);margin-top:1px}
+.cl .st{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:#e8f7f0;margin:10px 0 4px}
+.cl .st svg{flex:none;color:var(--ok)}.cl .st b{display:block;font-size:15px}.cl .st span{font-size:13px;color:var(--muted)}
+.cl .st.wait{background:#fff7e6}.cl .st.wait svg{color:#d97706}
+.cl .st.err{background:#fde8ec}.cl .st.err svg{color:var(--danger)}
+.cl .dg{width:100%;margin-top:8px;padding:12px;border-radius:14px;background:transparent;color:var(--danger);font-weight:600}
+.cl .pv{font-size:12px;color:var(--muted);margin:12px 4px 0;line-height:1.4}.cl .pv a{color:var(--muted)}
+.cl .nerr{margin:10px 4px 0;color:var(--danger);font-size:14px;font-weight:600}

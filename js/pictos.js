@@ -13,6 +13,9 @@ const D={
   crayon:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
   retour:'<path d="M4 4v5h5"/><path d="M4.5 9A8 8 0 1 1 6 17.5"/>',
   fichier:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  nuage:'<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12.5 3.5 3.5 0 0 0 6.5 19z"/><path d="m9 14 2 2 4-4"/>',
+  attente:'<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12.5 3.5 3.5 0 0 0 6.5 19z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/>',
+  coche:'<path d="M20 6 9 17l-5-5"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>',
 };
 export const pic=(k,t=24)=>`<svg viewBox="0 0 24 24" width="${t}" height="${t}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${D[k]||D.info}</svg>`;

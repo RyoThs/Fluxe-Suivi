@@ -4,10 +4,12 @@ import {S,pk} from '../etat.js';
 import {$,esc,fmt,fmtDate,nset,vol} from '../outils.js';
 import {bkLine} from '../rappel.js';
 import {VB,WHY} from '../versions.js';
+import {carteNuage} from './nuage.js';
+import {connecte} from '../nuage.js';
 /* ===== Écran « Sauvegarde » ===== */
 export function viewData(){
 const tr=S.trash.map((t,x)=>{const left=Math.max(1,Math.ceil((t.at+J30-Date.now())/864e5));return `<div class="vr"><div><b>${t.s?esc(fmtDate(t.s.date)):'Routine « '+esc(t.r.name)+' »'}</b><span>${t.s?nset(t.s)+' séries · '+fmt(vol(t.s))+' kg · ':''}effacée définitivement dans ${left} j</span></div><button class="del" style="color:var(--accent)" data-act="trest" data-x="${x}">Restaurer</button></div>`}).join('');
-return `<p class="mu" style="margin-left:4px">Tes séances sont enregistrées uniquement sur ce téléphone. Trois protections les gardent à l’abri.</p>
+return `<p class="mu" style="margin-left:4px">${connecte()?'Tes séances sont sur ce téléphone et sauvegardées en ligne.':'Tes séances sont enregistrées sur ce téléphone.'} Plusieurs protections les gardent à l’abri.</p>${carteNuage()}
 <div class="card"><div class="hist-date">1. Fichier de sauvegarde</div><div class="mu">${S.lastBackup?'Dernière sauvegarde : '+esc(fmtDate(S.lastBackup)):'Aucune sauvegarde pour l’instant'}. Le fichier te permet aussi de changer de téléphone (iPhone ↔ Android).</div>${bkLine()?'<p class="mu" style="margin:8px 0 10px">'+bkLine()+'</p>':''}
 <button class="btn" data-act="file">Sauvegarder (Fichiers, iCloud, mail…)</button>
 <div class="dat" style="margin:10px 0 0"><button class="sec" data-act="imp">Importer un fichier</button><button class="sec" data-act="paste">Coller du texte</button></div><button class="ghost" data-act="export">Copier les données en texte</button><div class="mu" style="margin-top:12px">Me le rappeler si le dernier fichier a plus de :</div><div class="chips" style="margin:8px 0 0;flex-wrap:wrap;overflow:visible">${BKD.map(d=>`<button class="chip${(S.bkEvery||7)===d?' on':''}" data-act="bke" data-d="${d}">${d} jours</button>`).join('')}</div><div class="mu" style="margin-top:6px">…ou dès que 5 séances ne sont pas sauvegardées.</div></div>
