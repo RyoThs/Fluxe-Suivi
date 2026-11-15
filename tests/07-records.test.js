@@ -22,7 +22,9 @@ test('le record est le poids le plus lourd soulevé, sans poids ajouté', async 
   const r = await records(p);
   assert.deepEqual(r.map(x => x.slice(0, 2)), [['Triceps machine hammer', '50 kg'], ['Tirage vertical', '35 kg']]);
   assert.match(r[0][2], /^12 répétitions · /);
-  assert.doesNotMatch(await p.$eval('#app', e => e.textContent), /Epley|1RM/);
+  /* les Records restent le poids réellement soulevé (décision v2.4.3) : le 1RM estimé n'existe que dans la courbe, en option */
+  assert.doesNotMatch(await p.$eval('.rec-seg', e => e.closest('.card').textContent), /Epley|1RM/);
+  assert.equal(await p.$eval('[data-act=cm].on', e => e.dataset.v), 'max', 'la courbe montre la charge réelle par défaut');
   assert.deepEqual(p.erreurs, []);
 });
 
