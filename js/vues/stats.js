@@ -3,9 +3,24 @@ import {MU} from '../catalogue.js';
 import {S,done} from '../etat.js';
 import {esc,fmt,fmtN,mieux,ok,vol} from '../outils.js';
 import {csum} from '../calculs.js';
+import {MESURES,PERIODES,dessin,points,resume} from '../courbe.js';
 function wk(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
-let sx=null; /* exercice affiché dans la courbe */
-export function setSx(v){sx=v}
+/* Courbe de progression : exercice affiché, mesure, période, point touché */
+let sx=null,cm='max',cp='m3',csel=-1;
+export function setSx(v){sx=v;csel=-1}
+export function setCm(v){if(MESURES[v]){cm=v;csel=-1}}
+export function setCp(v){if(PERIODES[v]){cp=v;csel=-1}}
+export function setCsel(v){csel=Number.isInteger(v)?v:-1}
+const SOUS={max:'Charge la plus lourde de chaque séance',rm:'Le poids que tu pourrais soulever 1 seule fois',vol:'Poids × répétitions × séries, à chaque séance'};
+function progression(l,nm){
+if(!nm.length)return '<p class="empty" style="margin:12px">Termine une séance pour voir ta progression.</p>';
+const pts=points(l,sx,cm,cp);
+const seg=(liste,cour,act,cls)=>`<div class="seg ${cls}" role="group">${liste.map(([v,t])=>`<button class="${cour===v?'on':''}" data-act="${act}" data-v="${v}" aria-pressed="${cour===v}">${t}</button>`).join('')}</div>`;
+return `<div class="chips">${nm.map(n=>`<button class="chip${n===sx?' on':''}" data-act="sx" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+${seg(Object.entries(MESURES),cm,'cm','cm-seg')}<div class="mu">${SOUS[cm]}</div>
+<div class="chead">${resume(pts,cm)}${seg(Object.entries(PERIODES).map(([v,[t]])=>[v,t]),cp,'cp','cp-seg')}</div>
+${dessin(pts,cm,csel)}${cm==='rm'?'<p class="cnote">Calculé avec ta meilleure série de 1 à 12 répétitions (formule d’Epley). C’est une estimation : ne cherche pas à la tester sans partenaire.</p>':''}`;
+}
 export function viewStats(){
 const l=done(),now=Date.now(),w0=wk(now),W=7*864e5;
 /* Total du jour : repart à zéro chaque nuit, séance en cours comprise */
@@ -14,8 +29,6 @@ const weeks=[...Array(8)].map((_,k)=>{const t=w0-(7-k)*W;const v=l.filter(s=>wk(
 const mx=Math.max(1,...weeks.map(x=>x.v));
 const nm=[...new Set(l.flatMap(s=>s.exercises.filter(e=>!e.cardio&&e.sets.some(ok)).map(e=>e.name)))];
 if(!sx||!nm.includes(sx))sx=nm[0]||null;
-const pts=sx?l.slice().sort((a,b)=>a.date-b.date).map(s=>{const e=s.exercises.find(e=>e.name===sx);return{t:s.date,v:e?e.sets.filter(ok).reduce((a,x)=>Math.max(a,+x.kg||0),0):0}}).filter(p=>p.v>0).slice(-12):[];
-const pm=Math.max(1,...pts.map(p=>p.v));
 const gv={};l.filter(s=>now-s.date<30*864e5).forEach(s=>s.exercises.forEach(e=>{if(e.cardio)return;const g=MU[e.name]||'Perso';gv[g]=(gv[g]||0)+e.sets.filter(ok).reduce((a,x)=>a+(+x.kg||0)*(+x.reps||0),0)}));
 const cs=l.filter(x=>now-x.date<W).flatMap(x=>x.exercises.filter(e=>e.cardio));
 const cardio7=cs.length?`<div class="card"><div class="hist-date">Cardio</div><div class="mu">7 derniers jours</div><div class="stats" style="box-shadow:none;margin:10px 0 0"><div><b>${fmtN(cs.reduce((a,e)=>a+csum(e,'min'),0))}</b><span>minutes</span></div><div><b>${fmtN(cs.reduce((a,e)=>a+csum(e,'km'),0))}</b><span>km</span></div><div><b>${Math.round(cs.reduce((a,e)=>a+csum(e,'kcal'),0))}</b><span>kcal</span></div></div></div>`:'';
@@ -23,7 +36,7 @@ const gt=Object.values(gv).reduce((a,b)=>a+b,0)||1;
 return `<h1>Stats</h1><p class="sub">Ta progression</p>
 <div class="stats"><div><b>${l.length}</b><span>séances</span></div><div><b>${l.filter(s=>now-s.date<W).length}</b><span>7 derniers jours</span></div><div><b>${fmt(today)}</b><span>kg aujourd’hui</span></div></div>
 <div class="card"><div class="hist-date">Volume par semaine</div><div class="mu">en kg, 8 dernières semaines</div><div class="chart" role="img" aria-label="Volume hebdomadaire">${weeks.map(x=>`<div><i style="height:${Math.round(x.v/mx*100)}px"></i>${new Date(x.t).getDate()}/${new Date(x.t).getMonth()+1}</div>`).join('')}</div></div>
-<div class="card"><div class="hist-date">Progression par exercice</div><div class="mu">charge la plus lourde (kg), 12 dernières séances</div>${nm.length?`<div class="chips">${nm.map(n=>`<button class="chip${n===sx?' on':''}" data-act="sx" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div><div class="chart" role="img" aria-label="Progression de ${esc(sx)}">${pts.map(p=>`<div><small>${fmtN(p.v)}</small><i style="height:${Math.round(p.v/pm*100)}px"></i>${new Date(p.t).getDate()}/${new Date(p.t).getMonth()+1}</div>`).join('')}</div>`:'<p class="empty" style="margin:12px">Termine une séance pour voir ta progression.</p>'}</div>
+<div class="card prog"><div class="hist-date">Progression par exercice</div>${progression(l,nm)}</div>
 <div class="card"><div class="hist-date">Répartition par groupe</div><div class="mu">volume des 30 derniers jours</div>${Object.entries(gv).sort((a,b)=>b[1]-a[1]).map(([g,v])=>`<div class="mg"><span>${esc(g)}</span><div><i style="width:${Math.round(v/gt*100)}%"></i></div><b>${Math.round(v/gt*100)}%</b></div>`).join('')||'<p class="empty" style="margin:12px">Pas encore de données.</p>'}</div>
 ${cardio7}${records(l)}`;
 }

@@ -28,6 +28,7 @@ const FICHIERS = [
   'js/calculs.js',
   'js/catalogue.js',
   'js/config.js',
+  'js/courbe.js',
   'js/dessins.js',
   'js/dialogue.js',
   'js/donnees.js',
