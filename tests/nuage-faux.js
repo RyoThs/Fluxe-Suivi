@@ -11,8 +11,10 @@ function installer() {
   window.__appels = [];
   window.__fxNuageFaux = {
     async pret() { const s = S0(); return s.user; },
-    async inscrire(e, m) { await pause(); hors(); const s = S0(); if (s.comptes[e]) throw err('auth/email-already-in-use'); const uid = 'u' + Object.keys(s.comptes).length + 'x'; s.comptes[e] = { m, uid }; s.user = { uid, email: e }; ecr(s); return s.user; },
-    async connecter(e, m) { await pause(); hors(); const s = S0(); const c = s.comptes[e]; if (!c || c.m !== m) throw err('auth/invalid-credential'); s.user = { uid: c.uid, email: e }; ecr(s); return s.user; },
+    async inscrire(e, m) { await pause(); hors(); const s = S0(); if (s.comptes[e]) throw err('auth/email-already-in-use'); const uid = 'u' + Object.keys(s.comptes).length + 'x'; s.comptes[e] = { m, uid, ok: false }; s.mails = (s.mails || 0) + 1; s.user = { uid, email: e, verifie: false }; ecr(s); return s.user; },
+    async renvoyer() { const s = S0(); s.mails = (s.mails || 0) + 1; ecr(s); },
+    async recharger() { const s = S0(); if (!s.user) return null; const c = s.comptes[s.user.email]; s.user.verifie = !!(c && c.ok); ecr(s); return s.user; },
+    async connecter(e, m) { await pause(); hors(); const s = S0(); const c = s.comptes[e]; if (!c || c.m !== m) throw err('auth/invalid-credential'); s.user = { uid: c.uid, email: e, verifie: !!c.ok }; ecr(s); return s.user; },
     async deconnecter() { const s = S0(); s.user = null; ecr(s); },
     async oublie(e) { window.__appels.push('oublie:' + e); },
     async lire(uid, depuis) {

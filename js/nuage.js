@@ -17,7 +17,7 @@ import {demander,pastilles} from './dialogue.js';
 import {snap} from './versions.js';
 import {toTrash} from './sauvegarde.js';
 
-const neuf=(u={})=>({uid:u.uid||null,email:u.email||'',envoye:{},metaMod:0,metaEnvoye:0,metaHash:'',dernier:0,dernierT:0});
+const neuf=(u={})=>({uid:u.uid||null,email:u.email||'',verifie:u.verifie===true,envoye:{},metaMod:0,metaEnvoye:0,metaHash:'',dernier:0,dernierT:0});
 function lireEtat(){try{const o=JSON.parse(localStorage.getItem('fluxe-suivi-nuage-v1'));if(o&&typeof o==='object'&&o.envoye&&typeof o.envoye==='object')return Object.assign(neuf(),o)}catch(e){}return neuf()}
 function ecrireEtat(){try{localStorage.setItem('fluxe-suivi-nuage-v1',JSON.stringify(E))}catch(e){}}
 let E=lireEtat(),api=null;
@@ -31,6 +31,7 @@ export const disponible=()=>!!(FIREBASE||window.__fxNuageFaux);
 export const connecte=()=>!!E.uid;
 export const compte=()=>E.email||'';
 export const dernierEnvoi=()=>E.dernier||0;
+export const verifie=()=>E.verifie===true;
 
 async function charger(){
   if(api)return api;
@@ -139,6 +140,7 @@ export function texteErreur(e){
     'auth/too-many-requests':'Trop d’essais : réessaie dans quelques minutes.',
     'auth/network-request-failed':'Pas de réseau : réessaie quand tu es connecté.',
     'auth/requires-recent-login':'Par sécurité, reconnecte-toi puis recommence.',
+    'renvoi-trop-tot':'Un e-mail vient déjà de partir : attends une minute avant d’en redemander un (et regarde dans les spams).',
     'permission-denied':'Le serveur a refusé l’accès. Déconnecte-toi puis reconnecte-toi.',
   })[c]||('Erreur inattendue'+(c?' ('+c+')':'')+'. Réessaie plus tard.');
 }
@@ -155,6 +157,9 @@ async function occupe(f){
 }
 export const inscrire=(email,mdp)=>occupe(async()=>{verifier(email,mdp);await charger();return brancher(await api.inscrire(email,mdp))});
 export const connecter=(email,mdp)=>occupe(async()=>{verifier(email,mdp);await charger();return brancher(await api.connecter(email,mdp))});
+/* adresse e-mail : renvoyer l'e-mail de vérification, ou vérifier si c'est fait */
+export const renvoyer=()=>occupe(async()=>{await charger();try{await api.renvoyer()}catch(e){if(e&&e.code==='auth/too-many-requests')throw {code:'renvoi-trop-tot'};throw e}return true});
+export const reverifier=()=>occupe(async()=>{await charger();const u=await api.recharger();if(u&&u.uid===E.uid){E.verifie=u.verifie;ecrireEtat()}maj({});return E.verifie});
 export const oublie=email=>occupe(async()=>{verifier(email);await charger();await api.oublie(email);return true});
 
 /* Première connexion sur ce téléphone : on réunit (ou non) les séances d'ici et celles du compte */
@@ -204,6 +209,7 @@ export async function demarrerNuage(){
   try{
     await charger();const u=await api.pret();
     if(!u||u.uid!==E.uid){const em=E.email;E=neuf();E.email=em;ecrireEtat();maj({statut:'off',msg:'Ta connexion a expiré : reconnecte-toi.'});return}
+    if(!E.verifie){try{const v=await api.recharger();if(v&&v.uid===E.uid&&v.verifie){E.verifie=true;ecrireEtat()}}catch(e){}}
     dernierRegard=Date.now();await synchro();
   }catch(e){maj(horsLigne(e)?{statut:'horsligne',attente:enAttente()}:{statut:'erreur',msg:texteErreur(e)})}
 }

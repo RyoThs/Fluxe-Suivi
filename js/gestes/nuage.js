@@ -5,12 +5,14 @@ import {toast} from '../etat.js';
 import {avertir,confirmer,saisir} from '../dialogue.js';
 import {sheet} from '../vues/panneaux.js';
 import {setEmail,setMode} from '../vues/nuage.js';
-import {compte,connecter,deconnecter,etat,inscrire,oublie,supprimerCompte,synchro} from '../nuage.js';
+import {compte,connecter,deconnecter,etat,inscrire,oublie,renvoyer,reverifier,supprimerCompte,synchro} from '../nuage.js';
 const valeur=id=>{const e=$(id);return e?e.value.trim():''};
 export const gestes={
 nmode:({b})=>{setEmail(valeur('#nm'));setMode(b.dataset.v);etat.msg='';sheet()},
 nok:({b})=>{const em=valeur('#nm'),mdp=$('#np')?$('#np').value:'',creer=!!document.querySelector('[data-act=nmode][data-v=creer].on');setEmail(em);
- (creer?inscrire(em,mdp):connecter(em,mdp)).then(ok=>{if(ok)toast(creer?'Compte créé : tes séances partent en ligne ✓':'Connecté ✓')})},
+ (creer?inscrire(em,mdp):connecter(em,mdp)).then(ok=>{if(ok)toast(creer?'Compte créé ✓ Un e-mail de vérification t’a été envoyé':'Connecté ✓')})},
+nrenv:()=>{renvoyer().then(ok=>{if(ok)toast('E-mail renvoyé à '+compte())})},
+nverif:()=>{reverifier().then(ok=>{if(ok===true)toast('Adresse vérifiée ✓');else if(ok===false&&!etat.msg)toast('Pas encore vérifiée : touche le lien dans l’e-mail, puis réessaie')})},
 noubli:()=>{const em=valeur('#nm');setEmail(em);oublie(em).then(ok=>{if(ok)avertir({icone:'fichier',ton:'bleu',titre:'E-mail envoyé',texte:'Ouvre l’e-mail reçu à '+em+' pour choisir un nouveau mot de passe, puis reviens ici te connecter.'})})},
 nsync:()=>{synchro()},
 nsortir:()=>{confirmer({icone:'retour',ton:'bleu',titre:'Se déconnecter ?',texte:'Tes séances restent sur ce téléphone et en ligne. Les prochaines ne seront plus envoyées tant que tu ne te reconnectes pas.',ok:'Me déconnecter',non:'Rester connecté'}).then(ok=>{if(!ok)return;deconnecter().then(()=>toast('Déconnecté'))})},
