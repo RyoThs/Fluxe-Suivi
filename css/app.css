@@ -227,3 +227,4 @@ svg.courbe{display:block;width:100%;height:auto;overflow:visible;touch-action:pa
 .cdet b{font-family:var(--num);font-size:20px;color:var(--ink)}
 .crec{font-family:var(--body)!important;font-size:12px!important;color:#b45309!important;background:#fef3c7;border-radius:999px;padding:2px 8px}
 .cnote{font-size:12px;color:var(--muted);margin:10px 2px 0}
+.chip.tout:not(.on){border-color:var(--accent);color:var(--accent)}

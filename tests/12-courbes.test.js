@@ -70,3 +70,25 @@ test('aucune séance sur la période : message clair, pas d’erreur', async () 
   assert.equal(await p.$$eval('.courbe .pt', l => l.length), 1);
   assert.deepEqual(p.erreurs, []);
 });
+
+test('« Toutes » : volume total, séries et durée de chaque séance ; Charge max et 1RM disparaissent', async () => {
+  const p = await A.page();
+  await donner(p, { ...DATA, sessions: [...DATA.sessions, { id: 'd', date: Date.now() - 2 * JOUR, dur: 55, exercises: [
+    { name: 'Squat', sets: [st(100, 5)] }, { name: 'Fentes', sets: [st(20, 10), st(20, 10, true)] }] }] });
+  await p.click('nav [data-tab=stats]');
+  await p.click('[data-act=cm][data-v=rm]');
+  await p.click('[data-act=sx][data-n="*"]');
+  assert.match(await txt(p, '.card.prog .hist-date'), /Progression globale/);
+  assert.deepEqual(await p.$$eval('[data-act=cm]', l => l.map(b => b.dataset.v)), ['vol', 'ser', 'dur']);
+  assert.equal(await p.$eval('[data-act=cm].on', b => b.dataset.v), 'vol', '1RM n’existe pas en global : retour au volume');
+  assert.equal(await txt(p, '.cdet > b'), '700 kg', '100×5 + 20×10, échauffement exclu');
+  assert.match(await txt(p, '.cdet'), /2 exercices · 2 séries/);
+  await p.click('[data-act=cm][data-v=ser]');
+  assert.equal(await txt(p, '.cdet > b'), '2 séries');
+  await p.click('[data-act=cm][data-v=dur]');
+  assert.equal(await txt(p, '.cdet > b'), '55 min');
+  assert.equal(await p.$$eval('.courbe .pt.record', l => l.length), 0, 'pas de « record » de durée');
+  await p.click('[data-act=sx][data-n="Squat"]');
+  assert.equal(await p.$eval('[data-act=cm].on', b => b.dataset.v), 'max');
+  assert.deepEqual(p.erreurs, []);
+});

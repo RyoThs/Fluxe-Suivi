@@ -5,10 +5,14 @@
             Formule d'Epley : poids × (1 + répétitions ÷ 30). Une série à 1 répétition compte pour son poids.
             Seules les séries de 1 à 12 répétitions servent : au-delà, l'estimation devient trop imprécise ;
    - vol  : le volume = poids × répétitions, additionné sur toutes les séries de l'exercice.
+   Mode « Toutes » (tous les exercices ensemble) : seules les mesures qui s'additionnent ont du sens :
+   - vol : volume total de la séance ; ser : nombre de séries de travail ; dur : durée de la séance (min).
    La courbe est un dessin SVG fait à la main : aucune bibliothèque à télécharger, ça marche hors ligne. */
-import {esc,fmt,fmtN,ok} from './outils.js';
+import {esc,fmt,fmtN,nset,ok,vol} from './outils.js';
 
+export const TOUTES='*'; /* « exercice » spécial : tous les exercices ensemble */
 export const MESURES={max:'Charge max',rm:'1RM estimé',vol:'Volume'};
+export const MESURES_G={vol:'Volume total',ser:'Séries',dur:'Durée'};
 export const PERIODES={m3:['3 mois',91],a1:['1 an',365],tout:['Tout',0]};
 const JOUR=864e5;
 
@@ -32,6 +36,15 @@ function valeur(e,m){
 export function points(sessions,nom,m,periode){
  const jours=(PERIODES[periode]||PERIODES.m3)[1],depuis=jours?Date.now()-jours*JOUR:0;
  const l=[];
+ if(nom===TOUTES){
+  sessions.filter(s=>s.date>=depuis).sort((a,b)=>a.date-b.date).forEach(s=>{
+   const ne=s.exercises.filter(e=>!e.cardio&&e.sets.some(ok)).length,ns=nset(s),ex=ne+' exercice'+(ne>1?'s':'');
+   if(m==='ser'){if(ns)l.push({t:s.date,v:ns,d:ex})}
+   else if(m==='dur'){if(+s.dur>0)l.push({t:s.date,v:+s.dur,d:ex+' · '+ns+' série'+(ns>1?'s':'')})}
+   else{const v=vol(s);if(v>0)l.push({t:s.date,v,d:ex+' · '+ns+' série'+(ns>1?'s':'')})}
+  });
+  return l;
+ }
  sessions.filter(s=>s.date>=depuis).sort((a,b)=>a.date-b.date).forEach(s=>{
   let best=null;
   s.exercises.forEach(e=>{if(e.cardio||e.name!==nom)return;const p=valeur(e,m);if(p&&(!best||p.v>best.v))best=p});
@@ -41,7 +54,7 @@ export function points(sessions,nom,m,periode){
 }
 
 const jourC=t=>new Date(t).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}).replace('.','');
-const unite=(v,m)=>(m==='vol'?fmt(v):fmtN(Math.round(v*10)/10))+' kg';
+const unite=(v,m)=>m==='ser'?fmtN(Math.round(v*10)/10)+' série'+(v>=2?'s':''):m==='dur'?fmt(v)+' min':(m==='vol'?fmt(v):fmtN(Math.round(v*10)/10))+' kg';
 
 /* Graduations « rondes » pour l'axe vertical */
 function graduations(lo,hi){
@@ -59,7 +72,7 @@ export function dessin(pts,m,sel){
  const gr=graduations(Math.max(0,lo0-marge),hi0+marge),lo=gr[0],hi=gr[gr.length-1];
  const X=i=>pts.length===1?(G+W-D)/2:G+i*(W-G-D)/(pts.length-1);
  const Y=v=>Hh+(1-(v-lo)/(hi-lo||1))*(H-Hh-B);
- const rec=vs.indexOf(hi0);
+ const rec=m==='dur'?-1:vs.indexOf(hi0); /* une séance plus longue n'est pas un « record » */
  if(!(sel>=0&&sel<pts.length))sel=pts.length-1;
  const ligne=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
  const aire=ligne+` L${X(pts.length-1).toFixed(1)} ${H-B} L${X(0).toFixed(1)} ${H-B} Z`;
@@ -71,7 +84,7 @@ export function dessin(pts,m,sel){
  const zones=pts.map((p,i)=>{const g=i?(X(i)-X(i-1))/2:X(0)-G+1,d=i<pts.length-1?(X(i+1)-X(i))/2:W-D-X(i)+1;return `<rect class="hit" data-act="cpt" data-x="${i}" x="${(X(i)-g).toFixed(1)}" y="0" width="${(g+d).toFixed(1)}" height="${H}"/>`}).join('');
  const s=pts[sel];
  const repere=`<line class="vl" x1="${X(sel).toFixed(1)}" x2="${X(sel).toFixed(1)}" y1="${Hh}" y2="${H-B}"/>`;
- return `<svg class="courbe" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(MESURES[m])} : ${pts.length} séance${pts.length>1?'s':''}, de ${unite(pts[0].v,m)} à ${unite(pts[pts.length-1].v,m)}">
+ return `<svg class="courbe" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(MESURES[m]||MESURES_G[m])} : ${pts.length} séance${pts.length>1?'s':''}, de ${unite(pts[0].v,m)} à ${unite(pts[pts.length-1].v,m)}">
 <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#818cf8" stop-opacity=".35"/><stop offset="1" stop-color="#818cf8" stop-opacity="0"/></linearGradient>
 <linearGradient id="cl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0d9488"/><stop offset=".55" stop-color="#4f46e5"/><stop offset="1" stop-color="#9333ea"/></linearGradient></defs>
 <g class="grille">${axe}</g>${repere}<path class="aire" d="${aire}"/><path class="ligne" d="${ligne}"/>${pastilles}${dates}${zones}</svg>
