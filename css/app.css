@@ -244,3 +244,6 @@ svg.courbe{display:block;width:100%;height:auto;overflow:visible;touch-action:pa
 .cl .dg{width:100%;margin-top:8px;padding:12px;border-radius:14px;background:transparent;color:var(--danger);font-weight:600}
 .cl .pv{font-size:12px;color:var(--muted);margin:12px 4px 0;line-height:1.4}.cl .pv a{color:var(--muted)}
 .cl .nerr{margin:10px 4px 0;color:var(--danger);font-size:14px;font-weight:600}
+.cl .nver{margin:10px 0 4px;padding:12px 14px;border-radius:16px;background:#fff7e6}
+.cl .nver b{display:block;font-size:14px}.cl .nver span{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.cl .nver .sec{padding:11px;font-size:14px}

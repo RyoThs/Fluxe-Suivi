@@ -3,7 +3,7 @@
 import {S} from '../etat.js';
 import {esc} from '../outils.js';
 import {pic} from '../pictos.js';
-import {compte,connecte,dernierEnvoi,disponible,etat} from '../nuage.js';
+import {compte,connecte,dernierEnvoi,disponible,etat,verifie} from '../nuage.js';
 
 /* formulaire : « Créer un compte » ou « J'ai déjà un compte » (le mot de passe n'est jamais gardé ici) */
 let mode='creer',email='';
@@ -24,6 +24,7 @@ export function carteNuage(){
 <div class="st ${st[1]}">${pic(st[0],26)}<div><b>${esc(st[2])}</b><span>${esc(st[3])}</span></div></div>
 ${etat.statut==='erreur'||etat.statut==='horsligne'?'<button class="ghost" data-act="nsync">Réessayer maintenant</button>':''}
 <div class="vr"><div><b>${esc(compte())}</b><span>Connecté sur cet appareil</span></div></div>
+${verifie()?'':`<div class="nver"><b>Adresse pas encore vérifiée</b><span>Ouvre l’e-mail « Vérifie ton adresse » envoyé à ${esc(compte())} (regarde aussi dans les spams). La sauvegarde marche déjà ; la vérification sert pour « Mot de passe oublié ».</span><div class="dat" style="margin:10px 0 0"><button class="sec" data-act="nrenv"${etat.occupe?' disabled':''}>Renvoyer l’e-mail</button><button class="sec" data-act="nverif"${etat.occupe?' disabled':''}>C’est fait</button></div>${etat.msg?`<p class="nerr" role="alert">${esc(etat.msg)}</p>`:''}</div>`}
 <button class="ghost" data-act="nsortir">Se déconnecter de cet appareil</button>
 <button class="dg" data-act="nsuppr">Supprimer mon compte et mes données en ligne</button>
 <p class="pv">Tes séances restent aussi sur ce téléphone. ${lien}</p></div>`;

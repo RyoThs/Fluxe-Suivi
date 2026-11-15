@@ -223,3 +223,21 @@ test('sécurité de la page : seules les adresses de Firebase sont ajoutées, et
   assert.match(csp, /script-src 'self';/);
   assert.ok(!/on(submit|click)=/.test(lire('js/vues/nuage.js')));
 });
+
+test('e-mail de vérification : envoyé à la création, « Renvoyer », puis « C’est fait » quand le lien a été touché', async () => {
+  const p = await appareil(VIDE);
+  await ouvrir(p); await p.fill('#nm', 'yo@test.fr'); await p.fill('#np', 'motdepasse1');
+  await p.click('[data-act=nok]'); await aJour(p);
+  assert.equal((await serveur(p)).mails, 1, 'e-mail envoyé à la création');
+  assert.match(await p.textContent('#nuage'), /Adresse pas encore vérifiée/);
+  await p.click('[data-act=nrenv]');
+  await attendre(p, () => JSON.parse(localStorage.getItem('__serveur')).mails === 2);
+  await p.click('[data-act=nverif]');
+  await attendre(p, () => /Pas encore vérifiée/.test(document.querySelector('#toast').textContent));
+  // la personne touche le lien dans l'e-mail
+  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('__serveur')); s.comptes['yo@test.fr'].ok = true; localStorage.setItem('__serveur', JSON.stringify(s)); });
+  await p.click('[data-act=nverif]');
+  await attendre(p, () => !/pas encore vérifiée/i.test(document.querySelector('#nuage').textContent));
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('fluxe-suivi-nuage-v1')).verifie), true);
+  assert.deepEqual(p.erreurs, []);
+});
