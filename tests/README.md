@@ -22,6 +22,8 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 | `14-gestes.test.js` | Chaque bouton (`data-act`) a son geste dans `js/gestes/`, parcours complet |
 | `15-courbes.test.js` | Courbes de progression : charge max, 1RM estimé, volume, vue « Toutes », périodes |
 | `16-sauvegarde-en-ligne.test.js` | Sauvegarde en ligne avec un faux serveur (`nuage-faux.js`) : compte, envoi, 2e appareil, hors ligne, suppression, e-mail de vérification, sécurité |
+| `17-erreurs.test.js` | Rapport d’erreurs : journal sur le téléphone, envoi automatique avec un compte, e-mail, écran de secours |
+| `18-publication.test.js` | Publication sur GitHub Pages : lien « Ouvrir l’application » en haut du README, `.nojekyll`, l’app marche dans le sous-dossier `/Fluxe-Suivi/` avec le service worker |
 
 `outils.js` : serveur et navigateur partagés par les tests. `nuage-faux.js` : faux serveur Firebase.
 `anciennes-sauvegardes/` : exemples de fichiers des anciennes versions (on en ajoute, on n'en supprime jamais).
