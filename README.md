@@ -1,5 +1,10 @@
 # Fluxe Suivi
 
+### 👉 [Ouvrir l’application](https://ryoths.github.io/Fluxe-Suivi/)
+
+> Sur cette page GitHub, cliquer sur `index.html` montre le code de l’application, pas l’application elle-même.
+> Pour l’utiliser, touche le lien ci-dessus (ou ouvre https://ryoths.github.io/Fluxe-Suivi/ dans Safari).
+
 Fluxe Suivi est un carnet de musculation pour le téléphone.
 C'est une « application web installable » (PWA) : elle s'ouvre dans Safari puis s'ajoute à l'écran d'accueil comme
 une vraie application. Une fois installée, elle fonctionne **sans connexion**.
@@ -71,7 +76,8 @@ Le détail est expliqué dans `tests/README.md`.
 | `manifest.json` | Nom, couleurs, icônes et captures de l'application installée |
 | `icons/`, `fonts/` | Icônes, image de démarrage et police Barlow Condensed (dans l'app, sans site extérieur) |
 | `app.js` | Ancien fichier gardé pour réparer les vieilles pages déjà installées |
-| `tests/` | Les tests automatiques (`01` à `16`, voir `tests/README.md`) |
+| `tests/` | Les tests automatiques (`01` à `18`, voir `tests/README.md`) |
+| `.nojekyll` | Fichier vide : GitHub publie le site tel quel, sans le transformer |
 | `screenshots/` | Captures d'écran (données de démonstration) |
 | `docs/VERSIONS.md` | Historique des versions et copies de secours |
 | `docs/STOCKAGE.md` | Tout ce que l'app range dans le téléphone (clés, base de secours, caches) |
