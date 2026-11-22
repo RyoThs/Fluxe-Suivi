@@ -38,9 +38,9 @@ test('la semaine en cours ne casse pas la série tant qu’elle n’est pas fini
   assert.equal(s.record, 8, 'meilleure série : 8 semaines');
 });
 
-test('le petit graphe : séances des 7 dernières semaines, de la plus ancienne à celle-ci', () => {
+test('le petit graphe : séances des 5 dernières semaines, de la plus ancienne à celle-ci', () => {
   const l = [...hebdo(6, 0), sea('x', lundi(0) + JOUR)]; /* 2 séances cette semaine */
-  assert.deepEqual(R.semaines(l, NOW).barres, [1, 1, 1, 1, 1, 1, 2]);
+  assert.deepEqual(R.semaines(l, NOW).barres, [1, 1, 1, 1, 2]);
 });
 
 test('24 récompenses, chacune avec un nom, une famille et une cible', () => {
@@ -140,7 +140,7 @@ test('les semaines d’affilée : juste le chiffre et le mini-graphe, à droite 
   await p.click('nav [data-tab=seance]');
   assert.ok(await p.$('#app .titre-l h1 + #serie'), 'à droite du titre « Entraînement »');
   assert.equal((await p.textContent('#app #serie .big')).trim(), '3');
-  assert.equal(await p.locator('#app #serie .sem i').count(), 7);
+  assert.equal(await p.locator('#app #serie .sem i').count(), 5);
   assert.doesNotMatch(await p.textContent('#app #serie'), /semaine/i, 'aucun texte sur la carte');
   await p.click('nav [data-tab=stats]');
   assert.ok(await p.$('#app .titre-l h1 + #serie'), 'à droite du titre « Stats »');
@@ -156,6 +156,7 @@ test('toucher la carte : tout est expliqué, et les 24 récompenses sont là (ob
   const txt = await p.textContent('#sheet');
   assert.match(txt, /3 semaines d’affilée/);
   assert.match(txt, /lundi au dimanche/);
+  assert.match(txt, /5 dernières semaines/);
   assert.match(txt, /Record/);
   assert.equal(await p.locator('#sheet .med').count(), 24);
   assert.ok(await p.locator('#sheet .med.on, #sheet .med.or').count() >= 1, '1re séance obtenue');

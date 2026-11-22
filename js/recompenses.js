@@ -33,7 +33,7 @@ export function semaines(sessions, now = Date.now()) {
     suite = i && k === ks[i - 1] + 1 ? suite + 1 : 1;
     record = Math.max(record, suite);
   });
-  const barres = [6, 5, 4, 3, 2, 1, 0].map(k => par.get(k) || 0);
+  const barres = [4, 3, 2, 1, 0].map(k => par.get(k) || 0); /* 5 dernières semaines */
   return {n, record: Math.max(record, n), barres, cetteSemaine: par.get(0) || 0};
 }
 

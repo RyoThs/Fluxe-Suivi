@@ -1,5 +1,5 @@
 /* Fluxe Suivi — Semaines d'affilée et récompenses (v3.6.0).
-   - L'indicateur : juste le chiffre et le mini-graphe des 7 dernières semaines, à droite du titre (accueil et Stats).
+   - L'indicateur : juste le chiffre et le mini-graphe des 5 dernières semaines, à droite du titre (accueil et Stats).
    - En le touchant, et seulement là : un panneau qui explique tout et montre les 24 récompenses.
    - Aucune fenêtre automatique : les nouvelles récompenses sont notées en silence (la dernière brille en or). */
 import {S, done, save} from '../etat.js';
@@ -15,7 +15,7 @@ export function carteSerie() {
   const barres = w.barres
     .map(
       (v, i) =>
-        `<i class="${v ? '' : 'v'}" style="height:${v ? 8 + Math.round((v / mx) * 18) : 6}px"${i === 6 ? ' data-now="1"' : ''}></i>`
+        `<i class="${v ? '' : 'v'}" style="height:${v ? 8 + Math.round((v / mx) * 18) : 6}px"${i === 4 ? ' data-now="1"' : ''}></i>`
     )
     .join('');
   return `<button class="serie-t" id="serie" data-act="serie" aria-label="${w.n} semaine${w.n > 1 ? 's' : ''} d’affilée : voir le détail et les récompenses"><span class="big">${w.n}</span><span class="sem" aria-hidden="true">${barres}</span></button>`;
@@ -43,7 +43,7 @@ export function panneauSerie() {
   return `<div class="card"><div class="ser2 seul"><span class="big">${w.n}</span> <div class="t">semaine${w.n > 1 ? 's' : ''} d’affilée</div></div>
 <p class="mu" style="margin:10px 0 0">Tu as fait au moins une séance chaque semaine depuis ${w.n} semaine${w.n > 1 ? 's' : ''}. Une semaine va du lundi au dimanche. Ta série continue tant que tu fais au moins 1 séance par semaine ; la semaine en cours ne la casse pas tant qu’elle n’est pas finie.</p>
 <div class="recap" style="justify-content:flex-start"><span>Cette semaine : ${w.cetteSemaine} séance${w.cetteSemaine > 1 ? 's' : ''}</span><span>Record : ${w.record} semaine${w.record > 1 ? 's' : ''}</span></div>
-<p class="mu" style="margin:8px 0 0">Le graphe montre tes séances des 7 dernières semaines ; la dernière barre est la semaine en cours.</p></div>
+<p class="mu" style="margin:8px 0 0">Les barres montrent tes séances des 5 dernières semaines (plus la barre est haute, plus tu as fait de séances) ; la dernière est la semaine en cours.</p></div>
 <div class="card"><div class="rtop"><span class="hist-date">Récompenses</span><b class="gt">${nb} / ${t.length}</b></div><p class="mu" style="margin:4px 0 0">En couleur : obtenues (la dernière brille en or). En gris : ta progression.</p>${fam}</div>`;
 }
 
