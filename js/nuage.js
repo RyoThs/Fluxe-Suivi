@@ -12,11 +12,12 @@
    ce n'est jamais dans le fichier de sauvegarde. */
 import {FIREBASE} from './nuage-config.js';
 import {S, save, surSave} from './etat.js';
-import {clean, nettoyerCorps} from './donnees.js';
 import {norm} from './outils.js';
 import {demander, pastilles} from './dialogue.js';
 import {snap} from './versions.js';
-import {toTrash} from './sauvegarde.js';
+import {fusionner, metaDe, modDe} from './nuage-fusion.js';
+import {texteErreur} from './nuage-messages.js';
+export {texteErreur};
 
 const neuf = (u = {}) => ({
   uid: u.uid || null,
@@ -75,17 +76,6 @@ async function charger() {
 }
 
 /* ===== Ce qu'il reste à envoyer ===== */
-const modDe = s => s.mod || s.date;
-const META = ['routines', 'notes', 'rests', 'gyms', 'mu', 'corps', 'rv'],
-  META_OPT = ['rest', 'gym', 'nv', 'bkEvery'];
-const metaDe = d => {
-  const o = {};
-  META.forEach(k => (o[k] = d[k]));
-  META_OPT.forEach(k => {
-    if (d[k] !== undefined) o[k] = d[k];
-  });
-  return o;
-};
 function aEnvoyer() {
   const out = [],
     ici = new Set();
@@ -108,72 +98,6 @@ export const enAttente = () => {
   const a = aEnvoyer();
   return a.out.length + a.suppr.length + (a.meta ? 1 : 0);
 };
-
-/* ===== Recevoir : ajoute ou met à jour ce qui vient des autres appareils ===== */
-function fusionner(r) {
-  let chg = false;
-  const sortir = new Set();
-  const pos = new Map(S.sessions.map((s, i) => [s.id, i]));
-  for (const d of r.sessions) {
-    if (d.t > E.dernierT) E.dernierT = d.t;
-    const i = pos.get(d.id),
-      l = i === undefined ? null : S.sessions[i];
-    if (d.del) {
-      if (l && l.id !== S.current && !l.edit && modDe(l) <= d.mod) {
-        toTrash({s: l});
-        sortir.add(l.id);
-        chg = true;
-      }
-      delete E.envoye[d.id];
-      continue;
-    }
-    let s = null;
-    try {
-      const c = clean({sessions: [JSON.parse(d.j)]});
-      s = c && c.sessions[0];
-    } catch (e) {}
-    if (!s || s.id !== d.id) continue; /* donnée illisible : ignorée, rien n'est cassé ici */
-    delete s.edit;
-    if (!l) {
-      if (E.envoye[d.id] === d.mod) continue; /* supprimée sur ce téléphone, suppression pas encore envoyée */
-      S.sessions.push(s);
-      pos.set(s.id, S.sessions.length - 1);
-      E.envoye[d.id] = d.mod;
-      chg = true;
-    } else if (l.id === S.current || l.edit) continue; /* jamais toucher à la séance ouverte */
-    else if (d.mod > modDe(l)) {
-      S.sessions[i] = s;
-      E.envoye[d.id] = d.mod;
-      chg = true;
-    } else if (d.mod === modDe(l)) E.envoye[d.id] = d.mod;
-  }
-  if (sortir.size) S.sessions = S.sessions.filter(s => !sortir.has(s.id));
-  if (r.meta && r.meta.mod > E.metaMod) {
-    let m = null;
-    try {
-      const p = JSON.parse(r.meta.j);
-      m = p && typeof p === 'object' ? clean(Object.assign({}, p, {sessions: []})) : null;
-    } catch (e) {}
-    if (m) {
-      META.forEach(k => {
-        /* choix de muscles (v3.3) : réunis, pour qu'un appareil resté sur une ancienne version ne les efface pas */
-        if (k === 'mu') S.mu = Object.assign({}, S.mu, m.mu);
-        else if (k === 'corps') S.corps = nettoyerCorps([...(S.corps || []), ...(m.corps || [])]);
-        else if (k === 'rv') S.rv = [...new Set([...(S.rv || []), ...(m.rv || [])])];
-        else S[k] = m[k];
-      });
-      META_OPT.forEach(k => {
-        if (m[k] !== undefined) S[k] = m[k];
-        else delete S[k];
-      });
-      E.metaMod = E.metaEnvoye = r.meta.mod;
-      E.metaHash = JSON.stringify(metaDe(S));
-      chg = true;
-    }
-  }
-  if (chg) S.sessions.sort((a, b) => a.date - b.date);
-  return chg;
-}
 
 /* ===== Un tour de synchronisation : recevoir, puis envoyer ===== */
 const horsLigne = e =>
@@ -213,7 +137,7 @@ async function tour() {
     const uid = E.uid,
       r = await api.lire(uid, E.dernierT);
     if (E.uid !== uid) return; /* déconnecté pendant l'envoi */
-    const chg = fusionner(r);
+    const chg = fusionner(r, E);
     const a = aEnvoyer();
     if (a.out.length || a.suppr.length || a.meta) {
       const metaMod = E.metaMod,
@@ -243,26 +167,6 @@ async function tour() {
 }
 
 /* ===== Compte ===== */
-export function texteErreur(e) {
-  const c = (e && e.code) || '';
-  return (
-    {
-      'auth/email-already-in-use': 'Cet e-mail a déjà un compte : touche « J’ai déjà un compte ».',
-      'auth/invalid-credential': 'E-mail ou mot de passe incorrect.',
-      'auth/wrong-password': 'E-mail ou mot de passe incorrect.',
-      'auth/user-not-found': 'E-mail ou mot de passe incorrect.',
-      'auth/invalid-email': 'Adresse e-mail invalide.',
-      'auth/missing-email': 'Écris ton adresse e-mail.',
-      'auth/weak-password': 'Mot de passe trop court (8 caractères minimum).',
-      'auth/too-many-requests': 'Trop d’essais : réessaie dans quelques minutes.',
-      'auth/network-request-failed': 'Pas de réseau : réessaie quand tu es connecté.',
-      'auth/requires-recent-login': 'Par sécurité, reconnecte-toi puis recommence.',
-      'renvoi-trop-tot':
-        'Un e-mail vient déjà de partir : attends une minute avant d’en redemander un (et regarde dans les spams).',
-      'permission-denied': 'Le serveur a refusé l’accès. Déconnecte-toi puis reconnecte-toi.',
-    }[c] || 'Erreur inattendue' + (c ? ' (' + c + ')' : '') + '. Réessaie plus tard.'
-  );
-}
 const verifier = (email, mdp) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw {code: 'auth/invalid-email'};
   if (mdp !== undefined && String(mdp).length < 8) throw {code: 'auth/weak-password'};
@@ -352,7 +256,7 @@ async function brancher(u) {
   const avant = {routines: S.routines.slice(), gyms: S.gyms.slice()};
   E = neuf(u);
   if (choix === 'non') S.sessions = S.sessions.filter(s => s.id === S.current);
-  fusionner(r);
+  fusionner(r, E);
   if (choix === 'ok') {
     /* réunir aussi les routines et les salles de ce téléphone */
     for (const x of avant.routines) if (!S.routines.some(y => norm(y.name) === norm(x.name))) S.routines.push(x);

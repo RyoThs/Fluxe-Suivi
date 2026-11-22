@@ -17,6 +17,12 @@ function lundi(t) {
 /* n° de semaine en partant de celle-ci (0), arrondi pour ignorer les changements d'heure */
 const numSemaine = (t, now) => Math.round((lundi(now) - lundi(t)) / (7 * JOUR));
 
+/**
+ * Semaines d'affilée avec au moins une séance (lundi → dimanche).
+ * @param {import('./donnees.js').Seance[]} sessions
+ * @param {number} [now]
+ * @returns {{n: number, record: number, barres: number[], cetteSemaine: number}} barres = séances des 5 dernières semaines
+ */
 export function semaines(sessions, now = Date.now()) {
   const par = new Map();
   for (const s of sessions) {
@@ -86,7 +92,12 @@ export const RECOMPENSES = [
 ];
 export const FAMILLES = ['Régularité', 'Séances', 'Force', 'Volume', 'Mon corps', 'Mannequin'];
 
-/* d = {sessions (terminées), corps, mu} → chaque récompense avec sa valeur et si elle est obtenue */
+/**
+ * Chaque récompense avec sa valeur actuelle et si elle est obtenue.
+ * @param {{sessions: import('./donnees.js').Seance[], corps?: import('./donnees.js').Mesure[], mu?: Object<string, string>}} d
+ * @param {number} [now]
+ * @returns {Array<{id: string, famille: string, titre: string, cible: number, icone: string, mesure: string, valeur: number, ok: boolean}>}
+ */
 export function tableau(d, now = Date.now()) {
   const l = d.sessions || [],
     corps = d.corps || [];

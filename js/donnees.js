@@ -2,20 +2,41 @@
 import {BKD, J30, KEY} from './config.js';
 import {GROUPES_PERSO} from './muscles.js';
 import {RECOMPENSES} from './recompenses.js';
+/* ===== Format des données (pour un développeur : voir aussi docs/DEVELOPPEUR.md) ===== */
+/**
+ * Une série de musculation (valeurs gardées en texte, comme saisies) ou un bloc de cardio.
+ * @typedef {{kg: string, reps: string, done: boolean, w?: true, t?: true}} Serie  w = échauffement, t = touchée à la main
+ * @typedef {{min: string, km: string, kcal: string, done: boolean, t?: true}} BlocCardio
+ * @typedef {{name: string, cardio?: true, sets: Array<Serie|BlocCardio>}} Exercice
+ * @typedef {{id: string, date: number, dur?: number, mod?: number, rt?: string, g?: string, gn?: string,
+ *   edit?: true, exercises: Exercice[]}} Seance  date et mod en millisecondes ; rt = routine de départ ; g/gn = salle
+ * @typedef {{id?: string, name: string, exercises: string[], sets?: Array<Array<Object>>}} Routine
+ * @typedef {{id: string, name: string, eq: string[], notes: Object<string, string>, chain?: string}} Salle
+ * @typedef {{t: number, kg?: number, mg?: number, taille?: number, poitrine?: number, bras?: number,
+ *   cuisse?: number, hanches?: number}} Mesure  une pesée et/ou des mensurations (cm), à la date t
+ * @typedef {{sessions: Seance[], routines: Routine[], current: string|null, notes: Object<string, string>,
+ *   rests: Object<string, number>, gyms: Salle[], gym?: string, mu: Object<string, string>, corps: Mesure[],
+ *   rv: string[], rvInit?: true, trash: Array<{at: number, s?: Seance, r?: Routine}>, rest?: number,
+ *   lastBackup?: number, snooze?: number, bkEvery?: string, nv?: true, editBak?: Seance}} Donnees
+ */
+/* ===== Petits outils de nettoyage (communs à toutes les données) ===== */
+/** Texte sans caractères de contrôle, sans espaces autour, au plus n caractères ('' si ce n'est pas du texte). */
+const str = (v, n) =>
+  typeof v === 'string'
+    ? v
+        .replace(/[\u0000-\u001f\u007f]/g, '')
+        .trim()
+        .slice(0, n)
+    : '';
+/** Nombre fini, sinon null. */
+const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
+/** Valeur de série saisie (kg, reps…) : texte de chiffres avec au plus 3 décimales, sinon ''. */
+const val = v => {
+  if (typeof v === 'number') v = String(v);
+  return typeof v === 'string' && /^\d{0,5}(\.\d{0,3})?$/.test(v) ? v : '';
+};
 /* Nettoyage et vérification des données (stockage local ET import) : seul ce qui est valide est gardé */
 function cleanSession(s) {
-  const str = (v, n) =>
-    typeof v === 'string'
-      ? v
-          .replace(/[\u0000-\u001f\u007f]/g, '')
-          .trim()
-          .slice(0, n)
-      : '';
-  const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
-  const val = v => {
-    if (typeof v === 'number') v = String(v);
-    return typeof v === 'string' && /^\d{0,5}(\.\d{0,3})?$/.test(v) ? v : '';
-  };
   if (!s || typeof s !== 'object' || !Array.isArray(s.exercises)) return null;
   const id = str(s.id, 40),
     date = num(s.date);
@@ -53,17 +74,6 @@ function cleanSession(s) {
 /* Une routine : {id, name, exercises:[noms], sets:[[{kg,reps,w?}…] ou [{min,km,kcal}…] (cardio) par exercice]}.
    « sets » est facultatif (anciennes routines) : sans lui, la séance reprend les séries de la dernière fois. */
 function cleanRoutine(r) {
-  const str = (v, n) =>
-    typeof v === 'string'
-      ? v
-          .replace(/[\u0000-\u001f\u007f]/g, '')
-          .trim()
-          .slice(0, n)
-      : '';
-  const val = v => {
-    if (typeof v === 'number') v = String(v);
-    return typeof v === 'string' && /^\d{0,5}(\.\d{0,3})?$/.test(v) ? v : '';
-  };
   if (!r || typeof r !== 'object' || !Array.isArray(r.exercises)) return null;
   const name = str(r.name, 60),
     ex = [],
@@ -103,6 +113,11 @@ const BORNES = {
   cuisse: [10, 300],
   hanches: [10, 300],
 };
+/**
+ * Pesées et mensurations valides seulement (bornes réalistes), sans doublon, triées par date.
+ * @param {unknown} l
+ * @returns {Mesure[]}
+ */
 export function nettoyerCorps(l) {
   const o = [],
     vus = new Set();
@@ -120,16 +135,13 @@ export function nettoyerCorps(l) {
   }
   return o.sort((a, b) => a.t - b.t);
 }
+/**
+ * Nettoie des données venues du téléphone, d'un fichier ou du serveur : seul ce qui est valide est gardé.
+ * @param {unknown} d
+ * @returns {Donnees|null} null si ce n'est pas une sauvegarde Fluxe
+ */
 export function clean(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.sessions)) return null;
-  const str = (v, n) =>
-    typeof v === 'string'
-      ? v
-          .replace(/[\u0000-\u001f\u007f]/g, '')
-          .trim()
-          .slice(0, n)
-      : '';
-  const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
   const o = {sessions: [], routines: [], current: null, notes: {}, rests: {}},
     ids = new Set(),
     eb = cleanSession(d.editBak);

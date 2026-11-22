@@ -20,7 +20,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `muscles.js` | Muscles travaillés par chaque exercice (principaux = 1 série, secondaires = ½), groupe des exercices perso |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |
-| `nuage.js`, `nuage-config.js` | Sauvegarde en ligne (facultative) : compte, envoi et réception des séances, sans réseau compris. Le pont Firebase est dans `../lib/` et n'est chargé que si un compte est utilisé |
+| `nuage.js`, `nuage-config.js`, `nuage-fusion.js`, `nuage-messages.js` | Sauvegarde en ligne (facultative) : compte, envoi et réception des séances, sans réseau compris. Le pont Firebase est dans `../lib/` et n'est chargé que si un compte est utilisé |
 | `erreurs.js` | Rapport d'erreurs : journal sur le téléphone, envoi automatique (avec un compte) ou par e-mail |
 | `routines.js` | Routines : création depuis l’Historique, brouillon de modification (séries, poids, reps, blocs cardio), démarrage |
 | `ecran.js` | Écran fixe : pas de zoom, message « Tourne ton téléphone » à l’horizontale |
@@ -32,7 +32,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `minuteur.js`, `veille.js`, `installation.js` | Minuteur de repos, écran allumé, bouton Installer |
 | `rendu.js` | Affiche l'onglet actif |
 | `actions.js` | Aiguillage : reçoit la saisie et les boutons, et envoie chaque bouton au bon fichier de `gestes/` |
-| `gestes/…` | Ce que fait chaque bouton, rangé par thème : `seance.js`, `routines.js`, `repos.js` (chrono), `donnees.js` (sauvegarde, corbeille), `salle.js`, `ecrans.js` (filtres, panneaux), `nuage.js` (Sauvegarde en ligne) |
+| `gestes/…` | Ce que fait chaque bouton, rangé par thème : `seance.js` (séance en cours), `fin-seance.js` (terminer, annuler, séances passées), `routines.js`, `repos.js` (chrono), `donnees.js` (sauvegarde, corbeille), `salle.js`, `ecrans.js` (filtres, panneaux), `nuage.js` (Sauvegarde en ligne) |
 | `vues/…` | Un fichier par écran : séance, historique, stats, guide, panneaux, écran sauvegarde |
 
 Les styles sont dans `../css/app.css`.
