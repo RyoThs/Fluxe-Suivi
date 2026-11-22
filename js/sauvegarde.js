@@ -1,6 +1,6 @@
 /* Fluxe Suivi — Fichier de sauvegarde, import, fusion et corbeille. */
 import {FORMAT, VER} from './config.js';
-import {clean, unwrap} from './donnees.js';
+import {clean, nettoyerCorps, unwrap} from './donnees.js';
 import {S, pk, save, toast} from './etat.js';
 import {norm} from './outils.js';
 import {render} from './rendu.js';
@@ -108,6 +108,8 @@ export function merge(d) {
   for (const x of d.routines) if (!S.routines.some(y => norm(y.name) === norm(x.name))) S.routines.push(x);
   for (const [k, v] of Object.entries(d.notes)) if (!S.notes[k]) S.notes[k] = v;
   for (const [k, v] of Object.entries(d.rests)) if (!S.rests[k]) S.rests[k] = v;
+  S.corps = nettoyerCorps([...(S.corps || []), ...(d.corps || [])]);
+  S.rv = [...new Set([...(S.rv || []), ...(d.rv || [])])];
   S.mu = S.mu || {};
   for (const [k, v] of Object.entries(d.mu || {})) if (!S.mu[k]) S.mu[k] = v;
   if (!S.rest && d.rest) S.rest = d.rest;

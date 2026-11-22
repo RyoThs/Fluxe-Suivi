@@ -1,6 +1,7 @@
 /* Fluxe Suivi — Lecture et nettoyage des données (téléphone ET fichiers importés) : seul ce qui est valide est gardé. */
 import {BKD, J30, KEY} from './config.js';
 import {GROUPES_PERSO} from './muscles.js';
+import {RECOMPENSES} from './recompenses.js';
 /* Nettoyage et vérification des données (stockage local ET import) : seul ce qui est valide est gardé */
 function cleanSession(s) {
   const str = (v, n) =>
@@ -92,6 +93,33 @@ function cleanRoutine(r) {
   if (plan) o.sets = sets;
   return o;
 }
+/* bornes de chaque mesure (en dehors : valeur absurde, écartée) */
+const BORNES = {
+  kg: [20, 400],
+  mg: [2, 70],
+  taille: [10, 300],
+  poitrine: [10, 300],
+  bras: [10, 300],
+  cuisse: [10, 300],
+  hanches: [10, 300],
+};
+export function nettoyerCorps(l) {
+  const o = [],
+    vus = new Set();
+  if (!Array.isArray(l)) return o;
+  for (const x of l.slice(0, 3000)) {
+    if (!x || typeof x !== 'object' || typeof x.t !== 'number' || !isFinite(x.t) || x.t <= 0) continue;
+    const e = {t: x.t};
+    for (const [k, [a, b]] of Object.entries(BORNES))
+      if (typeof x[k] === 'number' && isFinite(x[k]) && x[k] >= a && x[k] <= b) e[k] = Math.round(x[k] * 10) / 10;
+    const cle = JSON.stringify(e);
+    if (Object.keys(e).length > 1 && !vus.has(cle)) {
+      vus.add(cle);
+      o.push(e);
+    }
+  }
+  return o.sort((a, b) => a.t - b.t);
+}
 export function clean(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.sessions)) return null;
   const str = (v, n) =>
@@ -137,6 +165,11 @@ export function clean(d) {
       const n = str(k, 61);
       if (n && n.length <= 60 && n === k && GROUPES_PERSO.includes(v)) o.mu[n] = v;
     }
+  /* Mon corps (v3.6.0) : pesées et mensurations, {t, kg?, mg?, taille?, poitrine?, bras?, cuisse?, hanches?} */
+  o.corps = nettoyerCorps(d.corps);
+  /* récompenses déjà annoncées (v3.6.0) */
+  if (d.rvInit === true) o.rvInit = true;
+  o.rv = Array.isArray(d.rv) ? [...new Set(d.rv.filter(x => RECOMPENSES.some(r => r.id === x)))] : [];
   const r = num(d.rest);
   if (r !== null && r >= 15 && r <= 600) o.rest = Math.round(r);
   for (const k of ['lastBackup', 'snooze']) {
@@ -223,5 +256,16 @@ export function load() {
       localStorage.setItem(KEY + '-illisible', raw);
     } catch (e) {}
   }
-  return {sessions: [], routines: [], current: null, notes: {}, rests: {}, trash: [], gyms: [], mu: {}};
+  return {
+    sessions: [],
+    routines: [],
+    current: null,
+    notes: {},
+    rests: {},
+    trash: [],
+    gyms: [],
+    mu: {},
+    corps: [],
+    rv: [],
+  };
 }

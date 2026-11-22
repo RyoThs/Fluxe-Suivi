@@ -4,6 +4,8 @@ import {esc, fmt, fmtN, mieux, ok, vol} from '../outils.js';
 import {csum} from '../calculs.js';
 import {groupeDe} from '../muscles.js';
 import {carteProgression} from './progression.js';
+import {titreSerie} from './serie.js';
+import {carteCorps} from './corps.js';
 import {MESURES, MESURES_G, PERIODES, TOUTES, dessin, points, resume} from '../courbe.js';
 function wk(t) {
   const d = new Date(t);
@@ -92,8 +94,8 @@ export function viewStats() {
     ? `<div class="card"><div class="hist-date">Cardio</div><div class="mu">7 derniers jours</div><div class="stats" style="box-shadow:none;margin:10px 0 0"><div><b>${fmtN(cs.reduce((a, e) => a + csum(e, 'min'), 0))}</b><span>minutes</span></div><div><b>${fmtN(cs.reduce((a, e) => a + csum(e, 'km'), 0))}</b><span>km</span></div><div><b>${Math.round(cs.reduce((a, e) => a + csum(e, 'kcal'), 0))}</b><span>kcal</span></div></div></div>`
     : '';
   const gt = Object.values(gv).reduce((a, b) => a + b, 0) || 1;
-  return `<h1>Stats</h1><p class="sub">Ta progression</p>
-${carteProgression()}
+  return `${titreSerie('Stats')}<p class="sub">Ta progression</p>
+${carteProgression()}${carteCorps()}
 <div class="stats"><div><b>${l.length}</b><span>séances</span></div><div><b>${l.filter(s => now - s.date < W).length}</b><span>7 derniers jours</span></div><div><b>${fmt(today)}</b><span>kg aujourd’hui</span></div></div>
 <div class="card"><div class="hist-date">Volume par semaine</div><div class="mu">en kg, 8 dernières semaines</div><div class="chart" role="img" aria-label="Volume hebdomadaire">${weeks.map(x => `<div><i style="height:${Math.round((x.v / mx) * 100)}px"></i>${new Date(x.t).getDate()}/${new Date(x.t).getMonth() + 1}</div>`).join('')}</div></div>
 <div class="card prog"><div class="hist-date">${sx === TOUTES ? 'Progression globale' : 'Progression par exercice'}</div>${progression(l, nm)}</div>

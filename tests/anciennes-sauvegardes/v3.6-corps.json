@@ -1,0 +1,22 @@
+{
+ "app": "fluxe-suivi",
+ "format": 3,
+ "version": "3.6.0",
+ "exportedAt": "2026-11-22T12:00:00.000Z",
+ "data": {
+  "sessions": [
+   {"id": "c36a", "date": 1763700000000, "mod": 1763703000000, "dur": 50, "exercises": [
+    {"name": "Squat", "sets": [{"kg": "100", "reps": "8", "done": true}]}
+   ]}
+  ],
+  "routines": [],
+  "notes": {},
+  "rests": {},
+  "corps": [
+   {"t": 1763600000000, "kg": 80.2, "mg": 17},
+   {"t": 1763700000000, "kg": 79.8},
+   {"t": 1763700000000, "taille": 83, "bras": 36.5}
+  ],
+  "rv": ["seance1", "pesee1"]
+ }
+}

@@ -10,6 +10,7 @@ import {dureeTxt} from '../minuteur.js';
 import {ico} from '../pictos.js';
 import {derniere, estCardio, ilYa, nbSeries} from '../routines.js';
 import {groupeDe} from '../muscles.js';
+import {titreSerie} from './serie.js';
 function cardioCard(e, i) {
   const pc = prevCardio(e.name),
     nt = noteOf(e.name);
@@ -34,7 +35,7 @@ function carteRoutine(r, k) {
 export function viewSeance() {
   const s = cur();
   if (!s)
-    return `<h1>Entraînement</h1><p class="sub">Lance une séance ou pars d’une routine.</p>${backupCard()}
+    return `${titreSerie('Entraînement')}<p class="sub">Lance une séance ou pars d’une routine.</p>${backupCard()}
 <div class="card"><button class="btn big" data-act="start">${DB} Séance vide</button></div>
 <h2>Mes routines</h2>
 ${S.routines.map(carteRoutine).join('') || '<p class="empty">Aucune routine pour l’instant.</p>'}

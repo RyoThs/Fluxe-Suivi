@@ -18,6 +18,12 @@ const D = {
     '<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12.5 3.5 3.5 0 0 0 6.5 19z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/>',
   coche: '<path d="M20 6 9 17l-5-5"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>',
+  flamme: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 .8-3.3 2-4.3.2 1.6 1 2.6 2 3 0-3.5-.6-5.6 1-8.7z"/>',
+  trophee: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM12 13v4M8 20h8M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/>',
+  volume: '<path d="M4 20V11M10 20V6M16 20v-6M22 20H2"/>',
+  poids: '<path d="M5 8h14l-2 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
+  regle: '<path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/>',
+  corps: '<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/>',
 };
 export const pic = (k, t = 24) =>
   `<svg viewBox="0 0 24 24" width="${t}" height="${t}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${D[k] || D.info}</svg>`;

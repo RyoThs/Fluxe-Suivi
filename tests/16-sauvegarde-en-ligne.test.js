@@ -290,3 +290,24 @@ test('v3.3 : les choix de muscles des exercices perso voyagent, et une version e
   assert.deepEqual((await donnees(p1)).mu, { 'Presse maison': 'Jambes' }, 'les choix de muscles sont gardés');
   assert.deepEqual([p1.erreurs, p2.erreurs], [[], []]);
 });
+
+test('v3.6 : pesées, mensurations et récompenses voyagent, et une version en ligne sans elles ne les efface pas', async () => {
+  const p1 = await appareil({ ...VIDE, sessions: [seance('a', 2)], corps: [{ t: 1763600000000, kg: 80 }], rv: ['seance1'], rvInit: true }); // appli déjà ouverte une fois
+  await ouvrir(p1);
+  await p1.fill('#nm', 'corps@test.fr'); await p1.fill('#np', 'motdepasse1');
+  await p1.click('[data-act=nok]'); await aJour(p1);
+  let srv = await serveur(p1);
+  const m0 = JSON.parse(srv.data[srv.user.uid].m.j);
+  assert.deepEqual(m0.corps, [{ t: 1763600000000, kg: 80 }]);
+  assert.deepEqual(m0.rv, ['seance1']);
+  const m = JSON.parse(srv.data[srv.user.uid].m.j); delete m.corps; delete m.rv; m.rests = { 'k:squat': 120 };
+  srv.data[srv.user.uid].m = { j: JSON.stringify(m), mod: Date.now() + 60000, t: ++srv.t };
+  await serveur(p1, srv);
+  await p1.reload(); await p1.waitForSelector('nav');
+  await ouvrir(p1); await aJour(p1);
+  await p1.waitForFunction(() => (JSON.parse(localStorage.getItem('muscu-v1')).rests || {})['k:squat'] === 120, null, { timeout: 5000 });
+  const d = await donnees(p1);
+  assert.deepEqual(d.corps, [{ t: 1763600000000, kg: 80 }]);
+  assert.deepEqual(d.rv, ['seance1']);
+  assert.deepEqual(p1.erreurs, []);
+});
