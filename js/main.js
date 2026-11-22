@@ -12,6 +12,7 @@ import {carteNuage} from './vues/nuage.js';
 import {sheet} from './vues/panneaux.js';
 import {surErreur} from './erreurs.js';
 import {carteErreurs} from './vues/erreurs.js';
+import {initRecompenses} from './vues/serie.js';
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
    Elle force la mise à jour du service worker, vide SES caches (jamais tes données : elles sont ailleurs) et recharge.
    Une seule tentative par minute, pour ne jamais tourner en boucle. */
@@ -50,6 +51,7 @@ snapStart();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+initRecompenses(); /* récompenses déjà gagnées : notées sans fenêtre la 1re fois */
 render();
 /* Sauvegarde en ligne : seule sa carte est redessinée (jamais l'écran entier pendant une saisie) ;
    si des séances sont arrivées d'un autre appareil, l'écran est rafraîchi quand aucun champ n'est en cours de saisie. */

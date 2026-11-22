@@ -19,9 +19,10 @@ import {gestes as donnees} from './gestes/donnees.js';
 import {gestes as salle} from './gestes/salle.js';
 import {gestes as ecrans} from './gestes/ecrans.js';
 import {gestes as nuage} from './gestes/nuage.js';
+import {gestes as corps} from './gestes/corps.js';
 import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
-const GESTES = Object.assign(Object.create(null), seance, routines, repos, donnees, salle, ecrans, nuage);
+const GESTES = Object.assign(Object.create(null), seance, routines, repos, donnees, salle, ecrans, nuage, corps);
 export const nomsGestes = () => Object.keys(GESTES);
 $('#fi').addEventListener('change', ev => {
   const f = ev.target.files[0];

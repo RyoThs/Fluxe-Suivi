@@ -14,6 +14,7 @@ import {tStart, tStop} from '../minuteur.js';
 import {exercicesDe} from '../routines.js';
 import {snap} from '../versions.js';
 import {toTrash} from '../sauvegarde.js';
+import {noterRecompenses} from '../vues/serie.js';
 /* ===== Terminer la séance =====
    Séries saisies à la main mais pas validées avec ✓ : on les montre et on propose de les garder, au lieu de les perdre en silence.
    Les séries seulement préremplies (valeurs de la dernière fois, jamais touchées) ne sont jamais enregistrées comme faites. */
@@ -130,6 +131,7 @@ function clore(s) {
     }
     save();
     render();
+    if (saved === true) noterRecompenses();
   };
   fin();
 }

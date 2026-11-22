@@ -9,7 +9,7 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 ## localStorage (gardé même quand l'app est fermée)
 | Clé | Rôle | Fichier qui l'utilise |
 |---|---|---|
-| `muscu-v1` | **Tes données** : séances, programmes, notes, temps de repos, salle, muscles des exercices perso (`mu`, v3.3). Ne jamais changer. | `js/config.js` (nom), `js/etat.js` (écriture), `js/donnees.js` (lecture) |
+| `muscu-v1` | **Tes données** : séances, programmes, notes, temps de repos, salle, muscles des exercices perso (`mu`, v3.3), pesées et mensurations (`corps`, v3.6), récompenses déjà annoncées (`rv`, `rvInit`, v3.6). Ne jamais changer. | `js/config.js` (nom), `js/etat.js` (écriture), `js/donnees.js` (lecture) |
 | `muscu-v1-brut` | Copie des données d'origine si le nettoyage au démarrage a retiré des séances abîmées | `js/donnees.js` (écriture), `js/versions.js` (lecture) |
 | `muscu-v1-illisible` | Copie des données si elles étaient illisibles au démarrage | `js/donnees.js` |
 | `muscu-v1-sauvegarde` | Ancienne copie de secours (avant la v2.1). Seulement lue une fois, pour la ranger dans les versions de secours | `js/versions.js` |

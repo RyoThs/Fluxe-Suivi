@@ -15,6 +15,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `catalogue.js` | Exercices, machines, enseignes (On Air et autres) |
 | `progression.js` | Ma progression : niveau de chaque muscle (moitié régularité, moitié force), paliers, couleurs (palette B) |
 | `mannequin.js` | Tracés du mannequin (face et dos), repris de human-muscle (licence MIT recopiée en tête) |
+| `recompenses.js` | Semaines d’affilée (lundi → dimanche) et 24 récompenses calculées sur l’historique |
 | `muscles.js` | Muscles travaillés par chaque exercice (principaux = 1 série, secondaires = ½), groupe des exercices perso |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |
