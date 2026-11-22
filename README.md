@@ -79,7 +79,7 @@ Le détail est expliqué dans `tests/README.md`.
 | `manifest.json` | Nom, couleurs, icônes et captures de l'application installée |
 | `icons/`, `fonts/` | Icônes, image de démarrage et police Barlow Condensed (dans l'app, sans site extérieur) |
 | `app.js` | Ancien fichier gardé pour réparer les vieilles pages déjà installées |
-| `tests/` | Les tests automatiques (`01` à `23`, voir `tests/README.md`) |
+| `tests/` | Les tests automatiques (`01` à `24`, voir `tests/README.md`) |
 | `.nojekyll` | Fichier vide : GitHub publie le site tel quel, sans le transformer |
 | `screenshots/` | Captures d'écran (données de démonstration) |
 | `docs/VERSIONS.md` | Historique des versions et copies de secours |

@@ -20,6 +20,7 @@ import {gestes as salle} from './gestes/salle.js';
 import {gestes as ecrans} from './gestes/ecrans.js';
 import {gestes as nuage} from './gestes/nuage.js';
 import {gestes as corps} from './gestes/corps.js';
+import './glisser.js'; /* glisser vers la gauche */
 import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
 const GESTES = Object.assign(Object.create(null), seance, routines, repos, donnees, salle, ecrans, nuage, corps);
@@ -122,6 +123,10 @@ document.addEventListener('click', ev => {
     setTab(tb.dataset.tab);
     render();
     window.scrollTo(0, 0);
+    const app = $('#app');
+    app.classList.remove('entree');
+    void app.offsetWidth; /* relance l'animation */
+    app.classList.add('entree');
     return;
   }
   const b = ev.target.closest('[data-act]');

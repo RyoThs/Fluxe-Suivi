@@ -54,15 +54,22 @@ const fini = e => e.sets.length > 0 && e.sets.every(x => x.done);
 /* avec des exercices terminés, « + Ajouter un exercice » remonte juste au-dessus d'eux */
 const AJOUT = '<div class="row"><button class="btn" data-act="pick">+ Ajouter un exercice</button></div>';
 const aDesFinis = (s, ed) => !ed && s.exercises.some(fini);
+/* carte glissable : glisser vers la gauche montre « Remplacer » et « Supprimer » (v3.7.0) */
+function glissable(html, i) {
+  const act = `<div class="gl-act"><button class="glm" data-act="exrem" data-i="${i}">${ico('crayon')}Remplacer</button><button class="gls" data-act="exsup" data-i="${i}">${ico('corbeille')}Supprimer</button></div>`;
+  return html
+    .replace('<section class="card">', `<section class="gl" data-i="${i}">${act}<div class="card gl-c">`)
+    .replace(/<\/section>$/, '</div></section>');
+}
 function cartes(s, ed) {
   const l = s.exercises.map((e, i) => [e, i]);
-  if (ed) return l.map(([e, i]) => exCard(s, e, i)).join('');
+  if (ed) return l.map(([e, i]) => glissable(exCard(s, e, i), i)).join('');
   const enCours = l.filter(([e]) => !fini(e)),
     finis = l.filter(([e]) => fini(e)).reverse();
   return (
-    enCours.map(([e, i]) => exCard(s, e, i)).join('') +
+    enCours.map(([e, i]) => glissable(exCard(s, e, i), i)).join('') +
     (finis.length ? `${AJOUT}<div class="sep-fini">${ico('valide')}Terminés</div>` : '') +
-    finis.map(([e, i]) => exCard(s, e, i)).join('')
+    finis.map(([e, i]) => glissable(exCard(s, e, i), i)).join('')
   );
 }
 /* Bandeau du haut : Durée, Volume, Séries faites / prévues (hors échauffement et cardio), barre de progression */

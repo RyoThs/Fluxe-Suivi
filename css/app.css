@@ -361,3 +361,29 @@ nav{box-shadow:var(--shadow)}
 .serie-t .sem{display:flex;gap:3px;align-items:flex-end;height:26px}
 .serie-t .sem i{width:6px;border-radius:2px;background:var(--grad)}.serie-t .sem i.v{background:var(--line)}
 .card .recap{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap}.card .recap span{background:var(--raise);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--ink)}
+
+/* ===== Glisser, Annuler, transitions (v3.7.0) ===== */
+.gl{position:relative;margin-bottom:14px}
+.gl>.card{margin-bottom:0}
+.gl-act{position:absolute;top:0;right:0;bottom:0;display:flex;gap:8px;align-items:stretch;padding-left:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+.gl.ouvert .gl-act,.gl.glisse .gl-act{opacity:1;pointer-events:auto}
+.gl-act button{width:80px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#fff}
+.gl-act .pic svg{width:22px;height:22px}
+.gl-act .glm{background:linear-gradient(135deg,#4f46e5,#7c3aed)}.gl-act .gls{background:#e11d48}
+.gl-c{position:relative;z-index:1;transition:transform .25s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
+.gl.glisse .gl-c{transition:none}
+.lm .gl{margin-bottom:6px}
+.lm .gl-act button{width:58px;border-radius:12px}
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--raise);font-size:14px}
+.lrow b{font:700 17px var(--num);text-align:right}
+.gl.ouvert .lrow{background:var(--surface);box-shadow:var(--shadow2)}
+.tout{display:block;width:100%;padding:8px;color:var(--accent);font-weight:600;font-size:14px}
+#annuler{position:fixed;left:14px;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));max-width:532px;margin:0 auto;z-index:45;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px 12px 16px;border-radius:16px;background:#0b1022;color:#fff;font-size:15px;box-shadow:0 10px 30px rgba(11,16,34,.3);transform:translateY(140%);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;pointer-events:none}
+#annuler.on{transform:none;opacity:1;pointer-events:auto}
+#annuler button{color:#a5b4fc;font-weight:800;padding:6px 8px}
+#app.entree{animation:fxEntree .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes fxEntree{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#sheet.on{animation:fxSheet .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes fxSheet{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){#app.entree,#sheet.on{animation:none}.gl-c,#annuler{transition:none}}
+.gl-act .pic{color:#fff}
