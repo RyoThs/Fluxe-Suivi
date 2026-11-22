@@ -2,7 +2,7 @@
    Chaque geste reçoit le bouton touché (b), la séance en cours (s) et les numéros i, j, k du bouton.
    Il renvoie true quand l'app doit enregistrer puis redessiner l'écran ; sinon il s'en occupe lui-même. */
 import {MU} from '../catalogue.js';
-import {S, save, setTab, toast} from '../etat.js';
+import {S, cur, pk, save, setTab, toast} from '../etat.js';
 import {cname, dn, esc, fmt, fmtDate, mins, nset, uid, vol} from '../outils.js';
 import {avertir, choisir, confirmer, demander, pastilles} from '../dialogue.js';
 import {GROUPES_PERSO, groupeDe} from '../muscles.js';
@@ -14,6 +14,9 @@ import {tStart, tStop} from '../minuteur.js';
 import {exercicesDe} from '../routines.js';
 import {snap} from '../versions.js';
 import {toTrash} from '../sauvegarde.js';
+import {proposerAnnuler} from '../annuler.js';
+import {openRemplacer} from '../vues/panneaux.js';
+import {estCardio} from '../routines.js';
 import {noterRecompenses} from '../vues/serie.js';
 /* ===== Terminer la séance =====
    Séries saisies à la main mais pas validées avec ✓ : on les montre et on propose de les garder, au lieu de les perdre en silence.
@@ -168,9 +171,31 @@ function demanderMuscle(nm) {
   });
 }
 export const gestes = {
+  /* glisser → Supprimer : fait tout de suite, « Annuler » le remet à sa place */
+  exsup: ({a, b, s, i, j, k}) => {
+    const e = s && s.exercises[i];
+    if (!e) return;
+    s.exercises.splice(i, 1);
+    proposerAnnuler(e.name + ' supprimé', () => {
+      const c = cur();
+      if (c) c.exercises.splice(Math.min(i, c.exercises.length), 0, e);
+    });
+    return true;
+  },
+  /* glisser → Remplacer : la liste s'ouvre, le nouvel exercice garde les séries */
+  exrem: ({a, b, s, i, j, k}) => {
+    if (s && s.exercises[i]) openRemplacer(i);
+  },
   padd: ({a, b, s, i, j, k}) => {
     const nm = cname(b.dataset.n);
     if (!nm) return;
+    if (pk && pk.rempl >= 0 && s.exercises[pk.rempl]) {
+      const e = s.exercises[pk.rempl];
+      if (!!e.cardio === estCardio(nm)) e.name = nm;
+      else s.exercises[pk.rempl] = newEx(nm); /* muscu ↔ cardio : les séries n'ont pas le même format */
+      closePk();
+      return true;
+    }
     s.exercises.push(newEx(nm));
     const g = gymCur();
     if (g && !MU[nm] && !inGym(nm) && g.eq.length < 600) g.eq.push(nm);

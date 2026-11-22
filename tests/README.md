@@ -23,6 +23,7 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 | `15-courbes.test.js` | Courbes de progression : charge max, 1RM estimé, volume, vue « Toutes », périodes |
 | `16-sauvegarde-en-ligne.test.js` | Sauvegarde en ligne avec un faux serveur (`nuage-faux.js`) : compte, envoi, 2e appareil, hors ligne, suppression, e-mail de vérification, sécurité |
 | `17-erreurs.test.js` | Rapport d’erreurs : journal sur le téléphone, envoi automatique avec un compte, e-mail, écran de secours |
+| `24-glisser.test.js` | Glisser : remplacer ou supprimer un exercice, modifier ou supprimer une mesure, « Annuler », transitions entre les pages |
 | `23-corps-recompenses.test.js` | Semaines d’affilée, 24 récompenses (calcul, panneau, fenêtre, pas de rafale à la mise à jour), Mon corps (pesée, mensurations), données gardées partout |
 | `22-ordre-exercices.test.js` | Ordre pendant la séance : en cours en haut, terminés en bas ; boutons qui visent le bon exercice ; Historique dans l’ordre réel |
 | `21-seance.test.js` | Écran Séance v3.5 : caractérisation (tous les boutons d’avant restent), bandeau, série en cours, ligne Record, « Par côté », Repos, chrono à anneau et +30 s |

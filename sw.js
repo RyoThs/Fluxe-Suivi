@@ -9,14 +9,14 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v38'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v39'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
 const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
 
 const FICHIERS = [
-  './', 'index.html', 'manifest.json', 'css/app.css?v=3.6.0', 'js/main.js?v=3.6.0',
+  './', 'index.html', 'manifest.json', 'css/app.css?v=3.7.0', 'js/main.js?v=3.7.0',
   // les autres morceaux du code (chargés par js/main.js)
   'js/actions.js',
   'js/nuage.js',
@@ -41,6 +41,8 @@ const FICHIERS = [
   'js/progression.js',
   'js/mannequin.js',
   'js/recompenses.js',
+  'js/glisser.js',
+  'js/annuler.js',
   'js/dessins.js',
   'js/dialogue.js',
   'js/donnees.js',

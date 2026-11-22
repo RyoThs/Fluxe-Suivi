@@ -10,7 +10,7 @@ import {ensCards} from './guide.js';
 import {thumb} from '../icones.js';
 import {fillData, viewData} from './ecran-sauvegarde.js';
 import {panneauSerie} from './serie.js';
-import {formulaireCorps} from './corps.js';
+import {formulaireCorps, toutesMesures} from './corps.js';
 import {groupeDe} from '../muscles.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o) {
@@ -22,6 +22,11 @@ export function openSheet(o) {
 export function openPk() {
   const g = gymCur();
   openSheet({q: '', v: g && g.eq.length ? 'salle' : 'cat', m: 'Tous'});
+}
+/* même liste, pour remplacer l'exercice n° i (les séries sont gardées) */
+export function openRemplacer(i) {
+  const g = gymCur();
+  openSheet({q: '', v: g && g.eq.length ? 'salle' : 'cat', m: 'Tous', rempl: i});
 }
 export function openTool() {
   openSheet({tool: 1, kg: '', bar: 20});
@@ -51,8 +56,22 @@ export function sheet() {
     el.innerHTML = top('Semaines d’affilée') + panneauSerie();
     return;
   }
+  if (pk.corpsTout) {
+    el.innerHTML = top('Toutes mes mesures') + toutesMesures();
+    return;
+  }
   if (pk.corps) {
-    el.innerHTML = top(pk.corps === 'pesee' ? 'Nouvelle pesée' : 'Mensurations') + formulaireCorps(pk.corps);
+    const modif = pk.k >= 0;
+    el.innerHTML =
+      top(
+        pk.corps === 'pesee'
+          ? modif
+            ? 'Modifier la pesée'
+            : 'Nouvelle pesée'
+          : modif
+            ? 'Modifier les mensurations'
+            : 'Mensurations'
+      ) + formulaireCorps(pk.corps, modif ? (S.corps || [])[pk.k] : null);
     const f = el.querySelector('input');
     if (f) f.focus();
     return;
