@@ -265,3 +265,25 @@ svg.courbe{display:block;width:100%;height:auto;overflow:visible;touch-action:pa
 .er .sw small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .er a.sec{display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center}
 .er .pv{font-size:12px;color:var(--muted);margin:12px 4px 0;line-height:1.4}.er .pv a{color:var(--muted)}
+
+/* ===== Ma progression (v3.4.0) : mannequin en haut des Stats ===== */
+#mp{padding:16px 14px}
+.mpt{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.mpt .mu{margin:0;font-size:12px}
+.mpg{display:flex;align-items:baseline;gap:8px;margin:4px 0 2px}.mpg b{font-family:var(--num);font-weight:800;font-size:42px;line-height:1}.mpg span{color:var(--muted);font-size:13px}
+.gt{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mpc{display:flex;justify-content:space-around;margin:4px -6px 0}
+.corps{width:48%;max-width:170px;height:auto;aspect-ratio:1/2;overflow:visible}
+.corps .m{stroke:#1e2440;stroke-opacity:.75;stroke-width:2.4;paint-order:stroke}
+.corps .fx{pointer-events:none}
+.corps [data-act]{cursor:pointer}
+.corps .sel .m{stroke:#0b1022;stroke-opacity:1;stroke-width:5}
+.mpb{height:7px;border-radius:4px;margin:8px 4px 0;background:linear-gradient(90deg,#d6dbe7,#5eead4 12%,#38bdf8 40%,#6366f1 65%,#9333ea 85%,#db2777)}
+.mpe{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:3px 4px 0}
+.mpd{margin-top:12px;padding:12px;border-radius:16px;background:var(--raise);font-size:13.5px}
+.mpd.vide{color:var(--muted);text-align:center}
+.mpf{margin-top:8px;padding:8px 10px;border-radius:12px;background:#fff7ed;color:#9a3412;font-weight:500}
+.mph{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.mph b{font-family:var(--num);font-size:24px;font-weight:800}.mph span{font-family:var(--num);font-size:26px;font-weight:800;color:var(--accent)}
+.mpl{display:grid;grid-template-columns:84px 1fr 46px;gap:8px;align-items:center;font-weight:600}.mpl b{text-align:right;font-family:var(--num);font-size:18px}
+.mpj{height:8px;border-radius:4px;background:var(--surface);overflow:hidden}.mpj i{display:block;height:100%;background:var(--grad)}
+.mps{font-size:12px;color:var(--muted);margin:3px 0 9px 92px;line-height:1.35}
+.mpn{margin:2px 0 0;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
