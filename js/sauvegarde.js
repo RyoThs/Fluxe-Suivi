@@ -108,6 +108,8 @@ export function merge(d) {
   for (const x of d.routines) if (!S.routines.some(y => norm(y.name) === norm(x.name))) S.routines.push(x);
   for (const [k, v] of Object.entries(d.notes)) if (!S.notes[k]) S.notes[k] = v;
   for (const [k, v] of Object.entries(d.rests)) if (!S.rests[k]) S.rests[k] = v;
+  S.mu = S.mu || {};
+  for (const [k, v] of Object.entries(d.mu || {})) if (!S.mu[k]) S.mu[k] = v;
   if (!S.rest && d.rest) S.rest = d.rest;
   for (const g of d.gyms) {
     const l = S.gyms.find(x => x.id === g.id);

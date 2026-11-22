@@ -1,0 +1,18 @@
+{
+ "app": "fluxe-suivi",
+ "format": 3,
+ "version": "3.3.0",
+ "exportedAt": "2026-11-22T10:00:00.000Z",
+ "data": {
+  "sessions": [
+   {"id": "mu33a", "date": 1763700000000, "mod": 1763703000000, "dur": 50, "exercises": [
+    {"name": "Presse maison", "sets": [{"kg": "120", "reps": "10", "done": true}]},
+    {"name": "Leg curl", "sets": [{"kg": "40", "reps": "12", "done": true}]}
+   ]}
+  ],
+  "routines": [],
+  "notes": {},
+  "rests": {},
+  "mu": {"Presse maison": "Jambes", "Tirage du garage": "Dos"}
+ }
+}

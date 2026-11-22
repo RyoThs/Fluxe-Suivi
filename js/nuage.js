@@ -4,7 +4,8 @@
    - Chaque séance TERMINÉE est envoyée en ligne (la séance en cours, jamais). Une séance modifiée est renvoyée
      (sa date de modification « mod » augmente) ; une séance supprimée laisse une marque « supprimée » en ligne,
      pour disparaître aussi des autres appareils (elle va alors dans leur corbeille, récupérable 30 jours).
-   - Routines, salles, notes et temps de repos voyagent ensemble (« meta ») : la version la plus récente gagne.
+   - Routines, salles, notes, temps de repos et muscles des exercices perso voyagent ensemble (« meta ») :
+     la version la plus récente gagne (les muscles perso sont réunis, jamais effacés).
    - Sans réseau, rien n'est perdu : l'envoi part tout seul quand la connexion revient.
    Le pont vers Firebase (../lib/nuage-firebase.js) n'est téléchargé que si un compte est utilisé.
    Ce que l'app retient du compte (identifiant, ce qui a déjà été envoyé) est rangé à part, sous « fluxe-suivi-nuage-v1 » :
@@ -75,7 +76,7 @@ async function charger() {
 
 /* ===== Ce qu'il reste à envoyer ===== */
 const modDe = s => s.mod || s.date;
-const META = ['routines', 'notes', 'rests', 'gyms'],
+const META = ['routines', 'notes', 'rests', 'gyms', 'mu'],
   META_OPT = ['rest', 'gym', 'nv', 'bkEvery'];
 const metaDe = d => {
   const o = {};
@@ -155,7 +156,8 @@ function fusionner(r) {
     } catch (e) {}
     if (m) {
       META.forEach(k => {
-        S[k] = m[k];
+        /* choix de muscles (v3.3) : réunis, pour qu'un appareil resté sur une ancienne version ne les efface pas */
+        S[k] = k === 'mu' ? Object.assign({}, S.mu, m.mu) : m[k];
       });
       META_OPT.forEach(k => {
         if (m[k] !== undefined) S[k] = m[k];

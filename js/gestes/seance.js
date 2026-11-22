@@ -4,7 +4,8 @@
 import {MU} from '../catalogue.js';
 import {S, save, setTab, toast} from '../etat.js';
 import {cname, dn, esc, fmt, fmtDate, mins, nset, uid, vol} from '../outils.js';
-import {avertir, confirmer, demander, pastilles} from '../dialogue.js';
+import {avertir, choisir, confirmer, demander, pastilles} from '../dialogue.js';
+import {GROUPES_PERSO, groupeDe} from '../muscles.js';
 import {newEx, restFor, suggest} from '../calculs.js';
 import {gymCur, inGym} from '../salle.js';
 import {render} from '../rendu.js';
@@ -149,6 +150,21 @@ const demarrer = ({a, b, s, i, j, k}) => {
   S.current = n.id;
   return true;
 };
+/* Exercice perso : quel groupe de muscles ? (sert au mannequin « Ma progression » et aux Stats) */
+function demanderMuscle(nm) {
+  choisir({
+    icone: 'salle',
+    titre: 'Quel muscle travaille « ' + nm + ' » ?',
+    texte: 'Pour le compter dans ta progression. Tu pourras le changer plus tard dans la séance.',
+    choix: GROUPES_PERSO,
+  }).then(g => {
+    if (!g) return;
+    S.mu = S.mu || {};
+    S.mu[nm] = g;
+    save();
+    render();
+  });
+}
 export const gestes = {
   padd: ({a, b, s, i, j, k}) => {
     const nm = cname(b.dataset.n);
@@ -157,7 +173,12 @@ export const gestes = {
     const g = gymCur();
     if (g && !MU[nm] && !inGym(nm) && g.eq.length < 600) g.eq.push(nm);
     closePk();
+    if (b.dataset.cree && !MU[nm] && groupeDe(nm, S.mu) === 'Perso') setTimeout(() => demanderMuscle(nm));
     return true;
+  },
+  pmu: ({a, b, s, i, j, k}) => {
+    const e = s.exercises[i];
+    if (e && !MU[e.name]) demanderMuscle(e.name);
   },
   wu: ({a, b, s, i, j, k}) => {
     const x = s.exercises[i].sets[j];

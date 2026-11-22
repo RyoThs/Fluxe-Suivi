@@ -9,6 +9,7 @@ import {catCur, catName, gymCur, inGym, vis} from '../salle.js';
 import {ensCards} from './guide.js';
 import {thumb} from '../icones.js';
 import {fillData, viewData} from './ecran-sauvegarde.js';
+import {groupeDe} from '../muscles.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o) {
   if (!pk) history.pushState({fx: 1}, '');
@@ -116,25 +117,25 @@ export function plist() {
   const q = norm(pk.q),
     own = names()
       .filter(n => !MU[n])
-      .map(n => [n, 'Perso']);
+      .map(n => [n, groupeDe(n, S.mu), 'perso']);
   /* Avec un texte recherché : toute la bibliothèque. Sinon : Ma salle (machines cochées) ou le catalogue de l'enseigne. Tes exercices perso sont toujours là. */
   const g = gymCur(),
     sal = g && !q && pk.v === 'salle',
     cat = g && !q && pk.v === 'cat' ? new Set(catCur()) : null;
   const l = [...LIB, ...own].filter(
-    ([n, m]) =>
+    ([n, m, t]) =>
       vis(n) &&
-      (m === 'Perso' || ((!sal || inGym(n)) && (!cat || cat.has(n)))) &&
+      (t === 'perso' || ((!sal || inGym(n)) && (!cat || cat.has(n)))) &&
       (pk.m === 'Tous' || m === pk.m) &&
       norm(n).includes(q)
   );
-  const mk = (n, m, t, tg) =>
-    `<button class="pi" data-act="padd" data-n="${esc(n)}">${thumb(n)}<div class="pt"><b>${t}</b><span>${esc(m)}${tg ? ` <em class="mk">${esc(tg)}</em>` : ''}</span></div></button>`;
+  const mk = (n, m, t, tg, cree) =>
+    `<button class="pi" data-act="padd" data-n="${esc(n)}"${cree ? ' data-cree="1"' : ''}>${thumb(n)}<div class="pt"><b>${t}</b><span>${esc(m)}${tg ? ` <em class="mk">${esc(tg)}</em>` : ''}</span></div></button>`;
   const nv = cname(pk.q);
   const h =
     l.map(([n, m]) => mk(n, m, esc(n), TG[n])).join('') +
     (nv && q && ![...LIB, ...own].some(([n]) => norm(n) === q)
-      ? mk(nv, 'Exercice perso', 'Créer « ' + esc(nv) + ' »')
+      ? mk(nv, 'Exercice perso', 'Créer « ' + esc(nv) + ' »', '', true)
       : '');
   return (
     h ||

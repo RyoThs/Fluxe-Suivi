@@ -10,6 +10,7 @@
    confirmer(o) → true seulement si l'utilisateur touche le bouton principal
    saisir(o)    → le texte saisi, ou null
    avertir(o)   → un message avec un seul bouton « Compris »
+   choisir(o)   → un choix parmi o.choix (liste de textes, en grille de boutons), ou null (« Plus tard », à côté)
 
    Tests automatiques : si window.__fxAuto existe (tableau), aucune fenêtre ne s'affiche ; la réponse est prise
    dans ce tableau (true/rien = bouton principal, false = « non », texte = saisie) et le message est noté dans window.__fxVus. */
@@ -29,6 +30,7 @@ function auto(o) {
   window.__fxVus.push((o.titre || '') + (o.texte ? ' — ' + o.texte : ''));
   const r = window.__fxAuto.shift();
   if (r === false) return 'non';
+  if (o.choix) return typeof r === 'string' && o.choix.includes(r) ? r : null;
   if (o.champ) return {r: 'ok', valeur: typeof r === 'string' ? r : String(o.champ.valeur || '')};
   return 'ok';
 }
@@ -45,8 +47,8 @@ function afficher(o) {
     fond.className = 'dlg-fond';
     fond.innerHTML = `<div class="dlg" role="${o.danger ? 'alertdialog' : 'dialog'}" aria-modal="true" aria-labelledby="dlg-t">
 <div class="dlg-ic ${o.ton || 'bleu'}">${pic(o.icone || 'info', 28)}</div><h3 id="dlg-t">${esc(o.titre)}</h3>
-${o.texte ? `<p>${esc(o.texte)}</p>` : ''}${o.corps || ''}${champ}
-<div class="dlg-bt">${bt('ok', o.ok || 'Compris', 'ok' + (o.danger ? ' danger' : ''))}${bt('non', o.non, 'non')}${bt('lien', o.lien, 'lien')}</div></div>`;
+${o.texte ? `<p>${esc(o.texte)}</p>` : ''}${o.corps || ''}${champ}${o.choix ? `<div class="dlg-ch">${o.choix.map((c, i) => bt('c' + i, c, 'ch')).join('')}</div>` : ''}
+<div class="dlg-bt">${o.choix ? '' : bt('ok', o.ok || 'Compris', 'ok' + (o.danger ? ' danger' : ''))}${bt('non', o.non, 'non')}${bt('lien', o.lien, 'lien')}</div></div>`;
     document.body.appendChild(fond);
     const inp = fond.querySelector('.dlg-in');
     const fermer = r => {
@@ -77,7 +79,7 @@ ${o.texte ? `<p>${esc(o.texte)}</p>` : ''}${o.corps || ''}${champ}
     });
     requestAnimationFrame(() => {
       fond.classList.add('on');
-      (inp || fond.querySelector('[data-r=ok]')).focus();
+      (inp || fond.querySelector('[data-r=ok]') || fond.querySelector('[data-r]')).focus();
       if (inp) inp.select();
     });
   });
@@ -91,6 +93,12 @@ export const saisir = o =>
     ...o,
     champ: {valeur: o.valeur || '', max: o.max, label: o.label, mdp: o.mdp},
   }).then(r => (r && r.r === 'ok' ? r.valeur : null));
+export const choisir = o =>
+  demander({non: 'Plus tard', ...o}).then(r => {
+    if (o.choix.includes(r)) return r; /* réponse des tests automatiques */
+    const m = /^c(\d+)$/.exec(r || '');
+    return m ? o.choix[+m[1]] || null : null;
+  });
 export const avertir = o => demander({icone: 'info', ton: 'bleu', ...o, ok: o.ok || 'Compris'}).then(() => {});
 /* petit récapitulatif en pastilles : ['52 min', '3 exercices'] */
 export const pastilles = l =>
