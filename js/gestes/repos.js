@@ -34,6 +34,10 @@ export const gestes = {
     tAdd(15000);
     return;
   },
+  t30: ({a, b, s, i, j, k}) => {
+    tAdd(30000);
+    return;
+  },
   't-': ({a, b, s, i, j, k}) => {
     tAdd(-15000);
     return;
