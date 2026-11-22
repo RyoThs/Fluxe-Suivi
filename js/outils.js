@@ -25,3 +25,38 @@ export const cname = v =>
     .slice(0, 60); /* même règle que le nettoyage des données */
 export const K = n => 'k:' + norm(n).slice(0, 60);
 export const fmtN = n => String(Math.round(n * 100) / 100).replace('.', ',');
+/* Disques à mettre de chaque côté d'une barre (20 kg par défaut), du plus lourd au plus léger.
+   null si la charge est sous le poids de la barre ; [] pour la barre seule. */
+const DISQUES = [25, 20, 15, 10, 5, 2.5, 1.25];
+export function parCote(kg, barre = 20) {
+  kg = +kg;
+  if (!(kg >= barre)) return null;
+  let r = (kg - barre) / 2;
+  const l = [];
+  for (const d of DISQUES)
+    while (r >= d - 1e-9) {
+      l.push(d);
+      r -= d;
+    }
+  return l;
+}
+/* Exercices faits avec une barre olympique de 20 kg (pour l'étiquette « Par côté ») */
+export const BARRE = new Set([
+  'Développé couché',
+  'Développé incliné barre',
+  'Développé décliné',
+  'Rowing barre',
+  'Soulevé de terre',
+  'Développé militaire',
+  'Push press',
+  'Squat',
+  'Front squat',
+  'Soulevé de terre roumain',
+  'Good morning',
+  'Hip thrust',
+  'Curl barre',
+  'Arraché (snatch)',
+  'Épaulé (power clean)',
+  'Épaulé-jeté',
+  'Thruster',
+]);

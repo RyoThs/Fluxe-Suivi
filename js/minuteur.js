@@ -19,6 +19,7 @@ export function tStart(sec, nom) {
   tEnd = tDeb + tTot;
   tNom = nom || '';
   ouvert = false;
+  suivante();
   $('#timer').classList.remove('fin');
   $('#timer').classList.add('on');
   reglages();
@@ -26,10 +27,32 @@ export function tStart(sec, nom) {
   clearInterval(tInt);
   tInt = setInterval(tick, 250);
 }
+const ANNEAU = 2 * Math.PI * 21; /* tour complet de l'anneau du chrono */
+/* « Ensuite : Squat · série 3 » : la première série pas encore faite de la séance */
+function suivante() {
+  const z = $('#tn'),
+    s = cur();
+  if (!z) return;
+  let t = '';
+  for (const e of (s && s.exercises) || []) {
+    const j = e.sets.findIndex(x => !x.done);
+    if (j < 0) continue;
+    const x = e.sets[j];
+    t =
+      'Ensuite : ' +
+      e.name +
+      (e.cardio ? '' : ' · ' + (x.w ? 'échauffement' : 'série ' + (e.sets.slice(0, j).filter(y => !y.w).length + 1)));
+    break;
+  }
+  z.textContent = t;
+}
 function tick() {
   const r = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));
   $('#tt').textContent = fmtT(r);
-  $('#tb').style.width = (Math.max(0, tEnd - Date.now()) / tTot) * 100 + '%';
+  const f = Math.max(0, tEnd - Date.now()) / tTot;
+  $('#tb').style.width = f * 100 + '%';
+  const an = $('#tr');
+  if (an) an.style.strokeDashoffset = String(ANNEAU * (1 - f));
   if (r <= 0) {
     clearInterval(tInt);
     tInt = null;
