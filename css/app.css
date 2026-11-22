@@ -324,3 +324,6 @@ nav{box-shadow:var(--shadow)}
 .recl b{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .recl .pic svg{width:15px;height:15px;color:var(--accent)}
 .ghost.add{background:none;border:1.5px dashed #c9cfe0}
+.sep-fini{display:flex;align-items:center;gap:8px;margin:18px 6px 10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sep-fini::after{content:'';flex:1;height:1px;background:var(--line)}
+.sep-fini .pic svg{width:15px;height:15px;color:var(--ok)}
