@@ -76,3 +76,22 @@ test('en modifiant une séance passée, l’ordre ne bouge pas', async () => {
   await p.click('nav [data-tab=seance]');
   assert.deepEqual(await ordre(p), ['Squat', 'Leg extension']);
 });
+
+test('« + Ajouter un exercice » est juste au-dessus de « Terminés » (pas besoin de descendre sous les exercices finis)', async () => {
+  const p = await A.page();
+  await donner(p, seanceEnCours([{ name: 'Squat', sets: [fait(100, 8)] }, { name: 'Leg extension', sets: [afaire(50, 12)] }]));
+  await p.click('nav [data-tab=seance]');
+  assert.equal(await p.locator('#app [data-act=pick]').count(), 1, 'un seul bouton');
+  const avant = await p.$eval('#app [data-act=pick]', b => !!(b.compareDocumentPosition(document.querySelector('#app .sep-fini')) & Node.DOCUMENT_POSITION_FOLLOWING));
+  assert.ok(avant, 'le bouton est avant le repère « Terminés »');
+  for (const a of ['tool', 'finish', 'cancel']) assert.equal(await p.locator(`#app [data-act=${a}]`).count(), 1, a + ' reste en bas');
+});
+
+test('sans exercice terminé, « + Ajouter un exercice » reste à sa place habituelle, en bas', async () => {
+  const p = await A.page();
+  await donner(p, seanceEnCours([{ name: 'Leg extension', sets: [afaire(50, 12)] }]));
+  await p.click('nav [data-tab=seance]');
+  assert.equal(await p.locator('#app [data-act=pick]').count(), 1);
+  const juste = await p.$eval('#app [data-act=pick]', b => b.nextElementSibling && b.nextElementSibling.dataset.act === 'tool');
+  assert.ok(juste, 'à côté du calculateur de disques, comme avant');
+});

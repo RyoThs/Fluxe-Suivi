@@ -45,11 +45,14 @@ ${bandeau(s, ed)}
 <div class="row"><button class="sec" data-act="rest">${ico('chrono')}Repos par défaut : ${dureeTxt(S.rest || 90)} (changer)</button></div>
 <p class="mu" style="margin-left:4px">Astuce : touche le numéro d’une série pour la marquer comme échauffement (É).</p>
 ${cartes(s, ed)}
-<div class="row"><button class="btn" data-act="pick">+ Ajouter un exercice</button><button class="sec" data-act="tool">Calculateur de disques</button><button class="sec" data-act="finish">${ed ? 'Enregistrer les modifications' : 'Terminer la séance'}</button><button class="del" data-act="cancel">${ed ? 'Annuler les modifications' : 'Annuler la séance'}</button></div>`;
+<div class="row">${aDesFinis(s, ed) ? '' : '<button class="btn" data-act="pick">+ Ajouter un exercice</button>'}<button class="sec" data-act="tool">Calculateur de disques</button><button class="sec" data-act="finish">${ed ? 'Enregistrer les modifications' : 'Terminer la séance'}</button><button class="del" data-act="cancel">${ed ? 'Annuler les modifications' : 'Annuler la séance'}</button></div>`;
 }
 /* Ordre d'affichage (v3.5.1) : exercices en cours en haut (le nouvel ajout aussi), exercices terminés en bas,
    le dernier fini en premier. Les données gardent l'ordre réel (Historique). En modification d'une séance passée : ordre réel. */
 const fini = e => e.sets.length > 0 && e.sets.every(x => x.done);
+/* avec des exercices terminés, « + Ajouter un exercice » remonte juste au-dessus d'eux */
+const AJOUT = '<div class="row"><button class="btn" data-act="pick">+ Ajouter un exercice</button></div>';
+const aDesFinis = (s, ed) => !ed && s.exercises.some(fini);
 function cartes(s, ed) {
   const l = s.exercises.map((e, i) => [e, i]);
   if (ed) return l.map(([e, i]) => exCard(s, e, i)).join('');
@@ -57,7 +60,7 @@ function cartes(s, ed) {
     finis = l.filter(([e]) => fini(e)).reverse();
   return (
     enCours.map(([e, i]) => exCard(s, e, i)).join('') +
-    (finis.length ? `<div class="sep-fini">${ico('valide')}Terminés</div>` : '') +
+    (finis.length ? `${AJOUT}<div class="sep-fini">${ico('valide')}Terminés</div>` : '') +
     finis.map(([e, i]) => exCard(s, e, i)).join('')
   );
 }
