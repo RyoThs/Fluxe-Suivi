@@ -263,3 +263,30 @@ test('rappel « Pense à sauvegarder » : affiché sans compte, caché quand tou
   assert.ok(await p.$('[data-act=start]'));
   assert.deepEqual(p.erreurs, []);
 });
+
+test('v3.3 : les choix de muscles des exercices perso voyagent, et une version en ligne sans eux ne les efface pas', async () => {
+  const p1 = await appareil({ ...VIDE, sessions: [seance('a', 2)], mu: { 'Presse maison': 'Jambes' } });
+  await ouvrir(p1);
+  await p1.fill('#nm', 'mu@test.fr'); await p1.fill('#np', 'motdepasse1');
+  await p1.click('[data-act=nok]'); await aJour(p1);
+  let srv = await serveur(p1);
+  assert.deepEqual(JSON.parse(srv.data[srv.user.uid].m.j).mu, { 'Presse maison': 'Jambes' });
+  // un deuxième téléphone les récupère
+  const p2 = await appareil(VIDE, srv);
+  await p2.evaluate(() => { const s = JSON.parse(localStorage.getItem('__serveur')); s.user = null; localStorage.setItem('__serveur', JSON.stringify(s)); });
+  await ouvrir(p2);
+  await p2.click('[data-act=nmode][data-v=connexion]');
+  await p2.fill('#nm', 'mu@test.fr'); await p2.fill('#np', 'motdepasse1');
+  await p2.click('[data-act=nok]'); await aJour(p2);
+  assert.deepEqual((await donnees(p2)).mu, { 'Presse maison': 'Jambes' });
+  // un appareil resté sur une ancienne version envoie des réglages plus récents… sans « mu »
+  srv = await serveur(p1);
+  const m = JSON.parse(srv.data[srv.user.uid].m.j); delete m.mu; m.rests = { 'k:squat': 120 };
+  srv.data[srv.user.uid].m = { j: JSON.stringify(m), mod: Date.now() + 60000, t: ++srv.t };
+  await serveur(p1, srv);
+  await p1.reload(); await p1.waitForSelector('nav');
+  await ouvrir(p1); await aJour(p1);
+  await p1.waitForFunction(() => (JSON.parse(localStorage.getItem('muscu-v1')).rests || {})['k:squat'] === 120, null, { timeout: 5000 });
+  assert.deepEqual((await donnees(p1)).mu, { 'Presse maison': 'Jambes' }, 'les choix de muscles sont gardés');
+  assert.deepEqual([p1.erreurs, p2.erreurs], [[], []]);
+});

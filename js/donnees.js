@@ -1,5 +1,6 @@
 /* Fluxe Suivi — Lecture et nettoyage des données (téléphone ET fichiers importés) : seul ce qui est valide est gardé. */
 import {BKD, J30, KEY} from './config.js';
+import {GROUPES_PERSO} from './muscles.js';
 /* Nettoyage et vérification des données (stockage local ET import) : seul ce qui est valide est gardé */
 function cleanSession(s) {
   const str = (v, n) =>
@@ -129,6 +130,13 @@ export function clean(d) {
     for (const [k, v] of Object.entries(d.rests).slice(0, 1000)) {
       if (/^k:.{1,60}$/.test(k) && num(v) !== null && v >= 15 && v <= 600) o.rests[k] = Math.round(v);
     }
+  /* Exercices perso : le groupe de muscles choisi par l'utilisateur (v3.3.0), {nom: groupe} */
+  o.mu = {};
+  if (d.mu && typeof d.mu === 'object')
+    for (const [k, v] of Object.entries(d.mu).slice(0, 1000)) {
+      const n = str(k, 61);
+      if (n && n.length <= 60 && n === k && GROUPES_PERSO.includes(v)) o.mu[n] = v;
+    }
   const r = num(d.rest);
   if (r !== null && r >= 15 && r <= 600) o.rest = Math.round(r);
   for (const k of ['lastBackup', 'snooze']) {
@@ -215,5 +223,5 @@ export function load() {
       localStorage.setItem(KEY + '-illisible', raw);
     } catch (e) {}
   }
-  return {sessions: [], routines: [], current: null, notes: {}, rests: {}, trash: [], gyms: []};
+  return {sessions: [], routines: [], current: null, notes: {}, rests: {}, trash: [], gyms: [], mu: {}};
 }

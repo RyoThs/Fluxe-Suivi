@@ -9,6 +9,7 @@ import {backupCard} from '../rappel.js';
 import {dureeTxt} from '../minuteur.js';
 import {ico} from '../pictos.js';
 import {derniere, estCardio, ilYa, nbSeries} from '../routines.js';
+import {groupeDe} from '../muscles.js';
 function cardioCard(e, i) {
   const pc = prevCardio(e.name),
     nt = noteOf(e.name);
@@ -53,7 +54,7 @@ function exCard(s, e, i) {
     sg = s.edit ? null : suggest(e.name),
     nt = noteOf(e.name);
   let wi = -1;
-  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${esc(MU[e.name] || 'Perso')}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
+  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? esc(MU[e.name]) : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">${esc(groupeDe(e.name, S.mu))} ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
 ${sg ? `<button class="sg" data-act="sug" data-i="${i}">${ico('progres')}${esc(sg.txt)}<small>${esc(sg.why)}</small></button>` : ''}
 <input class="note" data-note="${i}" maxlength="200" placeholder="${gymCur() ? 'Réglage dans ' + esc(gymCur().name) + ' (siège, hauteur…)' : 'Note (réglage du siège, hauteur…)'}" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
 <div class="gr gh"><span>Série</span><span>Précédent</span><span>kg</span><span>Réps</span><span></span></div>

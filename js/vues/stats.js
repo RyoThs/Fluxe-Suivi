@@ -1,8 +1,8 @@
 /* Fluxe Suivi — Écran Stats. */
-import {MU} from '../catalogue.js';
 import {S, done} from '../etat.js';
 import {esc, fmt, fmtN, mieux, ok, vol} from '../outils.js';
 import {csum} from '../calculs.js';
+import {groupeDe} from '../muscles.js';
 import {MESURES, MESURES_G, PERIODES, TOUTES, dessin, points, resume} from '../courbe.js';
 function wk(t) {
   const d = new Date(t);
@@ -82,7 +82,7 @@ export function viewStats() {
   l.filter(s => now - s.date < 30 * 864e5).forEach(s =>
     s.exercises.forEach(e => {
       if (e.cardio) return;
-      const g = MU[e.name] || 'Perso';
+      const g = groupeDe(e.name, S.mu);
       gv[g] = (gv[g] || 0) + e.sets.filter(ok).reduce((a, x) => a + (+x.kg || 0) * (+x.reps || 0), 0);
     })
   );

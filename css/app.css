@@ -156,6 +156,11 @@ em.mk{display:inline-block;font-style:normal;font-size:11px;font-weight:600;line
 .dlg .recap span{background:var(--raise);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--ink)}
 .dlg ul{list-style:none;margin:10px 0 2px;padding:0;text-align:left}
 .dlg li{background:var(--raise);border-radius:12px;padding:9px 12px;margin-bottom:6px;font-size:14px;display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.dlg-ch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 4px}
+.dlg-ch .ch{padding:13px 8px;border-radius:14px;background:var(--raise);border:1px solid var(--line);font-weight:700;font-size:15px;color:var(--ink)}
+.dlg-ch .ch:last-child:nth-child(odd){grid-column:span 2}
+.mub{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;margin:-2px 0 0 -8px;border-radius:999px;color:var(--accent);font-size:inherit;font-weight:600}
+.mub .pic svg{width:13px;height:13px}
 .dlg li small{color:var(--muted);font-weight:600;white-space:nowrap}
 .dlg .dlg-in{display:block;width:100%;margin:14px 0 4px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--accent);background:var(--surface);font:600 17px var(--body);color:var(--ink);outline:none;box-shadow:0 0 0 4px var(--tint)}
 .dlg-bt{display:flex;flex-direction:column;gap:8px;margin-top:16px}
