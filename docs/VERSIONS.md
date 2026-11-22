@@ -6,7 +6,8 @@ Le retour se fait à partir de la branche `sauvegarde-v…`. Tes séances ne son
 
 | Version | Date | Ce qui a changé | Copie gardée |
 |---|---|---|---|
-| **3.3.0** | 2026-11-22 | **Muscles précis** : chaque exercice du catalogue connaît ses muscles (principaux et secondaires) ; un exercice perso demande son groupe de muscles (modifiable dans la séance) et apparaît dans ce groupe (liste, Stats). Préparation du mannequin « Ma progression » | (version actuelle) |
+| **3.4.0** | 2026-11-22 | **Ma progression** : nouvelle carte en haut des Stats avec un mannequin réaliste (face et dos) qui se colore selon ta progression réelle, moitié régularité (séries sur la durée) et moitié force (charges qui montent) ; toucher un muscle montre le détail ; point faible. Rien n'est retiré | (version actuelle) |
+| 3.3.0 | 2026-11-22 | **Muscles précis** : chaque exercice du catalogue connaît ses muscles (principaux et secondaires) ; un exercice perso demande son groupe de muscles (modifiable dans la séance) et apparaît dans ce groupe (liste, Stats). Préparation du mannequin « Ma progression » | `sauvegarde-v3.3.0` |
 | 3.2.1 | 2026-11-15 | Avec un compte à jour, plus de rappel « Pense à sauvegarder » (le fichier reste possible) ; « Tout est sauvegardé en ligne » dans Mes données | `sauvegarde-v3.2.1` |
 | 3.2.0 | 2026-11-15 | **Rapport d’erreurs** : journal sur le téléphone, envoi automatique au créateur (avec un compte) ou par e-mail ; un écran qui plante affiche un message au lieu de rester vide | `sauvegarde-v3.2.0` |
 | 3.1.2 | 2026-11-15 | Rangement, rien de visible : README à jour, tests renumérotés de 01 à 16, code remis en forme, cet historique | `sauvegarde-v3.1.2` |

@@ -21,6 +21,7 @@ Adresse : https://ryoths.github.io/Fluxe-Suivi/
 - **Routines** : elles se créent depuis une séance de l'Historique et se modifient en détail (séries, poids, reps, blocs cardio).
 - **Historique** : toutes tes séances passées, modifiables. Les données, la sauvegarde et la corbeille sont aussi ici.
 - **Stats** :
+  - **Ma progression** : un mannequin de face et de dos qui se colore selon ta progression réelle (régularité et force), muscle par muscle ;
   - **courbes de progression** par exercice (charge max, 1RM estimé, volume) ou pour toutes les séances (volume, séries, durée) ;
   - volume par semaine, répartition par groupe musculaire ;
   - 3 records (poids max, meilleure série, volume).
@@ -76,7 +77,7 @@ Le détail est expliqué dans `tests/README.md`.
 | `manifest.json` | Nom, couleurs, icônes et captures de l'application installée |
 | `icons/`, `fonts/` | Icônes, image de démarrage et police Barlow Condensed (dans l'app, sans site extérieur) |
 | `app.js` | Ancien fichier gardé pour réparer les vieilles pages déjà installées |
-| `tests/` | Les tests automatiques (`01` à `19`, voir `tests/README.md`) |
+| `tests/` | Les tests automatiques (`01` à `20`, voir `tests/README.md`) |
 | `.nojekyll` | Fichier vide : GitHub publie le site tel quel, sans le transformer |
 | `screenshots/` | Captures d'écran (données de démonstration) |
 | `docs/VERSIONS.md` | Historique des versions et copies de secours |

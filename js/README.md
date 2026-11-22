@@ -13,6 +13,8 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `outils.js` | Petites fonctions de calcul et de mise en forme |
 | `calculs.js` | Calculs sur l'historique : séries précédentes, records, suggestion de charge |
 | `catalogue.js` | Exercices, machines, enseignes (On Air et autres) |
+| `progression.js` | Ma progression : niveau de chaque muscle (moitié régularité, moitié force), paliers, couleurs (palette B) |
+| `mannequin.js` | Tracés du mannequin (face et dos), repris de human-muscle (licence MIT recopiée en tête) |
 | `muscles.js` | Muscles travaillés par chaque exercice (principaux = 1 série, secondaires = ½), groupe des exercices perso |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |

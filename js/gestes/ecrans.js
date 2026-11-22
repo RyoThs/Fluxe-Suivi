@@ -6,7 +6,13 @@ import {pk} from '../etat.js';
 import {render} from '../rendu.js';
 import {setCm, setCp, setCsel, setRx, setSx} from '../vues/stats.js';
 import {closePk, openPk, openTool, sheet} from '../vues/panneaux.js';
+import {setSel} from '../vues/progression.js';
 export const gestes = {
+  /* Ma progression : toucher un muscle (une 2e fois pour le relâcher) */
+  mus: ({a, b, s, i, j, k}) => {
+    setSel(b.dataset.m);
+    render();
+  },
   rx: ({a, b, s, i, j, k}) => {
     setRx(b.dataset.v);
     render();
