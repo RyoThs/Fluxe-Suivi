@@ -213,7 +213,12 @@ function lire(t) {
 
 export const nomsTable = () => Object.keys(TABLE);
 
-/* Les muscles d'un exercice : {code: 1 ou 0.5}. mu = choix des exercices perso (S.mu). */
+/**
+ * Les muscles d'un exercice : principal = 1, secondaire = 0.5.
+ * @param {string} nom
+ * @param {Object<string, string>} [mu] groupe choisi pour les exercices perso (S.mu)
+ * @returns {Object<string, number>} ex. {pec: 1, tri: 0.5}
+ */
 export function musclesDe(nom, mu) {
   if (Object.prototype.hasOwnProperty.call(TABLE, nom)) return lire(TABLE[nom]);
   if (MU[nom]) return {}; /* cardio (ou exercice du catalogue sans muscles) */
@@ -221,7 +226,12 @@ export function musclesDe(nom, mu) {
   return GROUPES_PERSO.includes(g) ? lire(PAR_GROUPE[g]) : {};
 }
 
-/* Le groupe affiché d'un exercice : catalogue, sinon choix perso, sinon « Perso » */
+/**
+ * Le groupe affiché d'un exercice : catalogue, sinon choix perso, sinon « Perso ».
+ * @param {string} nom
+ * @param {Object<string, string>} [mu]
+ * @returns {string}
+ */
 export function groupeDe(nom, mu) {
   if (MU[nom]) return MU[nom];
   const g = mu && Object.prototype.hasOwnProperty.call(mu, nom) ? mu[nom] : '';

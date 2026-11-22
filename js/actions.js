@@ -13,6 +13,7 @@ import {discs, plist, sheet} from './vues/panneaux.js';
 import {brouillon} from './routines.js';
 import {imp} from './sauvegarde.js';
 import {gestes as seance} from './gestes/seance.js';
+import {gestes as finSeance} from './gestes/fin-seance.js';
 import {gestes as routines} from './gestes/routines.js';
 import {gestes as repos} from './gestes/repos.js';
 import {gestes as donnees} from './gestes/donnees.js';
@@ -23,7 +24,18 @@ import {gestes as corps} from './gestes/corps.js';
 import './glisser.js'; /* glisser vers la gauche */
 import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
-const GESTES = Object.assign(Object.create(null), seance, routines, repos, donnees, salle, ecrans, nuage, corps);
+const GESTES = Object.assign(
+  Object.create(null),
+  seance,
+  finSeance,
+  routines,
+  repos,
+  donnees,
+  salle,
+  ecrans,
+  nuage,
+  corps
+);
 export const nomsGestes = () => Object.keys(GESTES);
 $('#fi').addEventListener('change', ev => {
   const f = ev.target.files[0];

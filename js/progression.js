@@ -38,6 +38,7 @@ export const MUSCLES_GLOBAL = [
   'abd',
 ];
 
+/** @param {number} n niveau de 0 à 1 @returns {'Débutant'|'Intermédiaire'|'Avancé'|'Élite'} */
 export const palier = n => (n >= 0.8 ? 'Élite' : n >= 0.5 ? 'Avancé' : n >= 0.2 ? 'Intermédiaire' : 'Débutant');
 
 const STOPS = [
@@ -48,6 +49,7 @@ const STOPS = [
   [0.85, [147, 51, 234]],
   [1, [219, 39, 119]],
 ];
+/** Couleur d'un niveau (palette « Fluxe intense »). @param {number} n de 0 à 1 @returns {string} #rrggbb */
 export function couleur(n) {
   n = Math.max(0, Math.min(1, +n || 0));
   for (let i = 1; i < STOPS.length; i++) {
@@ -70,7 +72,14 @@ export function couleur(n) {
   return '#db2777';
 }
 
-/* sessions : séances terminées ; mu : muscles des exercices perso (S.mu) */
+/**
+ * Niveau de chaque muscle (moitié régularité, moitié force) et niveau global.
+ * @param {import('./donnees.js').Seance[]} sessions séances terminées
+ * @param {Object<string, string>} mu muscles des exercices perso (S.mu)
+ * @param {number} [now]
+ * @returns {{muscles: Object<string, {regularite: number, force: number, niveau: number, series: number, parSemaine: number,
+ *   exo: {nom: string, debut: number, actuel: number, gain: number}|null}>, global: number, palier: string}}
+ */
 export function progression(sessions, mu, now = Date.now()) {
   const ids = Object.keys(MUSCLES);
   const parSemaine = new Map(); /* n° de semaine (0 = cette semaine) → {muscle: séries} */

@@ -28,6 +28,12 @@ export const fmtN = n => String(Math.round(n * 100) / 100).replace('.', ',');
 /* Disques à mettre de chaque côté d'une barre (20 kg par défaut), du plus lourd au plus léger.
    null si la charge est sous le poids de la barre ; [] pour la barre seule. */
 const DISQUES = [25, 20, 15, 10, 5, 2.5, 1.25];
+/**
+ * Disques à mettre de chaque côté de la barre, du plus lourd au plus léger.
+ * @param {number|string} kg charge totale
+ * @param {number} [barre] poids de la barre
+ * @returns {number[]|null} null si la charge est sous le poids de la barre
+ */
 export function parCote(kg, barre = 20) {
   kg = +kg;
   if (!(kg >= barre)) return null;
