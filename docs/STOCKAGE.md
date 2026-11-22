@@ -16,6 +16,7 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 | `fx-no` | Tu as fermé le bandeau « Installer » : il ne revient plus | `js/installation.js` |
 | `fx-test` | Petit essai d'écriture au démarrage (vérifie que le téléphone accepte d'enregistrer), effacé aussitôt | `js/etat.js` |
 | `fluxe-suivi-nuage-v1` | Sauvegarde en ligne (v3.0) : compte connecté (identifiant et e-mail, **jamais le mot de passe**) et ce qui a déjà été envoyé. Absent si on n'a pas de compte. Jamais dans le fichier de sauvegarde | `js/nuage.js` |
+| `fluxe-suivi-clubs-v1` | Catalogue partagé (v3.8) : dernière liste des clubs et derniers avis lus pour les clubs reliés (pour voir les corrections hors ligne). Copie de données publiques, recréée à la prochaine lecture. Jamais dans le fichier de sauvegarde | `js/club-reseau.js` |
 | `fluxe-suivi-erreurs-v1` | Rapport d'erreurs (v3.2) : journal des erreurs de l'app (30 jours, 50 au plus), réglage « prévenir automatiquement » et nombre d'envois du jour. Jamais de séance dedans | `js/erreurs.js` |
 | `fx-old-done` | Les anciennes copies (`muscu-v1-sauvegarde`, `muscu-v1-brut`) ont déjà été rangées dans les versions de secours | `js/versions.js` |
 

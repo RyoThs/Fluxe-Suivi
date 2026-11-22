@@ -301,6 +301,14 @@ export async function signaler(doc) {
   }
 }
 
+/* ===== Catalogue partagé (v3.8) : écrire demande un compte connecté ET vérifié ===== */
+export async function partager(f) {
+  if (!E.uid) throw {code: 'fx/sans-compte'};
+  if (!E.verifie) throw {code: 'fx/non-verifie'};
+  await charger();
+  return f(api, E.uid);
+}
+
 /* ===== Quand synchroniser ===== */
 let minuteur = 0,
   dernierRegard = 0;

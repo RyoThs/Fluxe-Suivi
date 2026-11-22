@@ -1,0 +1,17 @@
+{
+  "app": "fluxe-suivi",
+  "format": 3,
+  "exportedAt": "2026-11-23T10:00:00.000Z",
+  "data": {
+    "sessions": [],
+    "routines": [],
+    "current": null,
+    "notes": {},
+    "rests": {},
+    "gyms": [
+      { "id": "g1", "name": "Basic-Fit Lyon Part-Dieu", "chain": "basic-fit", "eq": ["Développé couché", "Presse à cuisses inclinée"], "notes": {}, "club": "AbC123", "clubNom": "Basic-Fit Lyon Part-Dieu" }
+    ],
+    "gym": "g1",
+    "mu": { "Presse à cuisses inclinée": "Jambes" }
+  }
+}

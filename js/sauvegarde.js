@@ -123,6 +123,7 @@ export function merge(d) {
       if (!l.eq.some(x => norm(x) === norm(n))) l.eq.push(n);
     });
     for (const [k, v] of Object.entries(g.notes)) if (!l.notes[k]) l.notes[k] = v;
+    if (!l.club && g.club) Object.assign(l, {club: g.club, clubNom: g.clubNom});
   }
   if (!S.gym && d.gym && S.gyms.some(g => g.id === d.gym)) S.gym = d.gym;
   return r;

@@ -29,7 +29,7 @@ Plan détaillé fichier par fichier : `js/README.md`. Stockage : `docs/STOCKAGE.
   routines: [{id?, name, exercises: [nom], sets?: [[série prévue]]}],
   current: id de la séance en cours | null,
   notes, rests: {"k:<exercice>": texte | secondes},
-  gyms: [{id, name, eq: [machines], notes, chain?}], gym?,
+  gyms: [{id, name, eq: [machines], notes, chain?, club?, clubNom?}], gym?,   // club : v3.8
   mu: {<exercice perso>: <groupe>},            // v3.3
   corps: [{t, kg?, mg?, taille?, poitrine?, bras?, cuisse?, hanches?}],   // v3.6
   rv: [ids des récompenses notées], rvInit?,   // v3.6
@@ -43,6 +43,7 @@ Règles : la clé `muscu-v1` ne change **jamais** ; un nouveau champ est **facul
 - **Aucune injection de code** : tout texte de l'utilisateur est échappé (`esc()`). Le test `tests/25-securite.test.js` glisse un piège dans tous les champs et ouvre tous les écrans ; il a été vérifié qu'il échoue si un `esc()` est retiré.
 - **Données entrantes nettoyées** par `clean()` (types, longueurs, bornes), y compris celles du serveur.
 - **Firestore** (`firestore.rules`) : chacun ne lit et n'écrit que ses propres données ; tailles limitées ; tout le reste est refusé. Le rapport d'erreurs est en écriture seule.
+- **Catalogue partagé (v3.8)** : `clubs/{id}` et `clubs/{id}/avis/{idAvis}` sont lisibles par tous (listes de machines, aucune donnée personnelle hormis l'identifiant anonyme du compte) ; écriture seulement avec une adresse vérifiée, un avis par machine et par compte (l'identifiant de l'avis contient le compte). Un club ne se modifie pas depuis l'app : modération dans la console Firebase. Tout tient dans le forfait gratuit Spark (pas de stockage de fichiers).
 - **Clé Firebase** (`js/nuage-config.js`) : publique par nature, **restreinte aux adresses du site** dans la console Google Cloud.
 - **Authentification** : e-mail + mot de passe (8 caractères minimum), vérification d'adresse, mot de passe oublié. Aucun lien de connexion par e-mail ni OAuth Cordova : l'arrêt de Firebase Dynamic Links ne concerne pas l'app.
 - Limite connue : GitHub Pages ne permet pas d'envoyer l'en-tête `frame-ancestors` (anti-« clickjacking ») ; à ajouter chez un hébergeur qui le permet, ou automatiquement dans une app native.

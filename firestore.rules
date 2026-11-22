@@ -26,6 +26,34 @@ service cloud.firestore {
         && request.resource.data.n is int && request.resource.data.quand is number;
       allow read, update, delete: if false;
     }
+    // Catalogue partagé par club (v3.8) : tout le monde peut LIRE les clubs et les avis (ce sont des listes de machines).
+    // ÉCRIRE demande un compte à l'adresse vérifiée ; un avis ne peut être écrit que par son auteur
+    // (son identifiant finit par le compte de l'auteur : un avis par machine et par personne).
+    // Un club ne se modifie ni ne se supprime depuis l'app (le propriétaire du projet le fait dans la console).
+    match /clubs/{club} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly(['n', 'e', 'v', 'u', 't'])
+        && request.resource.data.u == request.auth.uid
+        && request.resource.data.n is string && request.resource.data.n.size() > 0 && request.resource.data.n.size() <= 60
+        && request.resource.data.e is string && request.resource.data.e.size() <= 20
+        && request.resource.data.v is string && request.resource.data.v.size() <= 40
+        && request.resource.data.t is number;
+      allow update, delete: if false;
+      match /avis/{id} {
+        allow read: if true;
+        allow create, update: if request.auth != null && request.auth.token.email_verified == true
+          && id.matches('^[a-z0-9]{1,12}_' + request.auth.uid + '$')
+          && request.resource.data.keys().hasOnly(['m', 'k', 'u', 't', 'g', 'b'])
+          && request.resource.data.u == request.auth.uid
+          && request.resource.data.m is string && request.resource.data.m.size() > 0 && request.resource.data.m.size() <= 60
+          && request.resource.data.k in ['absent', 'present', 'marque', 'nom', 'ajout']
+          && request.resource.data.t is number
+          && (!('g' in request.resource.data) || (request.resource.data.g is string && request.resource.data.g.size() <= 20))
+          && (!('b' in request.resource.data) || (request.resource.data.b is string && request.resource.data.b.size() <= 30));
+        allow delete: if request.auth != null && id.matches('^[a-z0-9]{1,12}_' + request.auth.uid + '$');
+      }
+    }
     // tout le reste est interdit
     match /{autre=**} {
       allow read, write: if false;

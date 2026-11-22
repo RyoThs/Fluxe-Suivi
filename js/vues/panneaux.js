@@ -12,6 +12,7 @@ import {fillData, viewData} from './ecran-sauvegarde.js';
 import {panneauSerie} from './serie.js';
 import {formulaireCorps, toutesMesures} from './corps.js';
 import {groupeDe} from '../muscles.js';
+import {panneauAjout, panneauClub, panneauSignaler} from './club.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o) {
   if (!pk) history.pushState({fx: 1}, '');
@@ -52,6 +53,21 @@ export function sheet() {
   el.className = 'on';
   const top = t =>
     `<div class="sh-top"><span>${t}</span><button class="del" data-act="closepk" style="color:var(--accent);font-family:var(--body);font-size:16px">Fermer</button></div>`;
+  /* catalogue partagé (v3.8) */
+  if (pk.club) {
+    el.innerHTML = top('Mon club') + panneauClub();
+    return;
+  }
+  if (pk.sig) {
+    el.innerHTML = top('Signaler') + panneauSignaler();
+    return;
+  }
+  if (pk.ajm) {
+    el.innerHTML = top('Ajouter une machine') + panneauAjout();
+    const f = el.querySelector('#am-n');
+    if (f) f.focus();
+    return;
+  }
   if (pk.serie) {
     el.innerHTML = top('Semaines d’affilée') + panneauSerie();
     return;
