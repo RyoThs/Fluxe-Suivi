@@ -11,7 +11,7 @@ import {RECOMPENSES} from './recompenses.js';
  * @typedef {{id: string, date: number, dur?: number, mod?: number, rt?: string, g?: string, gn?: string,
  *   edit?: true, exercises: Exercice[]}} Seance  date et mod en millisecondes ; rt = routine de départ ; g/gn = salle
  * @typedef {{id?: string, name: string, exercises: string[], sets?: Array<Array<Object>>}} Routine
- * @typedef {{id: string, name: string, eq: string[], notes: Object<string, string>, chain?: string}} Salle
+ * @typedef {{id: string, name: string, eq: string[], notes: Object<string, string>, chain?: string, club?: string, clubNom?: string}} Salle
  * @typedef {{t: number, kg?: number, mg?: number, taille?: number, poitrine?: number, bras?: number,
  *   cuisse?: number, hanches?: number}} Mesure  une pesée et/ou des mensurations (cm), à la date t
  * @typedef {{sessions: Seance[], routines: Routine[], current: string|null, notes: Object<string, string>,
@@ -230,7 +230,13 @@ export function clean(d) {
           if (/^k:.{1,60}$/.test(k) && t) notes[k] = t;
         }
       const ch = typeof g.chain === 'string' && /^[a-z-]{1,20}$/.test(g.chain) ? g.chain : '';
-      o.gyms.push(ch ? {id, name, eq, notes, chain: ch} : {id, name, eq, notes});
+      const x = ch ? {id, name, eq, notes, chain: ch} : {id, name, eq, notes};
+      /* v3.8 : club partagé (catalogue corrigé par les membres) */
+      if (typeof g.club === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(g.club)) {
+        x.club = g.club;
+        x.clubNom = str(g.clubNom, 60) || name;
+      }
+      o.gyms.push(x);
     }
   if (typeof d.gym === 'string' && o.gyms.some(g => g.id === d.gym)) o.gym = d.gym;
   return o;

@@ -387,3 +387,23 @@ nav{box-shadow:var(--shadow)}
 @keyframes fxSheet{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){#app.entree,#sheet.on{animation:none}.gl-c,#annuler{transition:none}}
 .gl-act .pic{color:#fff}
+/* v3.8 : catalogue partagé par club (encart, bouton « … », badge « vérifiée », panneaux) */
+.cband{display:flex;gap:12px;align-items:flex-start;background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 6px 18px -10px rgba(30,41,80,.25)}
+.cband .ic{flex:none;width:36px;height:36px;border-radius:10px;background:#eef2ff;color:var(--accent);display:grid;place-items:center}
+.cband b{display:block;font-size:15px;margin-bottom:2px}.cband span{font-size:13px;color:var(--muted);line-height:1.35}
+.cband .bt{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.cb-p,.cb-s{border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.cb-p{background:var(--accent);color:#fff}.cb-s{background:#f1f4fa;color:var(--ink)}
+.csig{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:#f4f6fb;color:var(--muted);display:grid;place-items:center;margin-left:6px}
+.verif{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:#0f766e;background:#e6faf6;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.clien{margin-top:4px}.clien .pic{vertical-align:-3px;margin-right:2px}
+.cpan{padding:4px 4px 20px}.cpan h3{margin:0 0 4px;font-size:18px}.cpan .sb{color:var(--muted);font-size:13px;margin:0 0 14px}
+.cpan h2{margin:20px 0 6px}
+.copt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px;border:1px solid var(--line);border-radius:14px;margin-bottom:9px;font-size:15px;background:var(--raise);color:var(--ink)}
+.copt span{margin-left:auto;color:var(--muted);font-size:13px}
+.copt.on{border-color:var(--accent);background:#f5f7ff}
+.copt.radio i{width:20px;height:20px;border-radius:50%;border:2px solid #c5cddd;flex:none;box-sizing:border-box}.copt.radio.on i{border:6px solid var(--accent)}
+.cf{display:block;font-size:13px;color:var(--muted);margin:10px 4px 0}
+.crow{display:flex;gap:8px}.crow>*{flex:1;min-width:0}
+.cnote{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);background:#f6f8fc;border-radius:12px;padding:10px;margin:14px 0}
+.cnote svg{flex:none;margin-top:1px}

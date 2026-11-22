@@ -12,6 +12,8 @@ import {esc, norm} from '../outils.js';
 import {catCur, catName, chainOf, gymCur, inGym, vis} from '../salle.js';
 import {thumb} from '../icones.js';
 import {ico} from '../pictos.js';
+import {badgeVerifiee, bilanSalle, boutonSignaler, encartClub} from './club.js';
+import {rafraichir} from '../club-reseau.js';
 
 export let gq = '',
   gm = 'Tous',
@@ -37,14 +39,25 @@ export function ensCards(actuelle) {
 <p class="note">Listes probables, d’après ce que chaque enseigne annonce. Toutes les machines sont cochées au départ : décoche celles que ton club n’a pas.</p>`;
 }
 
-/* Une ligne : dessin, nom, muscle, étiquette de marque, et (avec une salle) le bouton ✓ / + */
+/* Une ligne : dessin, nom, muscle, étiquette de marque, et (avec une salle) le bouton ✓ / + ;
+   salle reliée à un club (v3.8) : badge « vérifiée » et bouton « … » pour signaler */
+let club = null; /* bilan du club de la salle active, calculé à chaque liste */
 function row([n, m, tg]) {
   const g = gymCur(),
     on = g && inGym(n);
   const btn = g
     ? `<button class="tg${on ? ' on' : ''}" data-act="gtog" data-n="${esc(n)}" aria-pressed="${!!on}" aria-label="${on ? 'Retirer de' : 'Ajouter à'} ${esc(g.name)} : ${esc(n)}">${on ? '✓' : '+'}</button>`
     : '';
-  return `<div class="gi${on ? ' in' : ''}">${thumb(n, 'lg')}<div class="pt"><b>${esc(n)}</b><span>${esc(m)}${tg ? ` <em class="mk">${esc(tg)}</em>` : ''}</span></div>${btn}</div>`;
+  const verif = club && club.verifiees.has(norm(n)) ? badgeVerifiee() : '';
+  return `<div class="gi${on ? ' in' : ''}">${thumb(n, 'lg')}<div class="pt"><b>${esc(n)}${verif}</b><span>${esc(m)}${tg ? ` <em class="mk">${esc(tg)}</em>` : ''}</span></div>${btn}${g ? boutonSignaler(n) : ''}</div>`;
+}
+
+/* ligne d'une machine hors bibliothèque : ajoutée par moi (muscle dans S.mu) ou par le club */
+function ligne(n) {
+  if (L[n]) return L[n];
+  const a = club && club.ajoutees.find(x => norm(x.nom) === norm(n)),
+    m = (S.mu && S.mu[n]) || (a && a.muscle);
+  return m && M.includes(m) ? [n, m, (a && a.marque) || ''] : null;
 }
 
 /* Liste rangée par muscle (titres « Pectoraux 19 », « Dos 24 »…) ; si un muscle est choisi, une seule liste */
@@ -59,8 +72,13 @@ function parMuscle(l) {
 export function glist() {
   const g = gymCur(),
     q = norm(gq);
-  const noms = !g ? LIB.map(x => x[0]) : gv === 'salle' ? g.eq : catCur();
-  const l = noms.map(n => L[n]).filter(r => r && vis(r[0]) && norm(r[0]).includes(q) && (gm === 'Tous' || r[1] === gm));
+  club = g && g.club ? bilanSalle() : null;
+  let noms = !g ? LIB.map(x => x[0]) : gv === 'salle' ? g.eq : catCur();
+  if (club && gv !== 'salle') {
+    noms = noms.filter(n => !club.retirees.has(norm(n)));
+    for (const a of club.ajoutees) if (!noms.some(n => norm(n) === norm(a.nom))) noms.push(a.nom);
+  }
+  const l = noms.map(ligne).filter(r => r && vis(r[0]) && norm(r[0]).includes(q) && (gm === 'Tous' || r[1] === gm));
   if (l.length) return parMuscle(l);
   if (g && gv === 'salle' && !g.eq.length)
     return '<p class="empty">Aucune machine cochée. Va dans le catalogue et touche + sur les machines de ta salle.</p>';
@@ -77,9 +95,12 @@ export function gymCard() {
     S.gyms.length > 1
       ? `<div class="chips">${S.gyms.map(x => `<button class="chip${x.id === S.gym ? ' on' : ''}" data-act="gsel" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}</div>`
       : '';
+  const lien = g.club
+    ? `<div class="mu clien">${ico('valide')}Club partagé : <b>${esc(g.clubNom || g.name)}</b>${(b => (b && b.membres ? ' · ' + pluriel(b.membres, 'membre') + ' ont aidé' : ''))(bilanSalle())}</div>`
+    : '';
   return `<div class="card gym"><div class="hist-date">${ico(ch && ch.id === 'on-air' ? 'etoile' : 'salle')}${esc(g.name)}</div>
-<div class="mu">${ch && ch.name !== g.name ? esc(ch.name) + ' · ' : ''}${pluriel(nb, 'machine')} cochée${nb > 1 ? 's' : ''} dans ta salle</div>${autres}
-<div class="lk"><button class="del" style="color:var(--accent)" data-act="gchg" aria-label="Changer d’enseigne">Changer</button><button class="del" style="color:var(--accent)" data-act="gren">Renommer</button><button class="del" style="color:var(--accent)" data-act="gnew">+ Salle</button><button class="del" data-act="gdel">Supprimer</button></div></div>`;
+<div class="mu">${ch && ch.name !== g.name ? esc(ch.name) + ' · ' : ''}${pluriel(nb, 'machine')} cochée${nb > 1 ? 's' : ''} dans ta salle</div>${lien}${autres}
+<div class="lk"><button class="del" style="color:var(--accent)" data-act="clien">${g.club ? 'Club' : 'Relier à mon club'}</button><button class="del" style="color:var(--accent)" data-act="gchg" aria-label="Changer d’enseigne">Changer</button><button class="del" style="color:var(--accent)" data-act="gren">Renommer</button><button class="del" style="color:var(--accent)" data-act="gnew">+ Salle</button><button class="del" data-act="gdel">Supprimer</button></div></div>`;
 }
 
 /* Interrupteur « Catalogue <enseigne> · n | Ma salle · n » (mis à jour à chaque coche) */
@@ -105,5 +126,13 @@ export function viewGuide() {
   if (!g)
     return `<h1>Ton enseigne</h1><p class="sub">Choisis ta salle de sport : tu verras uniquement ses machines.</p>${ensCards()}
 <h2>Toutes les machines</h2>${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
-  return `<h1>Guide</h1>${gymCard()}${segGuide()}${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
+  /* salle reliée : relire les avis du club (au plus une fois par minute), puis redessiner la liste */
+  if (g.club)
+    rafraichir(g.club, () => {
+      const el = document.getElementById('gl'),
+        c = document.querySelector('.card.gym');
+      if (el) el.innerHTML = glist();
+      if (c) c.outerHTML = gymCard();
+    });
+  return `<h1>Guide</h1>${gymCard()}${encartClub()}${segGuide()}${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
 }

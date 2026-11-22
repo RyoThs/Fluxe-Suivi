@@ -1,7 +1,7 @@
 /* Fluxe Suivi — Réactions aux gestes : saisie au clavier et boutons (data-act).
    Ce fichier ne fait que l'aiguillage. Le travail de chaque bouton est rangé par thème dans js/gestes/ :
    seance.js (séance en cours), routines.js, repos.js (chrono), donnees.js (sauvegarde, corbeille),
-   salle.js (Ma salle), ecrans.js (filtres et panneaux), nuage.js (Sauvegarde en ligne).
+   salle.js (Ma salle), club.js (catalogue partagé), ecrans.js (filtres et panneaux), nuage.js (Sauvegarde en ligne).
    Un geste qui renvoie true demande à l'app d'enregistrer puis de redessiner l'écran. */
 import {S, cur, pk, save, setTab, toast} from './etat.js';
 import {$, K, cname} from './outils.js';
@@ -21,6 +21,7 @@ import {gestes as salle} from './gestes/salle.js';
 import {gestes as ecrans} from './gestes/ecrans.js';
 import {gestes as nuage} from './gestes/nuage.js';
 import {gestes as corps} from './gestes/corps.js';
+import {gestes as club} from './gestes/club.js';
 import './glisser.js'; /* glisser vers la gauche */
 import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
@@ -34,7 +35,8 @@ const GESTES = Object.assign(
   salle,
   ecrans,
   nuage,
-  corps
+  corps,
+  club
 );
 export const nomsGestes = () => Object.keys(GESTES);
 $('#fi').addEventListener('change', ev => {
