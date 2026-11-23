@@ -292,3 +292,74 @@ test('règles de la base : clubs et avis lisibles par tous ; écriture seulement
   assert.match(avis, /hasOnly\(\['m', 'k', 'u', 't', 'g', 'b'\]\)/);
   assert.match(avis, /\['absent', 'present', 'marque', 'nom', 'ajout'\]/);
 });
+
+/* ----- v3.8.1 : chercher son club avant d'en créer un (évite les doublons) ----- */
+const CLUBS = [
+  { id: 'c1', n: 'Basic-Fit Lyon Part-Dieu', e: 'basic-fit', v: 'Lyon' },
+  { id: 'c2', n: 'Basic-Fit Lyon Confluence', e: 'basic-fit', v: 'Lyon' },
+  { id: 'c3', n: 'Basic-Fit Paris Bastille', e: 'basic-fit', v: 'Paris' },
+  { id: 'c4', n: 'Basic-Fit Saint-Étienne Centre', e: 'basic-fit', v: 'Saint-Étienne' },
+];
+test('chercher un club : par nom ou par ville, sans tenir compte des accents ni des majuscules', () => {
+  const ids = q => C.chercherClubs(CLUBS, q).map(c => c.id);
+  assert.deepEqual(ids(''), ['c1', 'c2', 'c3', 'c4'], 'recherche vide : tous les clubs');
+  assert.deepEqual(ids('lyon'), ['c1', 'c2']);
+  assert.deepEqual(ids('BASTILLE'), ['c3']);
+  assert.deepEqual(ids('etienne'), ['c4'], 'sans accent');
+  assert.deepEqual(ids('lyon conf'), ['c2'], 'tous les mots doivent correspondre');
+  assert.deepEqual(ids('Vaulx'), []);
+  assert.deepEqual(C.chercherClubs(null, 'lyon'), [], 'liste absente : rien, sans erreur');
+});
+test('chercher un club : les mots trouvés sont surlignés, le reste reste du texte sûr', () => {
+  assert.equal(C.surligner('Basic-Fit Lyon Part-Dieu', 'lyon'), 'Basic-Fit <mark>Lyon</mark> Part-Dieu');
+  assert.equal(C.surligner('Saint-Étienne', 'etienne'), 'Saint-<mark>Étienne</mark>');
+  assert.equal(C.surligner('Club <b>', ''), 'Club &lt;b&gt;');
+  assert.equal(C.surligner('<img src=x> lyon', 'lyon'), '&lt;img src=x&gt; <mark>lyon</mark>');
+});
+
+const SRV_CLUBS = { clubs: Object.fromEntries(CLUBS.map(({ id, ...c }) => [id, c])) };
+test('« Mon club » : la recherche filtre la liste pendant la frappe et surligne ce qui est trouvé', async () => {
+  const p = await ouvrir(SALLE(), SRV_CLUBS);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.equal(await p.locator('#sheet [data-act=cchoix]').count(), 4);
+  await p.fill('#cq', 'lyon');
+  assert.equal(await p.locator('#sheet [data-act=cchoix]').count(), 2);
+  assert.match(await p.textContent('#clist'), /2 clubs trouvés/);
+  assert.equal(await p.locator('#clist mark').first().textContent(), 'Lyon');
+  await p.click('#sheet [data-act=cchoix][data-id=c2]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].club, 'c2');
+  assert.deepEqual(p.erreurs, []);
+});
+test('« Mon club » : s’il existe des clubs, « Créer le mien » est un petit lien ; le formulaire s’ouvre en le touchant', async () => {
+  const p = await ouvrir(SALLE(), SRV_CLUBS);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.equal(await p.locator('#cl-n').count(), 0, 'pas de formulaire au départ');
+  assert.ok(await p.locator('#sheet [data-act=ccreer]').isVisible());
+  await p.fill('#cq', 'Vaulx');
+  assert.match(await p.textContent('#clist'), /Aucun club ne correspond à « Vaulx »/);
+  await p.click('#sheet [data-act=ccreer]');
+  await p.waitForSelector('#cl-n');
+  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', 'reprend ce qui a été cherché');
+  await p.fill('#cq', 'Paris');
+  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', 'chercher encore n’efface pas le formulaire');
+  assert.deepEqual(p.erreurs, []);
+});
+test('« Mon club » : aucun club dans l’enseigne → le formulaire est ouvert directement', async () => {
+  const p = await ouvrir(SALLE());
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#cl-n');
+  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Lyon Part-Dieu');
+  assert.equal(await p.locator('#sheet [data-act=ccreer]').count(), 0);
+});
+test('« Mon club » hors ligne : message clair et création toujours possible', async () => {
+  const p = await ouvrir(SALLE());
+  await p.evaluate(() => { localStorage.removeItem('fluxe-suivi-clubs-v1'); window.__horsLigne = true; });
+  await p.click('[data-act=clien]');
+  await p.waitForTimeout(400);
+  assert.doesNotMatch(await p.textContent('#clist'), /Chargement/);
+  assert.ok(await p.locator('#sheet [data-act=ccreer], #cl-n').count());
+  assert.deepEqual(p.erreurs, []);
+});

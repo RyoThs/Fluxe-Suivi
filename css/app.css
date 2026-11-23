@@ -407,3 +407,12 @@ nav{box-shadow:var(--shadow)}
 .crow{display:flex;gap:8px}.crow>*{flex:1;min-width:0}
 .cnote{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);background:#f6f8fc;border-radius:12px;padding:10px;margin:14px 0}
 .cnote svg{flex:none;margin-top:1px}
+/* v3.8.1 : chercher son club, « Créer le mien » en petit */
+.crech{position:relative;margin:0 0 12px}.crech svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+#cq{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:14px 18px 14px 44px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.ctit{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 4px 8px}
+.copt mark{background:#fff3c4;color:inherit;border-radius:3px;padding:0 1px}
+.cvide{text-align:center;color:var(--muted);font-size:14px;margin:18px 8px 6px;line-height:1.45}
+.clienc{display:flex;justify-content:center;align-items:center;gap:5px;margin:14px auto 0;background:none;border:0;color:var(--accent);font:600 13px var(--body);padding:10px;min-height:44px}
+.clienc span{color:var(--muted);font-weight:400}
+.cform{border-top:1px solid var(--line);margin-top:14px}.cform h2{font-size:16px;margin:16px 0 0}

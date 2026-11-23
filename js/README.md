@@ -19,7 +19,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `recompenses.js` | Semaines d’affilée (lundi → dimanche) et 24 récompenses calculées sur l’historique |
 | `muscles.js` | Muscles travaillés par chaque exercice (principaux = 1 série, secondaires = ½), groupe des exercices perso |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
-| `club.js` | Catalogue partagé par club (v3.8) : calculs purs (ce que le club décide, nettoyage des données du serveur) |
+| `club.js` | Catalogue partagé par club (v3.8) : calculs purs (ce que le club décide, recherche d’un club, nettoyage des données du serveur) |
 | `club-reseau.js` | Catalogue partagé : lecture publique des clubs et avis, écriture avec un compte vérifié, copie hors ligne |
 | `courbe.js` | Courbe de progression (Stats) : charge max, 1RM estimé, volume ; dessin SVG fait main |
 | `nuage.js`, `nuage-config.js`, `nuage-fusion.js`, `nuage-messages.js` | Sauvegarde en ligne (facultative) : compte, envoi et réception des séances, sans réseau compris. Le pont Firebase est dans `../lib/` et n'est chargé que si un compte est utilisé |
