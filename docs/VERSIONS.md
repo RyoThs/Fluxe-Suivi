@@ -6,7 +6,8 @@ Le retour se fait à partir de la branche `sauvegarde-v…`. Tes séances ne son
 
 | Version | Date | Ce qui a changé | Copie gardée |
 |---|---|---|---|
-| **3.11.0** | 2026-11-23 | **Les 379 clubs Fitness Park de France sont dans l’app**, dont 18 dans les DOM-TOM (Guadeloupe, Martinique, Guyane, La Réunion) : dans « Mon club », on cherche sa salle (ville, code postal, territoire) et on la relie | (version actuelle) |
+| **3.12.0** | 2026-11-23 | **Les 389 clubs L’Orange Bleue de France sont dans l’app**, dont Mamoudzou (Mayotte) et la Corse : dans « Mon club », on cherche sa salle et on la relie | (version actuelle) |
+| 3.11.0 | 2026-11-23 | **Les 379 clubs Fitness Park de France sont dans l’app**, dont 18 dans les DOM-TOM (Guadeloupe, Martinique, Guyane, La Réunion) : dans « Mon club », on cherche sa salle (ville, code postal, territoire) et on la relie | `sauvegarde-v3.11.0` |
 | 3.10.0 | 2026-11-23 | **Les 903 clubs Basic-Fit de France sont dans l’app** : dans « Mon club », on cherche sa salle par ville, rue ou code postal et on la relie, sans rien créer. Les listes sont rangées une par enseigne (`js/clubs/`) | `sauvegarde-v3.10.0` |
 | 3.9.0 | 2026-11-23 | **Les 137 clubs On Air de France sont dans l’app** (DOM-TOM compris : Martinique, Guadeloupe, La Réunion) : dans « Mon club », on cherche sa salle par nom, ville, code postal ou territoire et on la relie, sans rien créer ; étiquette « bientôt » sur les 16 clubs en pré-ouverture ; marche hors ligne. Les autres enseignes suivront | `sauvegarde-v3.9.0` |
 | 3.8.1 | 2026-11-23 | **Chercher son club** : dans « Mon club », une recherche (nom ou ville, sans tenir compte des accents) et les clubs existants en premier, mots trouvés surlignés ; « Créer le mien » devient un petit lien en bas (formulaire ouvert directement seulement si l’enseigne n’a encore aucun club), pour éviter les clubs en double | `sauvegarde-v3.8.1` |
