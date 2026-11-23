@@ -32,7 +32,7 @@ test('On Air : les 137 clubs de France sont connus, chacun avec un identifiant f
     assert.ok(c.v, c.n + ' : ville');
     assert.ok(C.nettoyerClub(c), c.n + ' : passe le contrôle des clubs');
   }
-  assert.deepEqual(K.clubsConnus('basic-fit'), [], 'les autres enseignes viendront ensuite');
+  assert.deepEqual(K.clubsConnus('autre'), [], 'une salle sans enseigne n’a pas de liste connue');
   assert.deepEqual(K.clubsConnus('inconnue'), []);
 });
 
@@ -108,5 +108,48 @@ test('« Mon club » On Air : un club créé par un membre s’ajoute à la list
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=cchoix]');
   assert.match(await p.textContent('#clist'), /Clubs On Air · 137/);
+  assert.deepEqual(p.erreurs, []);
+});
+
+/* ----- v3.10.0 : Basic-Fit (903 clubs, liste lue sur le site officiel le 2026-11-23) ----- */
+test('Basic-Fit : les 903 clubs de France sont connus, identifiants fixes et valides, sans doublon avec On Air', () => {
+  const l = K.clubsConnus('basic-fit');
+  assert.equal(l.length, 903);
+  assert.equal(new Set(l.map(c => c.id)).size, 903);
+  for (const c of l) {
+    assert.match(c.id, /^bf-[a-z0-9-]+$/);
+    assert.ok(c.id.length <= 40, c.id);
+    assert.equal(c.e, 'basic-fit');
+    assert.match(c.n, /^Basic-Fit /);
+    assert.match(c.cp, /^\d{5}$/, c.n);
+    assert.ok(C.nettoyerClub(c), c.n);
+  }
+  const tous = [...l, ...K.clubsConnus('on-air')].map(c => c.id);
+  assert.equal(new Set(tous).size, tous.length, 'aucun identifiant partagé entre enseignes');
+});
+test('Basic-Fit : on trouve un club par ville, par rue ou par code postal', () => {
+  const l = K.clubsConnus('basic-fit');
+  const noms = q => C.chercherClubs(l, q).map(c => c.n);
+  assert.deepEqual(noms('albi 81'), ['Basic-Fit Albi Francisco Goya', 'Basic-Fit Albi Les Portes d\'Albi', 'Basic-Fit Albi Route de la Drèche']);
+  assert.deepEqual(noms('dreche'), ['Basic-Fit Albi Route de la Drèche'], 'par la rue, sans accent');
+  assert.ok(noms('80200').some(n => /Péronne/.test(n)), 'Péronne (rue de Lisbonne) est bien là');
+});
+test('« Mon club » Basic-Fit : les clubs sont proposés et on relie sa salle sans rien créer', async () => {
+  const p = await A.page();
+  await p.context().addInitScript(installer);
+  await p.evaluate(() => localStorage.setItem('__serveur', JSON.stringify({ comptes: {}, data: {}, t: 1000, user: null, clubs: {}, avis: {} })));
+  await donner(p, { ...VIDE, gyms: [{ id: 'g1', name: 'Basic-Fit', chain: 'basic-fit', eq: CAT.catOf(CAT.CHAINS.find(c => c.id === 'basic-fit')), notes: {} }], gym: 'g1' });
+  await p.click('nav [data-tab=aide]');
+  await p.waitForTimeout(250);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.match(await p.textContent('#clist'), /Clubs Basic-Fit · 903/);
+  await p.fill('#cq', 'Vaulx');
+  await p.click('#sheet [data-act=ccreer]');
+  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', '« Créer le mien » reprend la recherche avec la marque');
+  await p.fill('#cq', 'dreche');
+  await p.click('#sheet [data-act=cchoix]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].clubNom, 'Basic-Fit Albi Route de la Drèche');
   assert.deepEqual(p.erreurs, []);
 });

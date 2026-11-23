@@ -62,14 +62,14 @@ export function listeClubs() {
   if (l === null) return '<p class="empty">Chargement des clubs…</p>';
   if (!l.length) {
     const reseau = navigator.onLine ? '' : ' (pas de réseau : la liste n’a pas pu être mise à jour)';
-    return `<p class="cvide">Aucun club ${esc(ch ? ch.name : '')} pour l’instant${reseau} : crée le tien ci-dessous.</p>`;
+    return `<p class="cvide">Aucun club ${ch ? esc(ch.name) + ' ' : ''}pour l’instant${reseau} : crée le tien ci-dessous.</p>`;
   }
   const r = chercherClubs(l, q);
   if (!r.length)
     return `<p class="cvide">Aucun club ne correspond à « ${esc(q.trim())} ».<br>Vérifie l’orthographe ou cherche par ville.</p>`;
   const titre = q.trim()
     ? pluriel(r.length, 'club') + ' trouvé' + (r.length > 1 ? 's' : '')
-    : `Clubs ${esc(ch ? ch.name : '')} · ${l.length}`;
+    : `Clubs ${ch ? esc(ch.name) + ' ' : ''}· ${l.length}`;
   return (
     `<div class="ctit">${titre}</div>` +
     r

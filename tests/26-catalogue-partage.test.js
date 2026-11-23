@@ -120,6 +120,8 @@ let CAT;
 test.before(async () => { CAT = await import(url('catalogue.js')); });
 const BF = () => CAT.catOf(CAT.CHAINS.find(c => c.id === 'basic-fit'));
 const SALLE = (extra = {}) => ({ ...VIDE, gyms: [{ id: 'g1', name: 'Basic-Fit Lyon Part-Dieu', chain: 'basic-fit', eq: BF(), notes: {}, ...extra }], gym: 'g1' });
+/* salle sans enseigne : ses clubs sont seulement ceux créés par les membres (aucune liste connue d'avance, v3.10) */
+const SALLE_LIBRE = () => ({ ...VIDE, gyms: [{ id: 'g1', name: 'Basic-Fit Lyon Part-Dieu', eq: BF(), notes: {} }], gym: 'g1' });
 const COMPTE = { uid: 'u1', email: 'yo@test.fr', verifie: true, envoye: {}, metaMod: 0, metaEnvoye: 0, metaHash: '', dernier: 0, dernierT: 0 };
 /* ouvre l'app avec le faux serveur ; compte = 'verifie' | 'non-verifie' | null */
 async function ouvrir(donneesApp, srv = {}, compte = null) {
@@ -139,11 +141,12 @@ async function ouvrir(donneesApp, srv = {}, compte = null) {
 const avisDe = (m, k, u, extra = {}) => ({ m, k, u, t: 5, ...extra });
 
 test('salle pas encore reliée : bouton « Relier à mon club », liste des clubs de son enseigne, choix enregistré', async () => {
-  const p = await ouvrir(SALLE(), { clubs: { c1: { n: 'Basic-Fit Lyon Part-Dieu', e: 'basic-fit', v: 'Lyon' }, c2: { n: 'Basic-Fit Paris Bastille', e: 'basic-fit', v: 'Paris' }, c3: { n: 'Fitness Park Lyon', e: 'fitness-park', v: 'Lyon' } } });
+  const p = await ouvrir(SALLE_LIBRE(), { clubs: { c1: { n: 'Basic-Fit Lyon Part-Dieu', e: 'autre', v: 'Lyon' }, c2: { n: 'Basic-Fit Paris Bastille', e: 'autre', v: 'Paris' }, c3: { n: 'Fitness Park Lyon', e: 'fitness-park', v: 'Lyon' } } });
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=cchoix]');
   const noms = await p.$$eval('#sheet [data-act=cchoix]', l => l.map(b => b.textContent));
-  assert.equal(noms.length, 2, 'seulement les clubs Basic-Fit');
+  assert.equal(noms.length, 2, 'seulement les clubs sans enseigne');
+  assert.match(await p.textContent('#clist'), /Clubs · 2/);
   assert.match(noms[0], /Lyon Part-Dieu/);
   await p.click('#sheet [data-act=cchoix][data-id=c1]');
   await p.waitForTimeout(200);
@@ -155,7 +158,7 @@ test('salle pas encore reliée : bouton « Relier à mon club », liste des club
 });
 
 test('créer son club : demande un compte vérifié ; avec compte, le club est créé et relié', async () => {
-  let p = await ouvrir(SALLE());
+  let p = await ouvrir(SALLE_LIBRE());
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=ccree]');
   await p.click('#sheet [data-act=ccree]');
@@ -163,7 +166,7 @@ test('créer son club : demande un compte vérifié ; avec compte, le club est c
   assert.match((await p.vus()).join(' '), /compte/i);
   assert.equal((await donnees(p)).gyms[0].club, undefined);
 
-  p = await ouvrir(SALLE(), {}, 'verifie');
+  p = await ouvrir(SALLE_LIBRE(), {}, 'verifie');
   await p.click('[data-act=clien]');
   await p.waitForSelector('#cl-n');
   await p.fill('#cl-n', 'Basic-Fit Lyon Part-Dieu');
@@ -171,7 +174,7 @@ test('créer son club : demande un compte vérifié ; avec compte, le club est c
   await p.click('#sheet [data-act=ccree]');
   await p.waitForTimeout(400);
   const s = await serveur(p);
-  assert.deepEqual(Object.values(s.clubs), [{ n: 'Basic-Fit Lyon Part-Dieu', e: 'basic-fit', v: 'Lyon', u: 'u1' }]);
+  assert.deepEqual(Object.values(s.clubs), [{ n: 'Basic-Fit Lyon Part-Dieu', e: 'autre', v: 'Lyon', u: 'u1' }]);
   assert.equal((await donnees(p)).gyms[0].club, Object.keys(s.clubs)[0]);
 });
 
@@ -295,10 +298,10 @@ test('règles de la base : clubs et avis lisibles par tous ; écriture seulement
 
 /* ----- v3.8.1 : chercher son club avant d'en créer un (évite les doublons) ----- */
 const CLUBS = [
-  { id: 'c1', n: 'Basic-Fit Lyon Part-Dieu', e: 'basic-fit', v: 'Lyon' },
-  { id: 'c2', n: 'Basic-Fit Lyon Confluence', e: 'basic-fit', v: 'Lyon' },
-  { id: 'c3', n: 'Basic-Fit Paris Bastille', e: 'basic-fit', v: 'Paris' },
-  { id: 'c4', n: 'Basic-Fit Saint-Étienne Centre', e: 'basic-fit', v: 'Saint-Étienne' },
+  { id: 'c1', n: 'Basic-Fit Lyon Part-Dieu', e: 'autre', v: 'Lyon' },
+  { id: 'c2', n: 'Basic-Fit Lyon Confluence', e: 'autre', v: 'Lyon' },
+  { id: 'c3', n: 'Basic-Fit Paris Bastille', e: 'autre', v: 'Paris' },
+  { id: 'c4', n: 'Basic-Fit Saint-Étienne Centre', e: 'autre', v: 'Saint-Étienne' },
 ];
 test('chercher un club : par nom ou par ville, sans tenir compte des accents ni des majuscules', () => {
   const ids = q => C.chercherClubs(CLUBS, q).map(c => c.id);
@@ -319,7 +322,7 @@ test('chercher un club : les mots trouvés sont surlignés, le reste reste du te
 
 const SRV_CLUBS = { clubs: Object.fromEntries(CLUBS.map(({ id, ...c }) => [id, c])) };
 test('« Mon club » : la recherche filtre la liste pendant la frappe et surligne ce qui est trouvé', async () => {
-  const p = await ouvrir(SALLE(), SRV_CLUBS);
+  const p = await ouvrir(SALLE_LIBRE(), SRV_CLUBS);
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=cchoix]');
   assert.equal(await p.locator('#sheet [data-act=cchoix]').count(), 4);
@@ -333,7 +336,7 @@ test('« Mon club » : la recherche filtre la liste pendant la frappe et surlign
   assert.deepEqual(p.erreurs, []);
 });
 test('« Mon club » : s’il existe des clubs, « Créer le mien » est un petit lien ; le formulaire s’ouvre en le touchant', async () => {
-  const p = await ouvrir(SALLE(), SRV_CLUBS);
+  const p = await ouvrir(SALLE_LIBRE(), SRV_CLUBS);
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=cchoix]');
   assert.equal(await p.locator('#cl-n').count(), 0, 'pas de formulaire au départ');
@@ -342,13 +345,13 @@ test('« Mon club » : s’il existe des clubs, « Créer le mien » est un peti
   assert.match(await p.textContent('#clist'), /Aucun club ne correspond à « Vaulx »/);
   await p.click('#sheet [data-act=ccreer]');
   await p.waitForSelector('#cl-n');
-  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', 'reprend ce qui a été cherché');
+  assert.equal(await p.inputValue('#cl-n'), 'Vaulx', 'reprend ce qui a été cherché');
   await p.fill('#cq', 'Paris');
-  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', 'chercher encore n’efface pas le formulaire');
+  assert.equal(await p.inputValue('#cl-n'), 'Vaulx', 'chercher encore n’efface pas le formulaire');
   assert.deepEqual(p.erreurs, []);
 });
 test('« Mon club » : aucun club dans l’enseigne → le formulaire est ouvert directement', async () => {
-  const p = await ouvrir(SALLE());
+  const p = await ouvrir(SALLE_LIBRE());
   await p.click('[data-act=clien]');
   await p.waitForSelector('#cl-n');
   assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Lyon Part-Dieu');
