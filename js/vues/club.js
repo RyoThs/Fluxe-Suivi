@@ -75,7 +75,7 @@ export function listeClubs() {
     r
       .map(
         x =>
-          `<button class="copt${g && g.club === x.id ? ' on' : ''}" data-act="cchoix" data-id="${esc(x.id)}" data-n="${esc(x.n)}"><b>${surligner(x.n, q)}</b>${x.v ? `<span>${surligner(x.v, q)}</span>` : ''}</button>`
+          `<button class="copt${g && g.club === x.id ? ' on' : ''}" data-act="cchoix" data-id="${esc(x.id)}" data-n="${esc(x.n)}"><b>${surligner(x.n, q)}${x.b ? '<em class="cbient">bientôt</em>' : ''}</b>${x.v ? `<span>${surligner(x.v, q)}</span>` : ''}</button>`
       )
       .join('')
   );
@@ -97,7 +97,7 @@ export function zoneCreer() {
 export function panneauClub() {
   const q = pk && pk.club ? pk.club.q || '' : '';
   return `<div class="cpan"><p class="sb">Choisis ton club : tu profites des corrections des autres membres.</p>
-<div class="crech">${LOUPE}<input id="cq" placeholder="Cherche ton club : nom ou ville" value="${esc(q)}" maxlength="60" autocomplete="off" aria-label="Chercher un club"></div>
+<div class="crech">${LOUPE}<input id="cq" placeholder="Ville, nom ou code postal" value="${esc(q)}" maxlength="60" autocomplete="off" aria-label="Chercher un club"></div>
 <div id="clist">${listeClubs()}</div><div id="ccre">${zoneCreer()}</div></div>`;
 }
 
