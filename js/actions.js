@@ -10,6 +10,7 @@ import {gymCur} from './salle.js';
 import {render} from './rendu.js';
 import {glist, setGq} from './vues/guide.js';
 import {discs, plist, sheet} from './vues/panneaux.js';
+import {listeClubs} from './vues/club.js';
 import {brouillon} from './routines.js';
 import {imp} from './sauvegarde.js';
 import {gestes as seance} from './gestes/seance.js';
@@ -67,6 +68,11 @@ document.addEventListener('input', ev => {
   if (t.id === 'dq' && pk && pk.tool) {
     pk.kg = t.value.replace(/[^\d.,]/g, '').slice(0, 6);
     $('#dr').innerHTML = discs();
+    return;
+  }
+  if (t.id === 'cq' && pk && pk.club) {
+    pk.club.q = t.value.slice(0, 60);
+    $('#clist').innerHTML = listeClubs();
     return;
   }
   if (t.id === 'gq') {

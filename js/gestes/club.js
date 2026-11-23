@@ -9,7 +9,7 @@ import {avertir} from '../dialogue.js';
 import {chainOf, gymCur} from '../salle.js';
 import {render} from '../rendu.js';
 import {closePk, openSheet, sheet} from '../vues/panneaux.js';
-import {cacherEncart, listeClubs} from '../vues/club.js';
+import {cacherEncart, listeClubs, zoneCreer} from '../vues/club.js';
 import {creerClub, donnerAvis, listerClubs, lireAvis, oublier} from '../club-reseau.js';
 import {texteErreur} from '../nuage.js';
 
@@ -45,18 +45,34 @@ export const gestes = {
   clien: () => {
     const g = gymCur();
     if (!g) return;
-    openSheet({club: {liste: null}});
+    openSheet({club: {liste: null, q: '', creer: false}});
     const ch = chainOf(g);
     listerClubs(ch ? ch.id : 'autre').then(
       l => {
-        const el = document.querySelector('#clist');
-        if (pk && pk.club && el) {
+        const el = document.querySelector('#clist'),
+          z = document.querySelector('#ccre');
+        if (pk && pk.club && el && z) {
           pk.club.liste = l;
           el.innerHTML = listeClubs();
+          z.innerHTML = zoneCreer();
         }
       },
       () => {}
     );
+  },
+  /* « Créer le mien » : ouvre le formulaire, prérempli avec ce qui a été cherché */
+  ccreer: () => {
+    const g = gymCur(),
+      z = document.querySelector('#ccre');
+    if (!g || !pk || !pk.club || !z) return;
+    const ch = chainOf(g),
+      q = cname(pk.club.q || '').slice(0, 60),
+      marque = ch && ch.id !== 'autre' ? ch.name : '';
+    pk.club.nom = !q ? g.name : marque && !norm(q).includes(norm(marque)) ? (marque + ' ' + q).slice(0, 60) : q;
+    pk.club.creer = true;
+    z.innerHTML = zoneCreer();
+    const f = z.querySelector('#cl-n');
+    if (f) f.focus();
   },
   cchoix: ({b}) => {
     const g = gymCur(),

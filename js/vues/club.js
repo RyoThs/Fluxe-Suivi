@@ -1,12 +1,12 @@
 /* Fluxe Suivi — Catalogue partagé par club (v3.8.0) : encart, ligne de machine et panneaux.
    - Encart « Ta salle est-elle juste ? » (salle reliée) ou « Relie ta salle à ton club » (pas encore reliée).
-   - Panneaux : choisir / créer son club, signaler une machine, ajouter une machine vue dans sa salle.
+   - Panneaux : chercher / choisir / créer son club (v3.8.1 : la recherche d'abord, « Créer le mien » en petit), signaler une machine, ajouter une machine vue dans sa salle.
    Tout texte venant du serveur ou de l'utilisateur passe par esc(). */
 import {M} from '../catalogue.js';
 import {pk} from '../etat.js';
 import {esc, norm} from '../outils.js';
 import {chainOf, gymCur} from '../salle.js';
-import {bilanClub} from '../club.js';
+import {bilanClub, chercherClubs, surligner} from '../club.js';
 import {avisConnus} from '../club-reseau.js';
 import {pic} from '../pictos.js';
 
@@ -46,30 +46,59 @@ export const badgeVerifiee = () => `<span class="verif">${pic('coche', 11)}véri
 export const boutonSignaler = n =>
   `<button class="csig" data-act="csig" data-n="${esc(n)}" aria-label="Signaler ou confirmer : ${esc(n)}">${PTS}</button>`;
 
-/* Liste des clubs de l'enseigne (redessinée seule quand elle arrive du réseau : les champs tapés restent) */
+const LOUPE =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>';
+const PLUS =
+  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const pluriel = (n, mot) => n + ' ' + mot + (n > 1 ? 's' : '');
+
+/* Liste des clubs de l'enseigne, filtrée par la recherche (redessinée seule : les champs tapés restent) */
 export function listeClubs() {
   const g = gymCur(),
     ch = chainOf(g),
-    l = pk && pk.club ? pk.club.liste : null;
+    c = pk && pk.club ? pk.club : {},
+    l = c.liste === undefined ? null : c.liste,
+    q = c.q || '';
   if (l === null) return '<p class="empty">Chargement des clubs…</p>';
-  if (!l.length)
-    return `<p class="empty">Aucun club ${esc(ch ? ch.name : '')} pour l’instant : crée le tien ci-dessous.</p>`;
-  return l
-    .map(
-      c =>
-        `<button class="copt${g && g.club === c.id ? ' on' : ''}" data-act="cchoix" data-id="${esc(c.id)}" data-n="${esc(c.n)}"><b>${esc(c.n)}</b>${c.v ? `<span>${esc(c.v)}</span>` : ''}</button>`
-    )
-    .join('');
+  if (!l.length) {
+    const reseau = navigator.onLine ? '' : ' (pas de réseau : la liste n’a pas pu être mise à jour)';
+    return `<p class="cvide">Aucun club ${esc(ch ? ch.name : '')} pour l’instant${reseau} : crée le tien ci-dessous.</p>`;
+  }
+  const r = chercherClubs(l, q);
+  if (!r.length)
+    return `<p class="cvide">Aucun club ne correspond à « ${esc(q.trim())} ».<br>Vérifie l’orthographe ou cherche par ville.</p>`;
+  const titre = q.trim()
+    ? pluriel(r.length, 'club') + ' trouvé' + (r.length > 1 ? 's' : '')
+    : `Clubs ${esc(ch ? ch.name : '')} · ${l.length}`;
+  return (
+    `<div class="ctit">${titre}</div>` +
+    r
+      .map(
+        x =>
+          `<button class="copt${g && g.club === x.id ? ' on' : ''}" data-act="cchoix" data-id="${esc(x.id)}" data-n="${esc(x.n)}"><b>${surligner(x.n, q)}</b>${x.v ? `<span>${surligner(x.v, q)}</span>` : ''}</button>`
+      )
+      .join('')
+  );
 }
-/* Panneau « Mon club » : liste des clubs de l'enseigne + création */
-export function panneauClub() {
-  const g = gymCur();
-  return `<div class="cpan"><p class="sb">Choisis ton club : tu profites des corrections des autres membres.</p><div id="clist">${listeClubs()}</div>
-<h2>Créer mon club</h2>
-<label class="cf" for="cl-n">Nom du club</label><input class="note" id="cl-n" maxlength="60" value="${esc(g ? g.name : '')}">
+/* Zone « créer » : formulaire si l'enseigne n'a aucun club ou si on a touché « Créer le mien », sinon un petit lien */
+export function zoneCreer() {
+  const g = gymCur(),
+    c = pk && pk.club ? pk.club : {};
+  if (!Array.isArray(c.liste)) return '';
+  if (c.liste.length && !c.creer)
+    return `<button class="clienc" data-act="ccreer"><span>Tu ne trouves pas ton club ?</span> ${PLUS}Créer le mien</button>`;
+  return `<div class="cform"><h2>Créer mon club</h2>
+<label class="cf" for="cl-n">Nom du club</label><input class="note" id="cl-n" maxlength="60" value="${esc(c.nom || (g ? g.name : ''))}">
 <label class="cf" for="cl-v">Ville</label><input class="note" id="cl-v" maxlength="40" placeholder="ex. Lyon">
 <p class="cnote">${pic('info', 16)}<span>Il faut un compte vérifié (Sauvegarde en ligne) pour créer un club. Les autres membres pourront ensuite le choisir.</span></p>
 <button class="btn" data-act="ccree">Créer et relier ma salle</button></div>`;
+}
+/* Panneau « Mon club » : recherche, liste des clubs de l'enseigne, puis création en petit */
+export function panneauClub() {
+  const q = pk && pk.club ? pk.club.q || '' : '';
+  return `<div class="cpan"><p class="sb">Choisis ton club : tu profites des corrections des autres membres.</p>
+<div class="crech">${LOUPE}<input id="cq" placeholder="Cherche ton club : nom ou ville" value="${esc(q)}" maxlength="60" autocomplete="off" aria-label="Chercher un club"></div>
+<div id="clist">${listeClubs()}</div><div id="ccre">${zoneCreer()}</div></div>`;
 }
 
 /* Panneau « Signaler » d'une machine */

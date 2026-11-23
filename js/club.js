@@ -3,7 +3,7 @@
    Genres : 'absent' (pas dans ma salle), 'present' (je confirme), 'marque' (autre marque), 'nom' (nom ou muscle faux), 'ajout'.
    Si un membre a donné plusieurs avis sur la même machine, seul le plus récent compte. */
 import {CHAINS, M} from './catalogue.js';
-import {norm} from './outils.js';
+import {esc, norm} from './outils.js';
 
 export const SEUIL = {retrait: 3, ajout: 3, verifiee: 2};
 export const GENRES = ['absent', 'present', 'marque', 'nom', 'ajout'];
@@ -108,4 +108,47 @@ export function idAvis(machine, uid) {
   let h = 5381;
   for (const c of norm(machine)) h = ((h * 33) ^ c.codePointAt(0)) >>> 0;
   return h.toString(36) + '_' + uid;
+}
+
+/* ===== Chercher son club (v3.8.1) : sans accents ni majuscules, tous les mots doivent correspondre ===== */
+const plier = t =>
+  String(t || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+const mots = q => plier(q).split(/\s+/).filter(Boolean);
+/**
+ * Les clubs dont le nom ou la ville contient tous les mots cherchés (dans l'ordre de la liste).
+ * @param {Array<{n: string, v?: string}>} liste
+ * @param {string} q
+ */
+export function chercherClubs(liste, q) {
+  const m = mots(q);
+  return (Array.isArray(liste) ? liste : []).filter(c => {
+    const t = plier(c.n + ' ' + (c.v || ''));
+    return m.every(x => t.includes(x));
+  });
+}
+/**
+ * Le texte, protégé par esc(), avec les mots cherchés entourés de <mark>.
+ * @param {string} texte
+ * @param {string} q
+ * @returns {string} du HTML sûr
+ */
+export function surligner(texte, q) {
+  const t = String(texte || ''),
+    lettres = [...t],
+    plie = lettres.map(plier);
+  /* on surligne seulement si chaque lettre pliée reste une seule lettre (cas normal en français) */
+  if (plie.some(x => x.length !== 1)) return esc(t);
+  const p = plie.join(''),
+    on = new Array(lettres.length).fill(false);
+  for (const x of mots(q)) for (let i = p.indexOf(x); i >= 0; i = p.indexOf(x, i + 1)) on.fill(true, i, i + x.length);
+  let out = '';
+  lettres.forEach((c, i) => {
+    if (on[i] && !on[i - 1]) out += '<mark>';
+    out += esc(c);
+    if (on[i] && !on[i + 1]) out += '</mark>';
+  });
+  return out;
 }
