@@ -25,7 +25,7 @@ GitHub les lance à chaque proposition de modification : ✅ = tout va bien, ❌
 | `17-erreurs.test.js` | Rapport d’erreurs : journal sur le téléphone, envoi automatique avec un compte, e-mail, écran de secours |
 | `25-securite.test.js` | Sécurité : un piège glissé dans tous les champs ne s’exécute jamais, règle CSP, aucune fonction dangereuse, règles Firestore |
 | `26-catalogue-partage.test.js` | Catalogue partagé par club : calculs du club (3 signalements, 3 membres, 2 confirmations), chercher / relier / créer son club (v3.8.1 : recherche d’abord, création en petit), signaler, ajouter, sans compte, pannes volontaires, piège, règles Firestore |
-| `27-clubs-connus.test.js` | Clubs connus d'avance (On Air 137 clubs avec DOM-TOM, Basic-Fit 903, Fitness Park 379 avec DOM-TOM, L’Orange Bleue 389, Neoness 32) : identifiants valides, recherche par code postal ou territoire, étiquette « bientôt », sans doublon, hors ligne |
+| `27-clubs-connus.test.js` | Clubs connus d'avance (On Air 137 clubs avec DOM-TOM, Basic-Fit 903, Fitness Park 379 avec DOM-TOM, L’Orange Bleue 389, Neoness 32, Keepcool 244 avec DOM-TOM) : identifiants valides, recherche par code postal ou territoire, étiquette « bientôt », sans doublon, hors ligne |
 | `24-glisser.test.js` | Glisser : remplacer ou supprimer un exercice, modifier ou supprimer une mesure, « Annuler », transitions entre les pages |
 | `23-corps-recompenses.test.js` | Semaines d’affilée, 24 récompenses (calcul, panneau, fenêtre, pas de rafale à la mise à jour), Mon corps (pesée, mensurations), données gardées partout |
 | `22-ordre-exercices.test.js` | Ordre pendant la séance : en cours en haut, terminés en bas ; boutons qui visent le bon exercice ; Historique dans l’ordre réel |

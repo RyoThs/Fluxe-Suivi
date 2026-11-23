@@ -3,13 +3,14 @@
    Ces clubs n'existent pas sur le serveur : seuls les avis des membres y sont écrits (clubs/{id}/avis), les règles le permettent.
    Un identifiant ne doit JAMAIS changer (les salles reliées et les avis en dépendent) : on ajoute, on ne renomme pas.
    On Air : 137 clubs en France, DOM-TOM compris (liste publique du site officiel, lue le 2026-11-23 ; 11 clubs à l'étranger écartés).
-   Une liste par enseigne dans js/clubs/ (On Air v3.9.0, Basic-Fit v3.10.0 : 903 clubs, Fitness Park v3.11.0 : 379 clubs, L’Orange Bleue v3.12.0 : 389 clubs, Neoness v3.13.0 : 32 clubs). */
+   Une liste par enseigne dans js/clubs/ (On Air v3.9.0, Basic-Fit v3.10.0 : 903 clubs, Fitness Park v3.11.0 : 379 clubs, L’Orange Bleue v3.12.0 : 389 clubs, Neoness v3.13.0 : 32 clubs, Keepcool v3.14.0 : 244 clubs). */
 
 import ONAIR from './clubs/on-air.js';
 import BASICFIT from './clubs/basic-fit.js';
 import FITNESSPARK from './clubs/fitness-park.js';
 import ORANGEBLEUE from './clubs/orange-bleue.js';
 import NEONESS from './clubs/neoness.js';
+import KEEPCOOL from './clubs/keepcool.js';
 
 const PAR_ENSEIGNE = {
   'on-air': {prefixe: 'onair-', marque: 'On Air', liste: ONAIR},
@@ -17,6 +18,7 @@ const PAR_ENSEIGNE = {
   'fitness-park': {prefixe: 'fp-', marque: 'Fitness Park', liste: FITNESSPARK},
   'orange-bleue': {prefixe: 'ob-', marque: 'L’Orange Bleue', liste: ORANGEBLEUE},
   neoness: {prefixe: 'neo-', marque: 'Neoness', liste: NEONESS},
+  keepcool: {prefixe: 'kc-', marque: 'Keepcool', liste: KEEPCOOL},
 };
 
 /**
