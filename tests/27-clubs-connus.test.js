@@ -233,3 +233,41 @@ test('« Mon club » L’Orange Bleue : les 389 clubs sont proposés', async () 
   assert.equal((await donnees(p)).gyms[0].clubNom, 'L’Orange Bleue Mamoudzou');
   assert.deepEqual(p.erreurs, []);
 });
+
+/* ----- v3.13.0 : Neoness (32 clubs, site officiel lu le 2026-11-23) ----- */
+test('Neoness : les 32 clubs de France sont connus, identifiants fixes et valides, uniques entre enseignes', () => {
+  const l = K.clubsConnus('neoness');
+  assert.equal(l.length, 32);
+  for (const c of l) {
+    assert.match(c.id, /^neo-[a-z0-9-]+$/);
+    assert.ok(c.id.length <= 40, c.id);
+    assert.equal(c.e, 'neoness');
+    assert.match(c.n, /^Neoness /);
+    assert.match(c.cp, /^\d{5}$/, c.n);
+    assert.ok(C.nettoyerClub(c), c.n);
+  }
+  const tous = ['on-air', 'basic-fit', 'fitness-park', 'orange-bleue', 'neoness'].flatMap(e => K.clubsConnus(e)).map(c => c.id);
+  assert.equal(new Set(tous).size, tous.length, 'aucun identifiant partagé');
+});
+test('Neoness : on trouve ses clubs par arrondissement ; le club en double sur leur site n’apparaît qu’une fois', () => {
+  const l = K.clubsConnus('neoness');
+  const noms = q => C.chercherClubs(l, q).map(c => c.n);
+  assert.equal(noms('75013').length, 3);
+  assert.deepEqual(noms('ivry'), ['Neoness Ivry-sur-Seine']);
+});
+test('« Mon club » Neoness : les 32 clubs sont proposés', async () => {
+  const p = await A.page();
+  await p.context().addInitScript(installer);
+  await p.evaluate(() => localStorage.setItem('__serveur', JSON.stringify({ comptes: {}, data: {}, t: 1000, user: null, clubs: {}, avis: {} })));
+  await donner(p, { ...VIDE, gyms: [{ id: 'g1', name: 'Neoness', chain: 'neoness', eq: CAT.catOf(CAT.CHAINS.find(c => c.id === 'neoness')), notes: {} }], gym: 'g1' });
+  await p.click('nav [data-tab=aide]');
+  await p.waitForTimeout(250);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.match(await p.textContent('#clist'), /Clubs Neoness · 32/);
+  await p.fill('#cq', 'saint-lazare');
+  await p.click('#sheet [data-act=cchoix]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].clubNom, 'Neoness Paris 9 Saint-Lazare');
+  assert.deepEqual(p.erreurs, []);
+});
