@@ -153,3 +153,45 @@ test('« Mon club » Basic-Fit : les clubs sont proposés et on relie sa salle s
   assert.equal((await donnees(p)).gyms[0].clubNom, 'Basic-Fit Albi Route de la Drèche');
   assert.deepEqual(p.erreurs, []);
 });
+
+/* ----- v3.11.0 : Fitness Park (379 clubs dont 18 dans les DOM-TOM, site officiel lu le 2026-11-23) ----- */
+test('Fitness Park : les 379 clubs de France sont connus, identifiants fixes et valides, uniques entre enseignes', () => {
+  const l = K.clubsConnus('fitness-park');
+  assert.equal(l.length, 379);
+  for (const c of l) {
+    assert.match(c.id, /^fp-[a-z0-9-]+$/);
+    assert.ok(c.id.length <= 40, c.id);
+    assert.equal(c.e, 'fitness-park');
+    assert.match(c.n, /^Fitness Park /);
+    assert.match(c.cp, /^\d{5}$/, c.n);
+    assert.ok(C.nettoyerClub(c), c.n);
+  }
+  const tous = ['on-air', 'basic-fit', 'fitness-park'].flatMap(e => K.clubsConnus(e)).map(c => c.id);
+  assert.equal(new Set(tous).size, tous.length, 'aucun identifiant partagé');
+});
+test('Fitness Park : les 18 clubs des DOM-TOM sont là, trouvables par territoire', () => {
+  const l = K.clubsConnus('fitness-park');
+  const n = q => C.chercherClubs(l, q).length;
+  assert.equal(l.filter(c => /^97/.test(c.cp)).length, 18);
+  assert.equal(n('guadeloupe'), 8);
+  assert.equal(n('martinique'), 5);
+  assert.equal(n('guyane'), 3);
+  assert.equal(n('reunion'), 2);
+  assert.deepEqual(C.chercherClubs(l, 'kourou').map(c => c.n), ['Fitness Park Guyane - Kourou']);
+});
+test('« Mon club » Fitness Park : les 379 clubs sont proposés', async () => {
+  const p = await A.page();
+  await p.context().addInitScript(installer);
+  await p.evaluate(() => localStorage.setItem('__serveur', JSON.stringify({ comptes: {}, data: {}, t: 1000, user: null, clubs: {}, avis: {} })));
+  await donner(p, { ...VIDE, gyms: [{ id: 'g1', name: 'Fitness Park', chain: 'fitness-park', eq: CAT.catOf(CAT.CHAINS.find(c => c.id === 'fitness-park')), notes: {} }], gym: 'g1' });
+  await p.click('nav [data-tab=aide]');
+  await p.waitForTimeout(250);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.match(await p.textContent('#clist'), /Clubs Fitness Park · 379/);
+  await p.fill('#cq', 'kourou');
+  await p.click('#sheet [data-act=cchoix]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].clubNom, 'Fitness Park Guyane - Kourou');
+  assert.deepEqual(p.erreurs, []);
+});
