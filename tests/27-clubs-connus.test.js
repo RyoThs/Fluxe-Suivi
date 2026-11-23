@@ -195,3 +195,41 @@ test('« Mon club » Fitness Park : les 379 clubs sont proposés', async () => {
   assert.equal((await donnees(p)).gyms[0].clubNom, 'Fitness Park Guyane - Kourou');
   assert.deepEqual(p.erreurs, []);
 });
+
+/* ----- v3.12.0 : L'Orange Bleue (389 clubs dont Mayotte et la Corse, site officiel lu le 2026-11-23) ----- */
+test('L’Orange Bleue : les 389 clubs de France sont connus, identifiants fixes et valides, uniques entre enseignes', () => {
+  const l = K.clubsConnus('orange-bleue');
+  assert.equal(l.length, 389);
+  for (const c of l) {
+    assert.match(c.id, /^ob-[a-z0-9-]+$/);
+    assert.ok(c.id.length <= 40, c.id);
+    assert.equal(c.e, 'orange-bleue');
+    assert.match(c.n, /^L’Orange Bleue /);
+    assert.match(c.cp, /^\d{5}$/, c.n);
+    assert.ok(C.nettoyerClub(c), c.n);
+  }
+  const tous = ['on-air', 'basic-fit', 'fitness-park', 'orange-bleue'].flatMap(e => K.clubsConnus(e)).map(c => c.id);
+  assert.equal(new Set(tous).size, tous.length, 'aucun identifiant partagé');
+});
+test('L’Orange Bleue : Mayotte et la Corse sont là', () => {
+  const l = K.clubsConnus('orange-bleue');
+  const noms = q => C.chercherClubs(l, q).map(c => c.n);
+  assert.deepEqual(noms('mayotte'), ['L’Orange Bleue Mamoudzou']);
+  assert.ok(noms('porto-vecchio').includes('L’Orange Bleue Porto-Vecchio'), 'Porto-Vecchio (Corse) n’est pas confondu avec Porto au Portugal');
+});
+test('« Mon club » L’Orange Bleue : les 389 clubs sont proposés', async () => {
+  const p = await A.page();
+  await p.context().addInitScript(installer);
+  await p.evaluate(() => localStorage.setItem('__serveur', JSON.stringify({ comptes: {}, data: {}, t: 1000, user: null, clubs: {}, avis: {} })));
+  await donner(p, { ...VIDE, gyms: [{ id: 'g1', name: 'L’Orange Bleue', chain: 'orange-bleue', eq: CAT.catOf(CAT.CHAINS.find(c => c.id === 'orange-bleue')), notes: {} }], gym: 'g1' });
+  await p.click('nav [data-tab=aide]');
+  await p.waitForTimeout(250);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.match(await p.textContent('#clist'), /Clubs L’Orange Bleue · 389/);
+  await p.fill('#cq', 'mamoudzou');
+  await p.click('#sheet [data-act=cchoix]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].clubNom, 'L’Orange Bleue Mamoudzou');
+  assert.deepEqual(p.erreurs, []);
+});
