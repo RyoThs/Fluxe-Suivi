@@ -27,7 +27,7 @@ Adresse : https://ryoths.github.io/Fluxe-Suivi/
   - **courbes de progression** par exercice (charge max, 1RM estimé, volume) ou pour toutes les séances (volume, séries, durée) ;
   - volume par semaine, répartition par groupe musculaire ;
   - 3 records (poids max, meilleure série, volume).
-- **Guide** (bouton `?`) : ta salle, ses machines (avec un dessin pour chacune) et tes notes de réglage. **Catalogue partagé** (v3.8) : cherche ton club (nom, ville ou code postal ; les 137 clubs On Air de France, DOM-TOM compris, sont déjà dans l’app) et relie ta salle pour corriger la liste des machines avec les autres membres (signaler, confirmer, ajouter) ; partager demande un compte vérifié.
+- **Guide** (bouton `?`) : ta salle, ses machines (avec un dessin pour chacune) et tes notes de réglage. **Catalogue partagé** (v3.8) : cherche ton club (nom, ville ou code postal ; les clubs On Air (137, DOM-TOM compris) et Basic-Fit (903) de France sont déjà dans l’app) et relie ta salle pour corriger la liste des machines avec les autres membres (signaler, confirmer, ajouter) ; partager demande un compte vérifié.
 
 ## Où vont tes données
 - **Sans compte** : tout reste **sur ton téléphone**, rien n'est envoyé sur Internet. Plusieurs protections existent : fichier de sauvegarde, versions de secours automatiques, corbeille de 30 jours.

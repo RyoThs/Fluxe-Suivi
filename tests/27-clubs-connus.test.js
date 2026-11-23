@@ -32,7 +32,7 @@ test('On Air : les 137 clubs de France sont connus, chacun avec un identifiant f
     assert.ok(c.v, c.n + ' : ville');
     assert.ok(C.nettoyerClub(c), c.n + ' : passe le contrôle des clubs');
   }
-  assert.deepEqual(K.clubsConnus('basic-fit'), [], 'les autres enseignes viendront ensuite');
+  assert.deepEqual(K.clubsConnus('autre'), [], 'une salle sans enseigne n’a pas de liste connue');
   assert.deepEqual(K.clubsConnus('inconnue'), []);
 });
 
@@ -144,6 +144,9 @@ test('« Mon club » Basic-Fit : les clubs sont proposés et on relie sa salle s
   await p.click('[data-act=clien]');
   await p.waitForSelector('#sheet [data-act=cchoix]');
   assert.match(await p.textContent('#clist'), /Clubs Basic-Fit · 903/);
+  await p.fill('#cq', 'Vaulx');
+  await p.click('#sheet [data-act=ccreer]');
+  assert.equal(await p.inputValue('#cl-n'), 'Basic-Fit Vaulx', '« Créer le mien » reprend la recherche avec la marque');
   await p.fill('#cq', 'dreche');
   await p.click('#sheet [data-act=cchoix]');
   await p.waitForTimeout(200);
