@@ -118,14 +118,14 @@ const plier = t =>
     .toLowerCase();
 const mots = q => plier(q).split(/\s+/).filter(Boolean);
 /**
- * Les clubs dont le nom ou la ville contient tous les mots cherchés (dans l'ordre de la liste).
- * @param {Array<{n: string, v?: string}>} liste
+ * Les clubs dont le nom, la ville ou le code postal contient tous les mots cherchés (dans l'ordre de la liste).
+ * @param {Array<{n: string, v?: string, cp?: string}>} liste
  * @param {string} q
  */
 export function chercherClubs(liste, q) {
   const m = mots(q);
   return (Array.isArray(liste) ? liste : []).filter(c => {
-    const t = plier(c.n + ' ' + (c.v || ''));
+    const t = plier(c.n + ' ' + (c.v || '') + ' ' + (c.cp || ''));
     return m.every(x => t.includes(x));
   });
 }

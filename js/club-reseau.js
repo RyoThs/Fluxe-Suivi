@@ -6,6 +6,7 @@
 import {FIREBASE} from './nuage-config.js';
 import {partager} from './nuage.js';
 import {depuisServeur, idAvis, nettoyerAvis, nettoyerClub} from './club.js';
+import {clubsConnus} from './clubs-connus.js';
 
 const faux = () => window.__fxNuageFaux; /* tests automatiques : faux serveur */
 let memo = null; /* copie en mémoire (évite de relire le téléphone à chaque dessin) */
@@ -31,7 +32,7 @@ async function lireTout(chemin, filtre) {
   return depuisServeur(await m.lirePublic(FIREBASE, chemin, filtre));
 }
 
-/** Clubs d'une enseigne (les derniers connus si le réseau ne répond pas). */
+/** Clubs d'une enseigne : ceux connus d'avance (clubs-connus.js) et ceux créés par les membres (les derniers connus si le réseau ne répond pas). */
 export async function listerClubs(enseigne) {
   const c = cache();
   try {
@@ -42,7 +43,12 @@ export async function listerClubs(enseigne) {
     c.clubs = [...c.clubs.filter(x => x.e !== e), ...nouveaux].slice(0, 3000);
     garder(c);
   } catch (e) {}
-  return c.clubs.filter(x => x.e === (enseigne || 'autre')).sort((a, b) => a.n.localeCompare(b.n, 'fr'));
+  /* clubs connus d'avance (v3.9) + clubs créés par les membres, sans doublon */
+  const connus = clubsConnus(enseigne || 'autre'),
+    ids = new Set(connus.map(x => x.id));
+  return [...connus, ...c.clubs.filter(x => x.e === (enseigne || 'autre') && !ids.has(x.id))].sort((a, b) =>
+    a.n.localeCompare(b.n, 'fr')
+  );
 }
 
 /** Avis d'un club. Sans réseau : les derniers connus. */
