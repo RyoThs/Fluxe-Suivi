@@ -19,4 +19,10 @@ module.exports = [
       'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }],
     },
   },
+  /* outils/ (pas chargés par l'app) : programmes lancés avec Node */
+  {
+    files: ['outils/**/*.mjs'],
+    languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: Object.fromEntries(['process', 'console', 'SharedArrayBuffer', 'Int32Array', 'Atomics', 'URL'].map(g => [g, 'readonly'])) },
+    rules: { 'no-undef': 'error', 'no-unused-vars': ['error', { args: 'none' }], 'no-dupe-keys': 'error', 'no-unreachable': 'error' },
+  },
 ];

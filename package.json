@@ -4,8 +4,8 @@
   "description": "Fluxe Suivi : carnet de musculation (PWA). Ce fichier sert seulement aux tests automatiques.",
   "scripts": {
     "test": "node --test --test-concurrency=1 \"tests/*.test.js\"",
-    "verifier": "eslint js",
-    "ranger": "prettier --write \"js/**/*.js\""
+    "verifier": "eslint js outils",
+    "ranger": "prettier --write \"js/**/*.js\" \"outils/**/*.mjs\""
   },
   "devDependencies": {
     "eslint": "10.1.0",
