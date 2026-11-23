@@ -271,3 +271,44 @@ test('« Mon club » Neoness : les 32 clubs sont proposés', async () => {
   assert.equal((await donnees(p)).gyms[0].clubNom, 'Neoness Paris 9 Saint-Lazare');
   assert.deepEqual(p.erreurs, []);
 });
+
+/* ----- v3.14.0 : Keepcool (244 clubs dont 13 dans les DOM-TOM, site officiel lu le 2026-11-23) ----- */
+test('Keepcool : les 244 clubs de France sont connus, identifiants fixes et valides, uniques entre enseignes', () => {
+  const l = K.clubsConnus('keepcool');
+  assert.equal(l.length, 244);
+  for (const c of l) {
+    assert.match(c.id, /^kc-[a-z0-9-]+$/);
+    assert.ok(c.id.length <= 40, c.id);
+    assert.equal(c.e, 'keepcool');
+    assert.match(c.n, /^Keepcool /);
+    assert.doesNotMatch(c.n + c.v, /&#|&amp;/, 'aucun code HTML dans les noms');
+    assert.match(c.cp, /^\d{5}$/, c.n);
+    assert.ok(C.nettoyerClub(c), c.n);
+  }
+  assert.ok(!l.some(c => /Neoness/.test(c.n)), 'le club Neoness affiché sur leur site est dans la liste Neoness, pas ici');
+  const tous = ['on-air', 'basic-fit', 'fitness-park', 'orange-bleue', 'neoness', 'keepcool'].flatMap(e => K.clubsConnus(e)).map(c => c.id);
+  assert.equal(new Set(tous).size, tous.length, 'aucun identifiant partagé');
+});
+test('Keepcool : les 13 clubs des DOM-TOM sont là ; Briançon garde son code postal 05100', () => {
+  const l = K.clubsConnus('keepcool');
+  const n = q => C.chercherClubs(l, q).length;
+  assert.equal(n('martinique'), 3);
+  assert.equal(n('reunion'), 10);
+  assert.deepEqual(C.chercherClubs(l, '05100').map(c => c.v), ['Briançon']);
+});
+test('« Mon club » Keepcool : les 244 clubs sont proposés', async () => {
+  const p = await A.page();
+  await p.context().addInitScript(installer);
+  await p.evaluate(() => localStorage.setItem('__serveur', JSON.stringify({ comptes: {}, data: {}, t: 1000, user: null, clubs: {}, avis: {} })));
+  await donner(p, { ...VIDE, gyms: [{ id: 'g1', name: 'Keepcool', chain: 'keepcool', eq: CAT.catOf(CAT.CHAINS.find(c => c.id === 'keepcool')), notes: {} }], gym: 'g1' });
+  await p.click('nav [data-tab=aide]');
+  await p.waitForTimeout(250);
+  await p.click('[data-act=clien]');
+  await p.waitForSelector('#sheet [data-act=cchoix]');
+  assert.match(await p.textContent('#clist'), /Clubs Keepcool · 244/);
+  await p.fill('#cq', 'creolis');
+  await p.click('#sheet [data-act=cchoix]');
+  await p.waitForTimeout(200);
+  assert.equal((await donnees(p)).gyms[0].clubNom, 'Keepcool La Martinique Robert Creolis');
+  assert.deepEqual(p.erreurs, []);
+});
