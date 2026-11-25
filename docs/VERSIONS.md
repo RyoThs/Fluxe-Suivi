@@ -6,7 +6,8 @@ Le retour se fait à partir de la branche `sauvegarde-v…`. Tes séances ne son
 
 | Version | Date | Ce qui a changé | Copie gardée |
 |---|---|---|---|
-| **3.14.0** | 2026-11-23 | **Les 244 clubs Keepcool de France sont dans l’app**, dont 13 dans les DOM-TOM (Martinique, La Réunion). Avec cette version, les 6 enseignes du catalogue ont leurs clubs : **2 084 clubs** au total | (version actuelle) |
+| **3.14.1** | 2026-11-25 | Correction : quand on rouvre l’app un autre jour, l’écran se met à jour (les **semaines d’affilée** restaient sur la semaine d’avant au lieu de repartir à zéro) ; le bouton compte maintenant **les séances de la semaine** (0, 1, 2, 3… et retour à 0 chaque lundi) ; le panneau garde les semaines d’affilée, le record et les récompenses (qui ne changent pas) | (version actuelle) |
+| 3.14.0 | 2026-11-23 | **Les 244 clubs Keepcool de France sont dans l’app**, dont 13 dans les DOM-TOM (Martinique, La Réunion). Avec cette version, les 6 enseignes du catalogue ont leurs clubs : **2 084 clubs** au total | `sauvegarde-v3.14.0` |
 | 3.13.0 | 2026-11-23 | **Les 32 clubs Neoness de France sont dans l’app** : dans « Mon club », on cherche sa salle (arrondissement, ville, code postal) et on la relie | `sauvegarde-v3.13.0` |
 | 3.12.0 | 2026-11-23 | **Les 389 clubs L’Orange Bleue de France sont dans l’app**, dont Mamoudzou (Mayotte) et la Corse : dans « Mon club », on cherche sa salle et on la relie | `sauvegarde-v3.12.0` |
 | 3.11.0 | 2026-11-23 | **Les 379 clubs Fitness Park de France sont dans l’app**, dont 18 dans les DOM-TOM (Guadeloupe, Martinique, Guyane, La Réunion) : dans « Mon club », on cherche sa salle (ville, code postal, territoire) et on la relie | `sauvegarde-v3.11.0` |
