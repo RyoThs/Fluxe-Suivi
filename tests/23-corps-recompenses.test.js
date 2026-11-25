@@ -147,7 +147,7 @@ test('les semaines d’affilée : juste le chiffre et le mini-graphe, à droite 
   await donner(p, { ...VIDE, sessions: trois() });
   await p.click('nav [data-tab=seance]');
   assert.ok(await p.$('#app .titre-l h1 + #serie'), 'à droite du titre « Entraînement »');
-  assert.equal((await p.textContent('#app #serie .big')).trim(), '3');
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '1', 'le bouton compte les séances de la semaine (v3.14.1, accord de Yoann)');
   assert.equal(await p.locator('#app #serie .sem i').count(), 5);
   assert.doesNotMatch(await p.textContent('#app #serie'), /semaine/i, 'aucun texte sur la carte');
   await p.click('nav [data-tab=stats]');
