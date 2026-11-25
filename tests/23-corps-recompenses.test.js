@@ -225,3 +225,27 @@ test('mise à jour avec un historique : les récompenses déjà gagnées sont no
   const d = await donnees(p);
   assert.ok(d.rv.includes('seance1') && d.rv.includes('seance10'), JSON.stringify(d.rv));
 });
+
+/* ===== Bug v3.14.1 : l'iPhone réveille l'app sans la recharger → l'indicateur restait sur l'ancienne semaine ===== */
+test('l’app revient au premier plan une nouvelle semaine : la barre « cette semaine » repart à zéro, la série est recalculée', async () => {
+  const p = await A.page();
+  /* dimanche 22 novembre 2026 au soir : une séance lundi 16 et une semaine plus tôt */
+  await p.clock.install({ time: new Date(2026, 10, 22, 20).getTime() });
+  await donner(p, { ...VIDE, sessions: [sea('a', lundi(0)), sea('b', lundi(1))] });
+  await p.click('nav [data-tab=seance]');
+  const barres = () => p.$$eval('#app #serie .sem i', l => l.map(i => i.className === 'v' ? 0 : 1));
+  assert.deepEqual(await barres(), [0, 0, 0, 1, 1], 'dimanche : la semaine en cours a sa séance');
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '2');
+  /* l'app passe en arrière-plan… et revient le mardi suivant (nouvelle semaine) */
+  await p.clock.setSystemTime(new Date(2026, 10, 24, 9).getTime());
+  await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await p.waitForTimeout(100);
+  assert.deepEqual(await barres(), [0, 0, 1, 1, 0], 'mardi : la barre de la nouvelle semaine est vide');
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '2', 'la semaine en cours ne casse pas la série');
+  /* et encore une semaine plus tard, sans séance : la série est cassée → 0 */
+  await p.clock.setSystemTime(new Date(2026, 11, 1, 9).getTime());
+  await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await p.waitForTimeout(100);
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '0', 'une semaine entière sans séance remet à zéro');
+  assert.deepEqual(p.erreurs, []);
+});

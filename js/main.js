@@ -13,6 +13,7 @@ import {sheet} from './vues/panneaux.js';
 import {surErreur} from './erreurs.js';
 import {carteErreurs} from './vues/erreurs.js';
 import {initRecompenses} from './vues/serie.js';
+import './jour.js'; /* redessine quand l'app revient au premier plan un autre jour */
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
    Elle force la mise à jour du service worker, vide SES caches (jamais tes données : elles sont ailleurs) et recharge.
    Une seule tentative par minute, pour ne jamais tourner en boucle. */
