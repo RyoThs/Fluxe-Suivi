@@ -417,3 +417,10 @@ nav{box-shadow:var(--shadow)}
 .clienc span{color:var(--muted);font-weight:400}
 .cform{border-top:1px solid var(--line);margin-top:14px}.cform h2{font-size:16px;margin:16px 0 0}
 .cbient{font-style:normal;font-size:11px;font-weight:600;color:#9a5b00;background:#fff4e0;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+/* Compteur anonyme (v3.15) : écran réservé au créateur */
+#cpt .big{font-family:var(--num);font-size:56px;font-weight:700;line-height:1.1}
+#cpt .bars{display:flex;align-items:flex-end;gap:7px;height:90px;margin-top:10px}
+#cpt .bars i{flex:1;border-radius:6px 6px 2px 2px;background:#c7cbf3}
+#cpt .bars i.on{background:var(--accent)}
+#cpt .jauge{height:10px;border-radius:5px;background:var(--raise);margin:10px 0 6px;overflow:hidden}
+#cpt .jauge b{display:block;height:100%;background:var(--grad)}

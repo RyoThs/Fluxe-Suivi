@@ -14,6 +14,7 @@ import {thumb} from '../icones.js';
 import {ico} from '../pictos.js';
 import {badgeVerifiee, bilanSalle, boutonSignaler, encartClub} from './club.js';
 import {rafraichir} from '../club-reseau.js';
+import {boutonCompteur} from './compteur.js';
 
 export let gq = '',
   gm = 'Tous',
@@ -122,7 +123,12 @@ export function viewGuide() {
   const g = gymCur();
   const muscles = `<div class="chips">${['Tous', ...M].map(m => `<button class="chip${gm === m ? ' on' : ''}" data-act="gm" data-m="${esc(m)}">${m === 'Tous' ? 'Tous les muscles' : esc(m)}</button>`).join('')}</div>`;
   const recherche = `<input id="gq" placeholder="Rechercher une machine" value="${esc(gq)}" autocomplete="off" aria-label="Rechercher une machine">`;
-  const pied = `<p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
+  /* bouton « Compteur » : seulement pour le compte du créateur (v3.15), rien pour les autres */
+  const majCompteur = () => {
+    const el = document.getElementById('gcpt');
+    if (el) el.innerHTML = boutonCompteur(majCompteur);
+  };
+  const pied = `<div id="gcpt">${boutonCompteur(majCompteur)}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
   if (!g)
     return `<h1>Ton enseigne</h1><p class="sub">Choisis ta salle de sport : tu verras uniquement ses machines.</p>${ensCards()}
 <h2>Toutes les machines</h2>${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;

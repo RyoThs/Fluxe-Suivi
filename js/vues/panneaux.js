@@ -13,6 +13,7 @@ import {panneauSerie} from './serie.js';
 import {formulaireCorps, toutesMesures} from './corps.js';
 import {groupeDe} from '../muscles.js';
 import {panneauAjout, panneauClub, panneauSignaler} from './club.js';
+import {panneauCompteur} from './compteur.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o) {
   if (!pk) history.pushState({fx: 1}, '');
@@ -53,6 +54,11 @@ export function sheet() {
   el.className = 'on';
   const top = t =>
     `<div class="sh-top"><span>${t}</span><button class="del" data-act="closepk" style="color:var(--accent);font-family:var(--body);font-size:16px">Fermer</button></div>`;
+  /* compteur anonyme (v3.15) : compte du créateur seulement */
+  if (pk.compteur) {
+    el.innerHTML = top('Compteur') + panneauCompteur();
+    return;
+  }
   /* catalogue partagé (v3.8) */
   if (pk.club) {
     el.innerHTML = top('Mon club') + panneauClub();

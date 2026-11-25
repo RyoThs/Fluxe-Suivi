@@ -5,9 +5,17 @@ import {M} from '../catalogue.js';
 import {pk} from '../etat.js';
 import {render} from '../rendu.js';
 import {setCm, setCp, setCsel, setRx, setSx} from '../vues/stats.js';
-import {closePk, openPk, openTool, sheet} from '../vues/panneaux.js';
+import {closePk, openPk, openSheet, openTool, sheet} from '../vues/panneaux.js';
+import {chargerCompteur} from '../vues/compteur.js';
 import {setSel} from '../vues/progression.js';
 export const gestes = {
+  /* Compteur anonyme (v3.15) : bouton visible seulement pour le compte du créateur */
+  compteur: () => {
+    openSheet({compteur: 1});
+    chargerCompteur(() => {
+      if (pk && pk.compteur) sheet();
+    });
+  },
   /* Ma progression : toucher un muscle (une 2e fois pour le relâcher) */
   mus: ({a, b, s, i, j, k}) => {
     setSel(b.dataset.m);
