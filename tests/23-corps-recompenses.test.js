@@ -243,7 +243,7 @@ test('l’app revient au premier plan une nouvelle semaine : la barre « cette s
   await p.click('nav [data-tab=seance]');
   const barres = () => p.$$eval('#app #serie .sem i', l => l.map(i => i.className === 'v' ? 0 : 1));
   assert.deepEqual(await barres(), [0, 0, 0, 1, 1], 'dimanche : la semaine en cours a sa séance');
-  assert.equal((await p.textContent('#app #serie .big')).trim(), '2');
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '1', '1 séance cette semaine (le bouton compte les séances)');
   /* l'app passe en arrière-plan… et revient le mardi suivant (nouvelle semaine) */
   await p.clock.setSystemTime(new Date(2026, 10, 24, 9).getTime());
   await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
@@ -261,5 +261,34 @@ test('l’app revient au premier plan une nouvelle semaine : la barre « cette s
   await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await p.waitForTimeout(100);
   assert.equal((await p.textContent('#app #serie .big')).trim(), '0', 'une semaine entière sans séance remet à zéro');
+  assert.deepEqual(p.erreurs, []);
+});
+
+/* ===== Demande de Yoann (v3.14.1) : le bouton compte les SÉANCES de la semaine : 0, 1, 2, 3… et retour à 0 chaque lundi ===== */
+test('le bouton compte les séances de la semaine (0, 1, 2…) et repart à 0 le lundi ; le panneau garde la série et le record', async () => {
+  const p = await A.page();
+  await p.clock.install({ time: new Date(2026, 10, 18, 20).getTime() }); /* mercredi 18 novembre au soir */
+  const avant = [sea('a', lundi(1)), sea('b', lundi(2))]; /* une séance les 2 semaines d'avant */
+  await donner(p, { ...VIDE, sessions: avant });
+  await p.click('nav [data-tab=seance]');
+  const chiffre = async () => (await p.textContent('#app #serie .big')).trim();
+  assert.equal(await chiffre(), '0', 'pas encore de séance cette semaine');
+  await donner(p, { ...VIDE, sessions: [...avant, sea('c', lundi(0))] });
+  await p.click('nav [data-tab=seance]');
+  assert.equal(await chiffre(), '1', '1 séance cette semaine');
+  await donner(p, { ...VIDE, sessions: [...avant, sea('c', lundi(0)), sea('d', lundi(0) + JOUR)] });
+  await p.click('nav [data-tab=seance]');
+  assert.equal(await chiffre(), '2', '2 séances cette semaine');
+  await p.click('#app #serie');
+  await p.waitForSelector('#sheet.on');
+  const txt = await p.textContent('#sheet');
+  assert.match(txt, /2 séances cette semaine/);
+  assert.match(txt, /3 semaines d’affilée/, 'la série reste expliquée dans le panneau');
+  await p.click('#sheet [data-act=closepk]');
+  /* lundi suivant : retour à 0 */
+  await p.clock.setSystemTime(new Date(2026, 10, 23, 9).getTime());
+  await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await p.waitForTimeout(100);
+  assert.equal(await chiffre(), '0', 'nouvelle semaine : retour à 0');
   assert.deepEqual(p.erreurs, []);
 });
