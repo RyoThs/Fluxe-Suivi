@@ -21,7 +21,9 @@ const numSemaine = (t, now) => Math.round((lundi(now) - lundi(t)) / (7 * JOUR));
  * Semaines d'affilée avec au moins une séance (lundi → dimanche).
  * @param {import('./donnees.js').Seance[]} sessions
  * @param {number} [now]
- * @returns {{n: number, record: number, barres: number[], cetteSemaine: number}} barres = séances des 5 dernières semaines
+ * @returns {{n: number, affiche: number, record: number, barres: number[], cetteSemaine: number}}
+ *   n = vraie série (récompenses) ; affiche = chiffre du bouton : 0 tant qu'il n'y a pas de séance cette semaine (v3.14.1) ;
+ *   barres = séances des 5 dernières semaines
  */
 export function semaines(sessions, now = Date.now()) {
   const par = new Map();
@@ -40,7 +42,7 @@ export function semaines(sessions, now = Date.now()) {
     record = Math.max(record, suite);
   });
   const barres = [4, 3, 2, 1, 0].map(k => par.get(k) || 0); /* 5 dernières semaines */
-  return {n, record: Math.max(record, n), barres, cetteSemaine: par.get(0) || 0};
+  return {n, affiche: par.has(0) ? n : 0, record: Math.max(record, n), barres, cetteSemaine: par.get(0) || 0};
 }
 
 /* nombre de records battus : chaque série qui dépasse le meilleur poids précédent de l'exercice */

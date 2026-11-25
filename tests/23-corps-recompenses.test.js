@@ -38,6 +38,14 @@ test('la semaine en cours ne casse pas la série tant qu’elle n’est pas fini
   assert.equal(s.record, 8, 'meilleure série : 8 semaines');
 });
 
+test('chiffre affiché (demande de Yoann, v3.14.1) : 0 tant qu’il n’y a pas de séance cette semaine ; la vraie série reste pour les récompenses', () => {
+  const sans = R.semaines(hebdo(10, 1), NOW);
+  assert.equal(sans.affiche, 0, 'pas encore de séance cette semaine : 0 sur le bouton');
+  assert.equal(sans.n, 10, 'la série continue quand même (récompenses, panneau)');
+  assert.equal(R.semaines(hebdo(9, 0), NOW).affiche, 10, 'avec une séance cette semaine : la série');
+  assert.equal(R.semaines([], NOW).affiche, 0);
+});
+
 test('le petit graphe : séances des 5 dernières semaines, de la plus ancienne à celle-ci', () => {
   const l = [...hebdo(6, 0), sea('x', lundi(0) + JOUR)]; /* 2 séances cette semaine */
   assert.deepEqual(R.semaines(l, NOW).barres, [1, 1, 1, 1, 2]);
@@ -241,7 +249,13 @@ test('l’app revient au premier plan une nouvelle semaine : la barre « cette s
   await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await p.waitForTimeout(100);
   assert.deepEqual(await barres(), [0, 0, 1, 1, 0], 'mardi : la barre de la nouvelle semaine est vide');
-  assert.equal((await p.textContent('#app #serie .big')).trim(), '2', 'la semaine en cours ne casse pas la série');
+  assert.equal((await p.textContent('#app #serie .big')).trim(), '0', 'pas encore de séance cette semaine : 0 sur le bouton (demande de Yoann)');
+  /* le panneau dit pareil, et rappelle la série qui attend une séance */
+  await p.click('#app #serie');
+  await p.waitForSelector('#sheet.on');
+  assert.equal((await p.textContent('#sheet .ser2 .big')).trim(), '0');
+  assert.match(await p.textContent('#sheet'), /Ta série de 2 semaines t’attend : fais une séance avant dimanche soir pour la continuer/);
+  await p.click('#sheet [data-act=closepk]');
   /* et encore une semaine plus tard, sans séance : la série est cassée → 0 */
   await p.clock.setSystemTime(new Date(2026, 11, 1, 9).getTime());
   await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));

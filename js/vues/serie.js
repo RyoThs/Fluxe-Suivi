@@ -18,7 +18,7 @@ export function carteSerie() {
         `<i class="${v ? '' : 'v'}" style="height:${v ? 8 + Math.round((v / mx) * 18) : 6}px"${i === 4 ? ' data-now="1"' : ''}></i>`
     )
     .join('');
-  return `<button class="serie-t" id="serie" data-act="serie" aria-label="${w.n} semaine${w.n > 1 ? 's' : ''} d’affilée : voir le détail et les récompenses"><span class="big">${w.n}</span><span class="sem" aria-hidden="true">${barres}</span></button>`;
+  return `<button class="serie-t" id="serie" data-act="serie" aria-label="${w.affiche} semaine${w.affiche > 1 ? 's' : ''} d’affilée : voir le détail et les récompenses"><span class="big">${w.affiche}</span><span class="sem" aria-hidden="true">${barres}</span></button>`;
 }
 /* titre de page avec l'indicateur à droite */
 export function titreSerie(titre) {
@@ -40,8 +40,14 @@ export function panneauSerie() {
         .map(r => medaille(r, r.id === derniere))
         .join('')}</div>`
   ).join('');
-  return `<div class="card"><div class="ser2 seul"><span class="big">${w.n}</span> <div class="t">semaine${w.n > 1 ? 's' : ''} d’affilée</div></div>
-<p class="mu" style="margin:10px 0 0">Tu as fait au moins une séance chaque semaine depuis ${w.n} semaine${w.n > 1 ? 's' : ''}. Une semaine va du lundi au dimanche. Ta série continue tant que tu fais au moins 1 séance par semaine ; la semaine en cours ne la casse pas tant qu’elle n’est pas finie.</p>
+  const s = n => n + ' semaine' + (n > 1 ? 's' : '');
+  /* pas encore de séance cette semaine : 0 affiché, et la série qui attend est rappelée (v3.14.1) */
+  const phrase =
+    !w.affiche && w.n
+      ? `Ta série de ${s(w.n)} t’attend : fais une séance avant dimanche soir pour la continuer.`
+      : `Tu as fait au moins une séance chaque semaine depuis ${s(w.affiche)}.`;
+  return `<div class="card"><div class="ser2 seul"><span class="big">${w.affiche}</span> <div class="t">semaine${w.affiche > 1 ? 's' : ''} d’affilée</div></div>
+<p class="mu" style="margin:10px 0 0">${phrase} Une semaine va du lundi au dimanche. Ta série continue tant que tu fais au moins 1 séance par semaine ; la semaine en cours ne la casse pas tant qu’elle n’est pas finie.</p>
 <div class="recap" style="justify-content:flex-start"><span>Cette semaine : ${w.cetteSemaine} séance${w.cetteSemaine > 1 ? 's' : ''}</span><span>Record : ${w.record} semaine${w.record > 1 ? 's' : ''}</span></div>
 <p class="mu" style="margin:8px 0 0">Les barres montrent tes séances des 5 dernières semaines (plus la barre est haute, plus tu as fait de séances) ; la dernière est la semaine en cours.</p></div>
 <div class="card"><div class="rtop"><span class="hist-date">Récompenses</span><b class="gt">${nb} / ${t.length}</b></div><p class="mu" style="margin:4px 0 0">En couleur : obtenues (la dernière brille en or). En gris : ta progression.</p>${fam}</div>`;
