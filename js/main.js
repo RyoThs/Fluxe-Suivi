@@ -14,6 +14,7 @@ import {surErreur} from './erreurs.js';
 import {carteErreurs} from './vues/erreurs.js';
 import {initRecompenses} from './vues/serie.js';
 import './jour.js'; /* redessine quand l'app revient au premier plan un autre jour */
+import {compter} from './compteur-envoi.js'; /* « +1 » anonyme de la semaine (v3.15) */
 /* Mise à jour bloquée (ancienne copie gardée par le téléphone) : l'app se répare toute seule.
    Elle force la mise à jour du service worker, vide SES caches (jamais tes données : elles sont ailleurs) et recharge.
    Une seule tentative par minute, pour ne jamais tourner en boucle. */
@@ -73,6 +74,7 @@ surNuage(o => {
   if ((o.recu || (o.statut === 'ok' && document.querySelector('.card.bkc'))) && !saisie()) render();
 });
 demarrerNuage();
+compter();
 /* Rapport d'erreurs : la carte se met à jour quand une erreur est notée ou envoyée */
 surErreur(() => {
   const c = document.querySelector('#erreurs');

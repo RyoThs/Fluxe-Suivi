@@ -36,6 +36,10 @@ function installer() {
     async lireAvis(club) { await pause(); hors(); const s = S0(); return Object.values((s.avis || {})[club] || {}); },
     async creerClub(uid, d) { await pause(); hors(); const s = S0(); s.clubs = s.clubs || {}; const id = 'club' + (Object.keys(s.clubs).length + 1); s.clubs[id] = { ...d, u: uid }; ecr(s); return id; },
     async ecrireAvis(uid, club, id, a) { await pause(); hors(); const s = S0(); s.avis = s.avis || {}; s.avis[club] = s.avis[club] || {}; s.avis[club][id] = { ...a, u: uid, t: ++s.t }; ecr(s); },
+    /* compteur anonyme (v3.15) : compteur/{semaine} = { ios, android, autre } ; admins/{uid} existe pour le créateur */
+    async compter(semaine, plat) { await pause(); hors(); if (window.__panneCompteur) throw err('internal'); const s = S0(); s.compteur = s.compteur || {}; const c = s.compteur[semaine] = s.compteur[semaine] || {}; c[plat] = (c[plat] || 0) + 1; ecr(s); window.__appels.push('compter:' + semaine + ':' + plat); },
+    async estAdmin(uid) { await pause(); hors(); const s = S0(); return !!(s.admins || {})[uid]; },
+    async lireCompteur(semaines) { await pause(); hors(); const s = S0(); if (!(s.admins || {})[s.user && s.user.uid]) throw err('permission-denied'); return semaines.map(k => ({ semaine: k, ...((s.compteur || {})[k] || {}) })); },
     async supprimerCompte(m) { await pause(); const s = S0(); const u = s.user; const c = u && s.comptes[u.email]; if (!c || c.m !== m) throw err('auth/invalid-credential'); delete s.comptes[u.email]; delete s.data[u.uid]; s.user = null; ecr(s); },
   };
 }

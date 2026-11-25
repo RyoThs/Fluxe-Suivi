@@ -309,6 +309,13 @@ export async function partager(f) {
   return f(api, E.uid);
 }
 
+/* ===== Compteur anonyme (v3.15) : lecture réservée au compte du créateur (admins/{uid} dans la base) ===== */
+export async function avecCompte(f) {
+  if (!E.uid) return null;
+  await charger();
+  return f(api, E.uid);
+}
+
 /* ===== Quand synchroniser ===== */
 let minuteur = 0,
   dernierRegard = 0;

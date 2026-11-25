@@ -20,6 +20,7 @@ Chaque fichier dit en haut ce qu'il fait, et la liste de ce qu'il emprunte aux a
 | `muscles.js` | Muscles travaillés par chaque exercice (principaux = 1 série, secondaires = ½), groupe des exercices perso |
 | `salle.js` | Ma salle : salle active, machines, notes de réglage |
 | `club.js` | Catalogue partagé par club (v3.8) : calculs purs (ce que le club décide, recherche d’un club, nettoyage des données du serveur) |
+| `compteur.js`, `compteur-envoi.js` | Compteur anonyme (v3.15) : calculs (semaine, type de téléphone) puis envoi du « +1 » de la semaine, réessayé sans réseau ; `vues/compteur.js` : écran réservé au compte du créateur |
 | `jour.js` | Nouveau jour : redessine l'écran quand l'app revient au premier plan un autre jour (le téléphone la réveille sans la recharger) |
 | `clubs-connus.js` | Clubs connus d'avance par enseigne : identifiants fixes, jamais renommés ; une liste par enseigne dans `clubs/` (`on-air.js` 137, `basic-fit.js` 903, `fitness-park.js` 379, `orange-bleue.js` 389, `neoness.js` 32, `keepcool.js` 244) |
 | `club-reseau.js` | Catalogue partagé : lecture publique des clubs et avis, écriture avec un compte vérifié, copie hors ligne |

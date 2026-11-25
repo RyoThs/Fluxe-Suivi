@@ -3,6 +3,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Compteur anonyme : n = nouveau total, a = ancien ; exactement un des trois totaux augmente de 1, les autres ne bougent pas
+    function ecart(n, a, k) {
+      return n.get(k, 0) - a.get(k, 0);
+    }
+    function plusUn(n, a) {
+      return n.keys().hasOnly(['ios', 'android', 'autre'])
+        && n.get('ios', 0) is int && n.get('android', 0) is int && n.get('autre', 0) is int
+        && ecart(n, a, 'ios') in [0, 1] && ecart(n, a, 'android') in [0, 1] && ecart(n, a, 'autre') in [0, 1]
+        && ecart(n, a, 'ios') + ecart(n, a, 'android') + ecart(n, a, 'autre') == 1;
+    }
     match /users/{uid}/{col}/{id} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
@@ -53,6 +63,20 @@ service cloud.firestore {
           && (!('b' in request.resource.data) || (request.resource.data.b is string && request.resource.data.b.size() <= 30));
         allow delete: if request.auth != null && id.matches('^[a-z0-9]{1,12}_' + request.auth.uid + '$');
       }
+    }
+    // Compteur anonyme (v3.15) : compteur/{lundi de la semaine, AAAA-MM-JJ} = { ios, android, autre }.
+    // Tout le monde (même sans compte) peut seulement AJOUTER 1 à UN des trois totaux. Aucun autre champ, aucune suppression.
+    // Seul le compte du créateur (qui a une fiche admins/{son uid}, créée à la main dans la console) peut le lire.
+    match /compteur/{semaine} {
+      allow create: if semaine.matches('^20[0-9]{2}-[01][0-9]-[0-3][0-9]$') && plusUn(request.resource.data, {});
+      allow update: if semaine.matches('^20[0-9]{2}-[01][0-9]-[0-3][0-9]$') && plusUn(request.resource.data, resource.data);
+      allow read: if request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      allow delete: if false;
+    }
+    // Fiche « créateur » : chacun peut seulement savoir si SA propre fiche existe. Création à la main dans la console.
+    match /admins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, write: if false;
     }
     // tout le reste est interdit
     match /{autre=**} {
