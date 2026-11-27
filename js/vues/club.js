@@ -35,7 +35,7 @@ export function encadreCommunautaire() {
     etat = navigator.onLine
       ? `<span class="co-ok">${pic('coche', 12)}Club partagé</span>`
       : '<span class="co-off">hors ligne · dernière liste connue</span>';
-  return `<div class="co">${tete('')}<div class="co-nom">${etat}<span>${esc(g.clubNom || g.name)}</span></div><div class="co-st"><div><b>${b.membres}</b><span>${b.membres > 1 ? 'membres' : 'membre'}</span></div><div><b>${b.verifiees.size}</b><span>${b.verifiees.size > 1 ? 'vérifiées' : 'vérifiée'}</span></div><div><b>+${b.ajoutees.length} / −${b.retirees.size}</b><span>ajouts / retraits</span></div></div><p>Ta salle est-elle juste ? Touche « ··· » sur une machine pour la confirmer ou la signaler.</p><div class="co-b"><button class="co-lk" data-act="cajout">+ Ajouter une machine vue</button><button class="co-lk" data-act="ccomment">Comment ?</button></div></div>`;
+  return `<div class="co">${tete('')}<div class="co-nom">${etat}<span>${esc(g.clubNom || g.name)}</span></div><div class="co-st"><div><b>${b.membres}</b><span>${b.membres > 1 ? 'membres' : 'membre'}</span></div><div><b>${b.verifiees.size}</b><span>${b.verifiees.size > 1 ? 'vérifiées' : 'vérifiée'}</span></div><div><b>+${b.ajoutees.length} / −${b.retirees.size}</b><span>ajouts / retraits</span></div></div><p>Ta salle est-elle juste ? Touche « ··· » sur une machine pour la confirmer ou la signaler.</p><div class="co-b"><button class="co-lk" data-act="cajout">+ Ajouter une machine vue</button><button class="co-lk" data-act="clien">Changer de club</button><button class="co-lk" data-act="ccomment">Comment ?</button></div></div>`;
 }
 /* Fenêtre « Comment ça marche ? » : 3 étapes */
 export function panneauComment() {

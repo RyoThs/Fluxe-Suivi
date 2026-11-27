@@ -105,6 +105,7 @@ test('salle communautaire rejointe : membres, vérifiées, ajoutées / retirées
   assert.match(await co.innerText(), /1\s+vérifiée/);
   assert.match(await co.textContent(), /Ta salle est-elle juste/);
   assert.equal(await co.locator('[data-act=cajout]').count(), 1);
+  assert.match(await co.locator('[data-act=clien]').textContent(), /Changer de club/, 'on peut toujours changer de club');
   await p.locator('#gl .gi', { hasText: m0 }).first().locator('[data-act=csig]').click();
   await p.waitForSelector('#sheet');
   assert.match(await p.textContent('#sheet'), /Confirmée par 2 membres · dernière fois le 12 nov/);
