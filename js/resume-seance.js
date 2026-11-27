@@ -78,7 +78,9 @@ export function resume(s, toutes, mu) {
     .slice(0, 2)
     .map(([g]) => g);
   if (cardio) groupes.push('Cardio');
-  const jour = majuscule(new Date(s.date).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'short'}));
+  const jour = majuscule(
+    new Date(s.date).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'short'})
+  );
   return {
     id: s.id,
     titre: groupes.join(' · ') || 'Séance',

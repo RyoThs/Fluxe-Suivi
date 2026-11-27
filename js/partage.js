@@ -4,7 +4,19 @@
 import {toast} from './etat.js';
 
 const L = 1080,
-  C = {fond: '#f3f5fb', carte: '#ffffff', encre: '#0b1022', gris: '#5b6482', trait: '#dfe4f1', bleu: '#4f46e5', teinte: '#eceafd', or: '#b45309', orFond: '#fff3c4', vert: '#0f766e', vertFond: '#e6fbf6'};
+  C = {
+    fond: '#f3f5fb',
+    carte: '#ffffff',
+    encre: '#0b1022',
+    gris: '#5b6482',
+    trait: '#dfe4f1',
+    bleu: '#4f46e5',
+    teinte: '#eceafd',
+    or: '#b45309',
+    orFond: '#fff3c4',
+    vert: '#0f766e',
+    vertFond: '#e6fbf6',
+  };
 const TITRE = '"Barlow Condensed", "Arial Narrow", sans-serif',
   TEXTE = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
@@ -26,7 +38,7 @@ export function dessiner(r) {
   const max = 6,
     liste = r.exercices.slice(0, max),
     plus = r.exercices.length > max ? 60 : 0,
-    hc = Math.max(1, liste.length) * 100 + 70 + plus, /* hauteur de la carte des exercices */
+    hc = Math.max(1, liste.length) * 100 + 70 + plus /* hauteur de la carte des exercices */,
     H = 540 + hc + 170;
   const cv = document.createElement('canvas');
   cv.width = L;

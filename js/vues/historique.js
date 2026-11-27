@@ -27,7 +27,7 @@ export function deplier(id) {
 const MONTRES = 3; /* exercices visibles avant « + n autres » */
 
 function boutonSauvegarde() {
-  return `<button class="hx-sv" data-act="data" aria-label="Sauvegarde, versions de secours et corbeille">${aSauvegarder() ? '<span class="pt" aria-hidden="true"></span>' : ''}${pic('bouclier', 18)}<b>Sauvegarde</b><span class="sr">${bkLine().replace(/<[^>]+>/g, '')}</span></button>`;
+  return `<button class="hx-sv" data-act="data" aria-label="Sauvegarde, versions de secours et corbeille">${aSauvegarder() ? '<span class="pt" aria-hidden="true"></span>' : ''}${pic('bouclier', 18)}<b>Sauvegarde</b><span class="sr">${bkLine()}</span></button>`;
 }
 
 function carte(r) {

@@ -133,7 +133,9 @@ test('modification et suppression voyagent d’un appareil à l’autre (la séa
   // sur p1 : on supprime b et on modifie a
   await p1.click('[data-act=closepk]');
   p1.reponses.push(true);
+  await p1.click('[data-act=hmenu][data-id=b]'); // v3.17 : actions dans le menu « ··· »
   await p1.click('[data-act=delsess][data-id=b]');
+  await p1.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p1.click('[data-act=editsess][data-id=a]');
   await p1.fill('[data-f=kg][data-i="0"][data-j="0"]', '120');
   await p1.click('[data-act=finish]');
@@ -157,6 +159,7 @@ test('sans réseau : rien n’est perdu, « en attente », puis envoi automatiqu
   // coupure du réseau (le téléphone le signale à l'app)
   await p.evaluate(() => { window.__horsLigne = true; Object.defineProperty(navigator, 'onLine', { get: () => !window.__horsLigne, configurable: true }); window.dispatchEvent(new Event('offline')); });
   p.reponses.push(true);
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   await p.waitForTimeout(3000);
   await ouvrir(p);

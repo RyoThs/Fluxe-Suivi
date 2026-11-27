@@ -18,6 +18,7 @@ test('Historique : « Créer une routine » reprend les exercices, séries et bl
   await donner(p, { ...VIDE, sessions: [SEANCE] });
   await p.click('nav [data-tab=histo]');
   p.reponses.push('Jambes');
+  await p.click('[data-act=hmenu][data-id=h1]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=mkr][data-id=h1]');
   const d = await donnees(p);
   assert.equal(d.routines.length, 1);

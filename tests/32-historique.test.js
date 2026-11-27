@@ -191,3 +191,14 @@ test('Partager annulé par l’utilisateur : aucun message d’erreur', async ()
   assert.equal(await p.locator('#toast.on').count(), 0, 'pas de message');
   assert.deepEqual(p.erreurs, []);
 });
+
+test('petit écran (320 px, iPhone SE) : rien ne dépasse sur le côté, le bouton Sauvegarde garde son bouclier', async () => {
+  const p = await A.page({ viewport: { width: 320, height: 568 } });
+  await ouvrirHisto(p, { ...VIDE, sessions: [il('a', 0, QUATRE)] });
+  assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'aucun défilement sur le côté');
+  // (le texte réservé aux lecteurs d'écran, .sr, est invisible et découpé : il ne compte pas)
+  const trop = await p.evaluate(() => [...document.querySelectorAll('#app *')].filter(e => !e.closest('.sr') && e.getBoundingClientRect().right > innerWidth + 0.5).map(e => e.className || e.tagName));
+  assert.deepEqual(trop, [], 'éléments qui dépassent');
+  assert.equal(await p.locator('.hx-sv svg').isVisible(), true);
+  assert.deepEqual(p.erreurs, []);
+});
