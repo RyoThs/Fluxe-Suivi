@@ -528,7 +528,7 @@ nav{box-shadow:var(--shadow)}
 .sx-bas{display:flex;gap:8px;margin:4px 0 6px}
 .sx-bas .sec{flex:1;min-width:0;padding:12px 8px;font-size:13.5px}
 .sx-ann{display:block;margin:6px auto 18px;font-size:14px}
-.note:placeholder-shown:not(:focus){width:auto;max-width:200px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600}
+.note:placeholder-shown:not(:focus){width:190px;max-width:100%;padding:6px 14px;border-radius:999px;font-weight:600}
 .astuces .mu{margin:6px 0}
 .sx-bas .sec{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:52px;line-height:1.2;white-space:nowrap}
 .sx-rep span{font-size:12px;color:var(--muted);font-weight:600}

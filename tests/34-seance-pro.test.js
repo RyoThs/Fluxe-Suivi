@@ -55,7 +55,7 @@ test('« ··· » d’un exercice : Remplacer, Repos, Supprimer ; plus de « Re
   await p.click('[data-act=emenu][data-i="1"]');
   const menu = p.locator('.sx-menu:visible');
   assert.equal(await menu.count(), 1);
-  assert.deepEqual(await menu.locator('button').evaluateAll(l => l.map(b => b.dataset.act)), ['exrem', 'rex', 'delex']);
+  assert.deepEqual(await menu.locator('button').evaluateAll(l => l.map(b => b.dataset.act)), ['emrem', 'emrex', 'delex']);
   await p.click('.sx-top h1');
   assert.equal(await p.locator('.sx-menu:visible').count(), 0, 'fermé en touchant ailleurs');
   p.reponses.push(true);

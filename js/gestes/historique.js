@@ -2,6 +2,8 @@
    Modifier, Créer une routine et Supprimer gardent leurs gestes d'avant (fin-seance.js, routines.js). */
 import {S, done} from '../etat.js';
 import {render} from '../rendu.js';
+import {gestes as seance} from './seance.js';
+import {gestes as repos} from './repos.js';
 import {resume} from '../resume-seance.js';
 import {partagerSeance} from '../partage.js';
 import {basculerMenu, deplier, fermerMenu, menuOuvert} from '../vues/historique.js';
@@ -28,7 +30,11 @@ document.addEventListener(
   true
 );
 
+/* les boutons du menu « ··· » d'un exercice ont leur propre nom (pas de doublon avec le glisser et la pastille Repos)
+   mais font exactement la même chose */
 export const gestes = {
+  emrem: x => seance.exrem(x),
+  emrex: x => repos.rex(x),
   emenu: ({b}) => {
     const m = b.nextElementSibling;
     if (!m || !m.classList.contains('sx-menu')) return;

@@ -114,7 +114,7 @@ function bandeau(s, ed) {
 }
 /* « ··· » d'un exercice (v3.19) : le menu est dans la page mais caché, il s'ouvre sans redessiner l'écran */
 const menuEx = (e, i) =>
-  `<button class="hx-m" data-act="emenu" data-i="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions pour ${esc(e.name)}">${pic('points', 20)}</button><div class="hx-menu sx-menu" role="menu" hidden><button role="menuitem" data-act="exrem" data-i="${i}">${pic('crayon', 18)}Remplacer</button><button role="menuitem" data-act="rex" data-i="${i}">${pic('chrono', 18)}Repos de cet exercice</button><button role="menuitem" class="r" data-act="delex" data-i="${i}">${pic('corbeille', 18)}Supprimer</button></div>`;
+  `<button class="hx-m" data-act="emenu" data-i="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions pour ${esc(e.name)}">${pic('points', 20)}</button><div class="hx-menu sx-menu" role="menu" hidden><button role="menuitem" data-act="emrem" data-i="${i}">${pic('crayon', 18)}Remplacer</button><button role="menuitem" data-act="emrex" data-i="${i}">${pic('chrono', 18)}Repos de cet exercice</button><button role="menuitem" class="r" data-act="delex" data-i="${i}">${pic('corbeille', 18)}Supprimer</button></div>`;
 function exCard(s, e, i) {
   if (e.cardio) return cardioCard(e, i);
   const pv = prevSets(e.name) || [],
