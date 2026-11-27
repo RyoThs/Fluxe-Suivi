@@ -183,6 +183,7 @@ test('Stats > Records : Poids max, Meilleure série (poids × reps), Volume (poi
     seance('b', 1, { exercises: [{ name: 'Squat', sets: [st(80, 12)] }] }),
   ] });
   await p.click('nav [data-tab=stats]');
+  await p.click('[data-act=pli][data-v=rec]'); // v3.16 : la rubrique Records est repliée au départ
   const lire = () => p.$$eval('.rec', l => l.map(r => [r.querySelector('div').firstChild.textContent, r.querySelector('span').textContent.split(' · ')[0], r.querySelector('b').textContent.replace(/\s/g, ' ')]));
   assert.deepEqual(await lire(), [['Squat', '5 répétitions', '105 kg']]);
   await p.click('[data-act=rx][data-v=serie]');

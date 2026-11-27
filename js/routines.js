@@ -1,10 +1,10 @@
 /* Fluxe Suivi — Routines : création depuis une séance de l'historique, brouillon pour la modification, démarrage.
    Une routine : {id, name, exercises:[noms], sets:[[{kg,reps,w?}…] pour chaque exercice]} */
-import {MU} from './catalogue.js';
-import {done} from './etat.js';
+import {S, done} from './etat.js';
+import {estCardio as cardio} from './muscles.js';
 import {ok, uid} from './outils.js';
 import {newEx, prevCardio, prevSets} from './calculs.js';
-export const estCardio = n => MU[n] === 'Cardio';
+export const estCardio = n => cardio(n, S.mu);
 /* séries de travail d'un exercice de séance → séries prévues (poids, répétitions, échauffement) */
 const copie = x => {
   if ('min' in x || 'km' in x || 'kcal' in x) return {min: x.min || '', km: x.km || '', kcal: x.kcal || ''};

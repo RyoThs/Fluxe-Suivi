@@ -1,6 +1,6 @@
 /* Fluxe Suivi — Lecture et nettoyage des données (téléphone ET fichiers importés) : seul ce qui est valide est gardé. */
 import {BKD, J30, KEY} from './config.js';
-import {GROUPES_PERSO} from './muscles.js';
+import {CHOIX_PERSO} from './muscles.js';
 import {RECOMPENSES} from './recompenses.js';
 /* ===== Format des données (pour un développeur : voir aussi docs/DEVELOPPEUR.md) ===== */
 /**
@@ -175,7 +175,7 @@ export function clean(d) {
   if (d.mu && typeof d.mu === 'object')
     for (const [k, v] of Object.entries(d.mu).slice(0, 1000)) {
       const n = str(k, 61);
-      if (n && n.length <= 60 && n === k && GROUPES_PERSO.includes(v)) o.mu[n] = v;
+      if (n && n.length <= 60 && n === k && CHOIX_PERSO.includes(v)) o.mu[n] = v;
     }
   /* Mon corps (v3.6.0) : pesées et mensurations, {t, kg?, mg?, taille?, poitrine?, bras?, cuisse?, hanches?} */
   o.corps = nettoyerCorps(d.corps);

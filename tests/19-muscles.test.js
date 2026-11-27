@@ -118,7 +118,7 @@ test('données : les choix valides sont gardés, les mauvais écartés, et une a
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [seance('m1', 1)], mu: { 'Presse maison': 'Jambes', 'Truc': 'Cardio', 'Machin': 42, '': 'Dos', ['x'.repeat(80)]: 'Dos' } });
   await p.click('nav [data-tab=seance]'); await p.click('[data-act=start]'); // force un enregistrement
-  assert.deepEqual((await donnees(p)).mu, { 'Presse maison': 'Jambes' });
+  assert.deepEqual((await donnees(p)).mu, { 'Presse maison': 'Jambes', 'Truc': 'Cardio' }, 'v3.16 : « Cardio » est un choix valide');
   await donner(p, { ...VIDE, sessions: [seance('m2', 1)] });
   await p.click('nav [data-tab=seance]'); await p.click('[data-act=start]');
   assert.deepEqual((await donnees(p)).mu, {});

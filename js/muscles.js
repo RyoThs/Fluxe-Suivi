@@ -32,6 +32,29 @@ export const MUSCLES = {
 
 /* Groupes proposés pour un exercice perso, et les muscles qu'ils colorent */
 export const GROUPES_PERSO = ['Pectoraux', 'Dos', 'Épaules', 'Bras', 'Jambes', 'Fessiers', 'Abdos', 'Corps entier'];
+/* Choix proposés pour un exercice perso : les groupes de muscles, plus « Cardio » (v3.16) */
+export const CHOIX_PERSO = [...GROUPES_PERSO, 'Cardio'];
+/* Noms qui parlent de cardio (sans accents, en minuscules) : reconnus tout seuls tant qu'aucun choix n'a été fait */
+const MOTS_CARDIO =
+  /\b(velo|tapis|course|courir|footing|jogging|running|rameur|aviron|elliptique|stepper|escalier|corde a sauter|natation|nage|spinning|bike|biking|vtt|cardio|hiit)\b/;
+const simple = n =>
+  String(n)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+const choixDe = (nom, mu) => (mu && Object.prototype.hasOwnProperty.call(mu, nom) ? mu[nom] : '');
+/**
+ * Un exercice est-il du cardio ? Catalogue d'abord, puis le choix de l'utilisateur, puis le nom.
+ * @param {string} nom
+ * @param {Object<string, string>} [mu]
+ * @returns {boolean}
+ */
+export function estCardio(nom, mu) {
+  if (MU[nom]) return MU[nom] === 'Cardio';
+  const g = choixDe(nom, mu);
+  if (CHOIX_PERSO.includes(g)) return g === 'Cardio';
+  return MOTS_CARDIO.test(simple(nom));
+}
 const PAR_GROUPE = {
   Pectoraux: 'pec / dela tri',
   Dos: 'dors / trap lomb bic',
@@ -234,6 +257,7 @@ export function musclesDe(nom, mu) {
  */
 export function groupeDe(nom, mu) {
   if (MU[nom]) return MU[nom];
-  const g = mu && Object.prototype.hasOwnProperty.call(mu, nom) ? mu[nom] : '';
-  return GROUPES_PERSO.includes(g) ? g : 'Perso';
+  const g = choixDe(nom, mu);
+  if (GROUPES_PERSO.includes(g)) return g;
+  return estCardio(nom, mu) ? 'Cardio' : 'Perso';
 }

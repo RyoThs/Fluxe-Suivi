@@ -4,7 +4,7 @@
 import {M} from '../catalogue.js';
 import {pk} from '../etat.js';
 import {render} from '../rendu.js';
-import {setCm, setCp, setCsel, setRx, setSx} from '../vues/stats.js';
+import {basculer, setCm, setCp, setCsel, setRx} from '../vues/stats.js';
 import {closePk, openPk, openSheet, openTool, sheet} from '../vues/panneaux.js';
 import {chargerCompteur} from '../vues/compteur.js';
 import {setSel} from '../vues/progression.js';
@@ -53,9 +53,10 @@ export const gestes = {
     sheet();
     return;
   },
-  sx: ({a, b, s, i, j, k}) => {
-    setSx(b.dataset.n);
-    return true;
+  /* Stats : déplier / replier une rubrique (v3.16) */
+  pli: ({b}) => {
+    basculer(b.dataset.v);
+    render();
   },
   /* courbe de progression (Stats) : mesure, période, point touché */
   cm: ({b}) => {

@@ -241,7 +241,6 @@ svg.courbe{display:block;width:100%;height:auto;overflow:visible;touch-action:pa
 .cdet b{font-family:var(--num);font-size:20px;color:var(--ink)}
 .crec{font-family:var(--body)!important;font-size:12px!important;color:#b45309!important;background:#fef3c7;border-radius:999px;padding:2px 8px}
 .cnote{font-size:12px;color:var(--muted);margin:10px 2px 0}
-.chip.tout:not(.on){border-color:var(--accent);color:var(--accent)}
 /* v3.0 : Sauvegarde en ligne */
 .cl .in{width:100%;font:inherit;font-size:16px;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);margin:6px 0 0}
 .cl .in:focus{outline:2px solid var(--accent);outline-offset:1px}
@@ -424,3 +423,11 @@ nav{box-shadow:var(--shadow)}
 #cpt .bars i.on{background:var(--accent)}
 #cpt .jauge{height:10px;border-radius:5px;background:var(--raise);margin:10px 0 6px;overflow:hidden}
 #cpt .jauge b{display:block;height:100%;background:var(--grad)}
+/* Stats : rubriques repliables (v3.16) */
+.pli-t{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
+.pli-t>span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pli-t .hist-date{margin:0}
+.pli-t .fl{flex:none;width:32px;height:32px;border-radius:50%;background:var(--tint);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
+.pli.ouvert .pli-t{margin-bottom:6px}
+.pli.ouvert .pli-t .fl{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.pli-t .fl{transition:none}}

@@ -117,3 +117,20 @@ test('mode avion : après une 1re visite, l’app s’ouvre sans réseau, avec s
   assert.deepEqual(p.erreurs, []);
   await p.context().setOffline(false);
 });
+
+test('réseau faible (rien ne répond) : après une 1re visite, l’app s’ouvre en quelques secondes avec la copie du téléphone', async () => {
+  const p = await A.page({ serviceWorkers: 'allow' });
+  await p.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise(ok => navigator.serviceWorker.addEventListener('controllerchange', ok, { once: true }));
+  });
+  await p.context().route('**/*', () => {}); // le téléphone croit être connecté, mais aucune réponse n'arrive jamais
+  p.erreurs.length = 0;
+  const debut = Date.now();
+  p.reload().catch(() => {});
+  await p.waitForSelector('#app h1', { timeout: 15000 }); // l'écran dessiné par l'app (pas seulement la page de départ)
+  const duree = Date.now() - debut;
+  assert.ok(duree < 8000, 'écran affiché en ' + duree + ' ms');
+  assert.match(await p.$eval('h1', e => e.textContent), /Entraînement/);
+  await p.context().unroute('**/*');
+});
