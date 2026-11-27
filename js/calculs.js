@@ -1,5 +1,6 @@
 /* Fluxe Suivi — Calculs sur l'historique : séries précédentes, records, suggestion de charge, cardio. */
 import {MU} from './catalogue.js';
+import {estCardio} from './muscles.js';
 import {S, done} from './etat.js';
 import {K, dn, e1, fmtN, mieux, norm, ok} from './outils.js';
 export function prevSets(name) {
@@ -21,7 +22,7 @@ export function best(name) {
 } /* meilleure série déjà faite (ou null) */
 /* Nouvel exercice dans la séance. « plan » = séries prévues par une routine ; sinon on reprend celles de la dernière fois */
 export function newEx(name, plan) {
-  if (MU[name] === 'Cardio')
+  if (estCardio(name, S.mu))
     return {
       name,
       cardio: true,

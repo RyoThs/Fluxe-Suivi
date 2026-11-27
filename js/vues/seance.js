@@ -14,7 +14,7 @@ import {titreSerie} from './serie.js';
 function cardioCard(e, i) {
   const pc = prevCardio(e.name),
     nt = noteOf(e.name);
-  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">Cardio${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
+  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? 'Cardio' : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">Cardio ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
 ${pc ? `<div class="prev">Dernière fois : ${esc(cline(pc))}</div>` : ''}
 <input class="note" data-note="${i}" maxlength="200" placeholder="Note (niveau, inclinaison, vitesse…)" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
 <div class="gr gh"><span>Bloc</span><span>Durée (min)</span><span>Distance (km)</span><span>Calories</span><span></span></div>

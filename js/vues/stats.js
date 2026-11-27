@@ -6,24 +6,41 @@ import {groupeDe} from '../muscles.js';
 import {carteProgression} from './progression.js';
 import {titreSerie} from './serie.js';
 import {carteCorps} from './corps.js';
-import {MESURES, MESURES_G, PERIODES, TOUTES, dessin, points, resume} from '../courbe.js';
+import {ico} from '../pictos.js';
+import {MESURES_G, PERIODES, TOUTES, dessin, points, resume} from '../courbe.js';
+/* Rubriques repliables (v3.16) : repliées par défaut ; ce qu'on a ouvert est retenu par le téléphone */
+const PLIS = ['prog', 'cardio', 'rec'],
+  CLE_PLIS = 'fx-stats-ouvert';
+let ouverts = new Set();
+try {
+  const l = JSON.parse(localStorage.getItem(CLE_PLIS) || '[]');
+  if (Array.isArray(l)) ouverts = new Set(l.filter(v => PLIS.includes(v)));
+} catch (e) {}
+export function basculer(v) {
+  if (!PLIS.includes(v)) return;
+  if (ouverts.has(v)) ouverts.delete(v);
+  else ouverts.add(v);
+  try {
+    localStorage.setItem(CLE_PLIS, JSON.stringify([...ouverts]));
+  } catch (e) {}
+}
+/* Carte repliable : son titre est un bouton ; repliée, elle montre une ligne de résumé */
+function pli(v, titre, resumeTxt, contenu, cls = '') {
+  const o = ouverts.has(v);
+  return `<div class="card pli${o ? ' ouvert' : ''}${cls ? ' ' + cls : ''}"><button class="pli-t" data-act="pli" data-v="${v}" aria-expanded="${o}"><span><span class="hist-date">${titre}</span>${o ? '' : `<span class="mu">${resumeTxt}</span>`}</span><span class="fl">${ico('bas')}</span></button>${o ? contenu : ''}</div>`;
+}
 function wk(t) {
   const d = new Date(t);
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
   return d.getTime();
 }
-/* Courbe de progression : exercice affiché, mesure, période, point touché */
-let sx = null,
-  cm = 'max',
+/* Courbe de progression (toujours globale depuis la v3.16) : mesure, période, point touché */
+let cm = 'vol',
   cp = 'm3',
   csel = -1;
-export function setSx(v) {
-  sx = v;
-  csel = -1;
-}
 export function setCm(v) {
-  if (MESURES[v] || MESURES_G[v]) {
+  if (MESURES_G[v]) {
     cm = v;
     csel = -1;
   }
@@ -37,33 +54,24 @@ export function setCp(v) {
 export function setCsel(v) {
   csel = Number.isInteger(v) ? v : -1;
 }
-const SOUS = {
-  max: 'Charge la plus lourde de chaque séance',
-  rm: 'Le poids que tu pourrais soulever 1 seule fois',
-  vol: 'Poids × répétitions × séries, à chaque séance',
-};
 const SOUS_G = {
   vol: 'Tous les exercices additionnés, à chaque séance',
   ser: 'Séries de travail validées (hors échauffement), à chaque séance',
   dur: 'Durée de chaque séance',
 };
-function progression(l, nm) {
-  if (!nm.length) return '<p class="empty" style="margin:12px">Termine une séance pour voir ta progression.</p>';
-  const g = sx === TOUTES,
-    ms = g ? MESURES_G : MESURES;
-  if (!ms[cm]) cm = g ? 'vol' : 'max'; /* la mesure choisie n'existe pas dans ce mode */
-  const pts = points(l, sx, cm, cp);
+function progression(l) {
+  if (!l.length) return '<p class="empty" style="margin:12px">Termine une séance pour voir ta progression.</p>';
+  const pts = points(l, TOUTES, cm, cp);
   const seg = (liste, cour, act, cls) =>
     `<div class="seg ${cls}" role="group">${liste.map(([v, t]) => `<button class="${cour === v ? 'on' : ''}" data-act="${act}" data-v="${v}" aria-pressed="${cour === v}">${t}</button>`).join('')}</div>`;
-  return `<div class="chips"><button class="chip tout${g ? ' on' : ''}" data-act="sx" data-n="${TOUTES}">Toutes</button>${nm.map(n => `<button class="chip${n === sx ? ' on' : ''}" data-act="sx" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
-${seg(Object.entries(ms), cm, 'cm', 'cm-seg')}<div class="mu">${(g ? SOUS_G : SOUS)[cm]}</div>
+  return `${seg(Object.entries(MESURES_G), cm, 'cm', 'cm-seg')}<div class="mu">${SOUS_G[cm]}</div>
 <div class="chead">${resume(pts, cm)}${seg(
     Object.entries(PERIODES).map(([v, [t]]) => [v, t]),
     cp,
     'cp',
     'cp-seg'
   )}</div>
-${dessin(pts, cm, csel)}${cm === 'rm' && !g ? '<p class="cnote">Calculé avec ta meilleure série de 1 à 12 répétitions (formule d’Epley). C’est une estimation : ne cherche pas à la tester sans partenaire.</p>' : ''}`;
+${dessin(pts, cm, csel)}`;
 }
 export function viewStats() {
   const l = done(),
@@ -79,8 +87,6 @@ export function viewStats() {
     return {t, v};
   });
   const mx = Math.max(1, ...weeks.map(x => x.v));
-  const nm = [...new Set(l.flatMap(s => s.exercises.filter(e => !e.cardio && e.sets.some(ok)).map(e => e.name)))];
-  if (!sx || (sx !== TOUTES && !nm.includes(sx))) sx = nm[0] || null;
   const gv = {};
   l.filter(s => now - s.date < 30 * 864e5).forEach(s =>
     s.exercises.forEach(e => {
@@ -90,15 +96,23 @@ export function viewStats() {
     })
   );
   const cs = l.filter(x => now - x.date < W).flatMap(x => x.exercises.filter(e => e.cardio));
+  const cmin = fmtN(cs.reduce((a, e) => a + csum(e, 'min'), 0)),
+    ckm = fmtN(cs.reduce((a, e) => a + csum(e, 'km'), 0));
   const cardio7 = cs.length
-    ? `<div class="card"><div class="hist-date">Cardio</div><div class="mu">7 derniers jours</div><div class="stats" style="box-shadow:none;margin:10px 0 0"><div><b>${fmtN(cs.reduce((a, e) => a + csum(e, 'min'), 0))}</b><span>minutes</span></div><div><b>${fmtN(cs.reduce((a, e) => a + csum(e, 'km'), 0))}</b><span>km</span></div><div><b>${Math.round(cs.reduce((a, e) => a + csum(e, 'kcal'), 0))}</b><span>kcal</span></div></div></div>`
+    ? pli(
+        'cardio',
+        'Cardio',
+        `${cmin} min · ${ckm} km ces 7 derniers jours`,
+        `<div class="mu">7 derniers jours</div><div class="stats" style="box-shadow:none;margin:10px 0 0"><div><b>${cmin}</b><span>minutes</span></div><div><b>${ckm}</b><span>km</span></div><div><b>${Math.round(cs.reduce((a, e) => a + csum(e, 'kcal'), 0))}</b><span>kcal</span></div></div>`
+      )
     : '';
+  const der = l.length ? l.reduce((a, x) => (x.date > a.date ? x : a)) : null;
   const gt = Object.values(gv).reduce((a, b) => a + b, 0) || 1;
   return `${titreSerie('Stats')}<p class="sub">Ta progression</p>
 ${carteProgression()}${carteCorps()}
 <div class="stats"><div><b>${l.length}</b><span>séances</span></div><div><b>${l.filter(s => now - s.date < W).length}</b><span>7 derniers jours</span></div><div><b>${fmt(today)}</b><span>kg aujourd’hui</span></div></div>
 <div class="card"><div class="hist-date">Volume par semaine</div><div class="mu">en kg, 8 dernières semaines</div><div class="chart" role="img" aria-label="Volume hebdomadaire">${weeks.map(x => `<div><i style="height:${Math.round((x.v / mx) * 100)}px"></i>${new Date(x.t).getDate()}/${new Date(x.t).getMonth() + 1}</div>`).join('')}</div></div>
-<div class="card prog"><div class="hist-date">${sx === TOUTES ? 'Progression globale' : 'Progression par exercice'}</div>${progression(l, nm)}</div>
+${pli('prog', 'Progression globale', der ? 'Dernière séance : ' + fmt(vol(der)) + ' kg soulevés' : 'Pas encore de séance', progression(l), 'prog')}
 <div class="card"><div class="hist-date">Répartition par groupe</div><div class="mu">volume des 30 derniers jours</div>${
     Object.entries(gv)
       .sort((a, b) => b[1] - a[1])
@@ -161,5 +175,26 @@ function records(l) {
         `<button class="${rx === v ? 'on' : ''}" data-act="rx" data-v="${v}" aria-pressed="${rx === v}">${t}</button>`
     )
     .join('')}</div>`;
-  return `<div class="card"><div class="hist-date">Records</div>${seg}<div class="mu">${sous}</div>${rec.map(([n, r]) => `<div class="rec"><div>${esc(n)}<br><span>${esc(r.d)} · ${jour(r.t)}</span></div><b>${rx === 'max' ? fmtN(r.v) : fmt(r.v)} kg</b></div>`).join('') || '<p class="empty" style="margin:12px">Pas encore de records.</p>'}</div>`;
+  /* résumé quand la rubrique est repliée : les 2 charges les plus lourdes */
+  const top = {};
+  l.forEach(s =>
+    s.exercises.forEach(e => {
+      if (e.cardio) return;
+      e.sets.filter(ok).forEach(x => {
+        if ((+x.kg || 0) > (top[e.name] || 0)) top[e.name] = +x.kg;
+      });
+    })
+  );
+  const res =
+    Object.entries(top)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([n, v]) => esc(n) + ' ' + fmtN(v) + ' kg')
+      .join(' · ') || 'Pas encore de records';
+  return pli(
+    'rec',
+    'Records',
+    res,
+    `${seg}<div class="mu">${sous}</div>${rec.map(([n, r]) => `<div class="rec"><div>${esc(n)}<br><span>${esc(r.d)} · ${jour(r.t)}</span></div><b>${rx === 'max' ? fmtN(r.v) : fmt(r.v)} kg</b></div>`).join('') || '<p class="empty" style="margin:12px">Pas encore de records.</p>'}`
+  );
 }

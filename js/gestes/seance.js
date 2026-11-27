@@ -6,7 +6,7 @@ import {MU} from '../catalogue.js';
 import {S, cur, pk, save, toast} from '../etat.js';
 import {cname, uid} from '../outils.js';
 import {choisir, confirmer} from '../dialogue.js';
-import {GROUPES_PERSO, groupeDe} from '../muscles.js';
+import {CHOIX_PERSO, groupeDe} from '../muscles.js';
 import {newEx, restFor, suggest} from '../calculs.js';
 import {gymCur, inGym} from '../salle.js';
 import {render} from '../rendu.js';
@@ -37,11 +37,14 @@ function demanderMuscle(nm) {
     icone: 'salle',
     titre: 'Quel muscle travaille « ' + nm + ' » ?',
     texte: 'Pour le compter dans ta progression. Tu pourras le changer plus tard dans la séance.',
-    choix: GROUPES_PERSO,
+    choix: CHOIX_PERSO,
   }).then(g => {
     if (!g) return;
     S.mu = S.mu || {};
     S.mu[nm] = g;
+    /* devenu cardio (ou l'inverse) : les séries n'ont pas le même format, l'exercice repart vide à la même place */
+    const s = cur();
+    if (s) s.exercises = s.exercises.map(e => (e.name === nm && !!e.cardio !== estCardio(nm) ? newEx(nm) : e));
     save();
     render();
   });

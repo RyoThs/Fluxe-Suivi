@@ -9,7 +9,7 @@
    (Les données de l'app sont dans le localStorage : ce fichier n'y touche jamais.) */
 
 const PREFIXE = 'fluxe-suivi-';
-const VERSION = PREFIXE + 'v50'; // change ce numéro à chaque mise à jour de l'app
+const VERSION = PREFIXE + 'v51'; // change ce numéro à chaque mise à jour de l'app
 
 // Anciens noms de cache utilisés par Fluxe Suivi avant le préfixe (relevés dans l'historique Git).
 // Ils ne sont PAS supprimés : ils servent seulement de secours en lecture pendant la transition.
@@ -119,26 +119,51 @@ const chercherDansMesCaches = async requete => {
 // Même requête, mais en demandant toujours au serveur si le fichier a changé.
 const sansVieilleCopie = req => { try { return new Request(req, { cache: 'no-cache' }); } catch (x) { return req; } };
 
+// Réseau faible (v3.16) : si le serveur ne répond pas en DELAI ms, la copie du téléphone est utilisée tout de suite
+// (la réponse du réseau, si elle arrive, met quand même la copie à jour pour la prochaine fois).
+// Pendant LENT ms ensuite, les autres fichiers sont pris directement dans la copie : l'app s'ouvre en quelques secondes.
+const DELAI = 2500;
+const LENT = 30000;
+let lentJusqua = 0;
+const attendre = ms => new Promise(ok => setTimeout(() => ok(undefined), ms));
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   // Seuls les fichiers de l'app elle-même sont gérés (plus aucun site extérieur).
   if (url.origin !== location.origin) return;
 
-  e.respondWith(
-    // cache: 'no-cache' = toujours demander au serveur si le fichier a changé (évite les vieilles copies du téléphone)
-    fetch(sansVieilleCopie(e.request))
-      .then(rep => {
-        if (rep && rep.ok) {
-          const copie = rep.clone();
-          caches.open(VERSION).then(c => c.put(e.request, copie));
-        }
-        return rep;
-      })
-      .catch(async () =>
-        (await chercherDansMesCaches(e.request)) ||
-        (e.request.mode === 'navigate' ? await chercherDansMesCaches('index.html') : undefined) ||
-        Response.error()
-      )
-  );
+  const copieDuTelephone = async () =>
+    (await chercherDansMesCaches(e.request)) ||
+    (e.request.mode === 'navigate' ? await chercherDansMesCaches('index.html') : undefined);
+
+  // cache: 'no-cache' = toujours demander au serveur si le fichier a changé (évite les vieilles copies du téléphone)
+  const reseau = fetch(sansVieilleCopie(e.request)).then(rep => {
+    if (rep && rep.ok) {
+      lentJusqua = 0;
+      const copie = rep.clone();
+      caches.open(VERSION).then(c => c.put(e.request, copie));
+    }
+    return rep;
+  });
+  e.waitUntil(reseau.then(() => {}, () => {}));
+
+  e.respondWith((async () => {
+    if (Date.now() < lentJusqua) {
+      const vite = await copieDuTelephone();
+      if (vite) return vite;
+    }
+    try {
+      const rep = await Promise.race([reseau, attendre(DELAI)]);
+      if (rep) return rep;
+      const vite = await copieDuTelephone(); // trop lent : on n'attend plus
+      if (vite) {
+        lentJusqua = Date.now() + LENT;
+        return vite;
+      }
+      return await reseau; // rien en copie : on n'a pas d'autre choix que d'attendre
+    } catch (x) {
+      return (await copieDuTelephone()) || Response.error();
+    }
+  })());
 });
