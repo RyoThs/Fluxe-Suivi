@@ -92,6 +92,7 @@ test('sans exercice terminé, « + Ajouter un exercice » reste à sa place habi
   await donner(p, seanceEnCours([{ name: 'Leg extension', sets: [afaire(50, 12)] }]));
   await p.click('nav [data-tab=seance]');
   assert.equal(await p.locator('#app [data-act=pick]').count(), 1);
-  const juste = await p.$eval('#app [data-act=pick]', b => b.nextElementSibling && b.nextElementSibling.dataset.act === 'tool');
-  assert.ok(juste, 'à côté du calculateur de disques, comme avant');
+  // v3.19 : juste au-dessus de la rangée « Calculateur de disques / Repos par défaut », toujours en bas
+  const juste = await p.$eval('#app [data-act=pick]', b => { const r = b.closest('.row'), n = r && r.nextElementSibling; return !!(n && n.classList.contains('sx-bas') && n.querySelector('[data-act=tool]')); });
+  assert.ok(juste, 'juste avant la rangée Calculateur / Repos');
 });

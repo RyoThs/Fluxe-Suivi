@@ -1,9 +1,9 @@
 /* Fluxe Suivi — Écran Séance : séance en cours, exercices, séries, cardio. */
 import {MU, TG} from '../catalogue.js';
 import {S, cur, done} from '../etat.js';
-import {BARRE, esc, mieux, fmt, fmtDate, fmtN, mins, nset, parCote, vol} from '../outils.js';
+import {BARRE, esc, mieux, fmt, fmtN, mins, nset, parCote, vol} from '../outils.js';
 import {best, cline, prevCardio, prevSets, restFor, suggest} from '../calculs.js';
-import {gymCur, noteOf} from '../salle.js';
+import {noteOf} from '../salle.js';
 import {thumb} from '../icones.js';
 import {backupCard} from '../rappel.js';
 import {dureeTxt} from '../minuteur.js';
@@ -17,9 +17,9 @@ import {titreSerie} from './serie.js';
 function cardioCard(e, i) {
   const pc = prevCardio(e.name),
     nt = noteOf(e.name);
-  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? 'Cardio' : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">Cardio ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
+  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? 'Cardio' : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">Cardio ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div>${menuEx(e, i)}</div>
 ${pc ? `<div class="prev">Dernière fois : ${esc(cline(pc))}</div>` : ''}
-<input class="note" data-note="${i}" maxlength="200" placeholder="Note (niveau, inclinaison, vitesse…)" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
+<input class="note" data-note="${i}" maxlength="200" placeholder="✎ Ajouter une note" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
 <div class="gr gh"><span>Bloc</span><span>Durée (min)</span><span>Distance (km)</span><span>Calories</span><span></span></div>
 ${e.sets.map((x, j) => `<div class="gr${x.done ? ' ok' : ''}"><span class="plate">${j + 1}</span><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="min" value="${esc(x.min)}" aria-label="Durée en minutes, bloc ${j + 1}"><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="km" value="${esc(x.km)}" aria-label="Distance en km, bloc ${j + 1}"><input type="text" inputmode="numeric" data-i="${i}" data-j="${j}" data-f="kcal" value="${esc(x.kcal)}" aria-label="Calories, bloc ${j + 1}"><button class="ck" data-act="chk" data-i="${i}" data-j="${j}" aria-pressed="${!!x.done}" aria-label="Valider le bloc ${j + 1}">✓</button></div>`).join('')}
 <button class="ghost" data-act="addset" data-i="${i}">+ Ajouter un bloc</button></section>`;
@@ -72,12 +72,14 @@ export function viewSeance() {
   const s = cur();
   if (!s) return accueil();
   const ed = !!s.edit;
-  return `<h1>${esc(fmtDate(s.date))}</h1><p class="sub">${ed ? 'Modification d’une séance passée' : 'Séance en cours'}</p>
-${bandeau(s, ed)}
-<div class="row"><button class="sec" data-act="rest">${ico('chrono')}Repos par défaut : ${dureeTxt(S.rest || 90)} (changer)</button></div>
-<p class="mu" style="margin-left:4px">Astuce : touche le numéro d’une série pour la marquer comme échauffement (É).</p>
+  /* bandeau collé en haut (v3.19) : nom de la routine, date, « Terminer », chiffres */
+  const r = s.rt && S.routines.find(x => x.id === s.rt),
+    titre = r ? r.name : ed ? 'Séance passée' : 'Séance libre',
+    jour = new Date(s.date).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'short'});
+  return `<div class="sx-top"><div class="sx-l"><div class="sx-n"><h1>${esc(titre)}</h1><div class="sx-d">${esc(jour.charAt(0).toUpperCase() + jour.slice(1))} · ${ed ? 'modification' : 'en cours'}</div></div><button class="sx-fin" data-act="finish">${ed ? 'Enregistrer' : 'Terminer'}</button></div>${bandeau(s, ed)}</div>
 ${cartes(s, ed)}
-<div class="row">${aDesFinis(s, ed) ? '' : '<button class="btn" data-act="pick">+ Ajouter un exercice</button>'}<button class="sec" data-act="tool">Calculateur de disques</button><button class="sec" data-act="finish">${ed ? 'Enregistrer les modifications' : 'Terminer la séance'}</button><button class="del" data-act="cancel">${ed ? 'Annuler les modifications' : 'Annuler la séance'}</button></div>`;
+${aDesFinis(s, ed) ? '' : AJOUT}<div class="sx-bas"><button class="sec" data-act="tool">Calculateur de disques</button><button class="sec sx-rep" data-act="rest"><span>Repos par défaut</span><b>${dureeTxt(S.rest || 90)}</b></button></div>
+<button class="del sx-ann" data-act="cancel">${ed ? 'Annuler les modifications' : 'Annuler la séance'}</button>`;
 }
 /* Ordre d'affichage (v3.5.1) : exercices en cours en haut (le nouvel ajout aussi), exercices terminés en bas,
    le dernier fini en premier. Les données gardent l'ordre réel (Historique). En modification d'une séance passée : ordre réel. */
@@ -110,6 +112,9 @@ function bandeau(s, ed) {
     pc = prevues ? Math.round((faites / prevues) * 100) : 0;
   return `<div class="card live"><div class="kpi"><div><span class="lab">Durée</span><b><span id="el">${ed ? s.dur || 0 : mins(s.date)}</span> <small>min</small></b></div><div><span class="lab">Volume</span><b>${fmt(vol(s))} <small>kg</small></b></div><div><span class="lab">Séries</span><b>${faites} <small>/ ${prevues}</small></b></div></div><div class="prog" aria-hidden="true"><i style="width:${pc}%"></i></div></div>`;
 }
+/* « ··· » d'un exercice (v3.19) : le menu est dans la page mais caché, il s'ouvre sans redessiner l'écran */
+const menuEx = (e, i) =>
+  `<button class="hx-m" data-act="emenu" data-i="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions pour ${esc(e.name)}">${pic('points', 20)}</button><div class="hx-menu sx-menu" role="menu" hidden><button role="menuitem" data-act="emrem" data-i="${i}">${pic('crayon', 18)}Remplacer</button><button role="menuitem" data-act="emrex" data-i="${i}">${pic('chrono', 18)}Repos de cet exercice</button><button role="menuitem" class="r" data-act="delex" data-i="${i}">${pic('corbeille', 18)}Supprimer</button></div>`;
 function exCard(s, e, i) {
   if (e.cardio) return cardioCard(e, i);
   const pv = prevSets(e.name) || [],
@@ -124,10 +129,10 @@ function exCard(s, e, i) {
     px = proch >= 0 ? e.sets[proch] : null,
     dq = px && BARRE.has(e.name) && +px.kg > 0 ? parCote(px.kg) : null;
   const meta = `<div class="meta"><button class="chip-m" data-act="rex" data-i="${i}" aria-label="Repos pour cet exercice : ${dureeTxt(restFor(e.name))}, toucher pour changer">${ico('chrono')}Repos <b>${dureeTxt(restFor(e.name))}</b></button>${dq ? `<span class="chip-m">${ico('salle')}Par côté <b>${dq.length ? dq.map(fmtN).join(' + ') : 'barre seule'}</b></span>` : ''}</div>`;
-  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? esc(MU[e.name]) : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">${esc(groupeDe(e.name, S.mu))} ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div><button class="del" data-act="delex" data-i="${i}">Retirer</button></div>
+  return `<section class="card"><div class="ex-head"><div class="eh">${thumb(e.name, 'sm')}<div><div class="ex-name">${esc(e.name)}</div><div class="mu">${MU[e.name] ? esc(MU[e.name]) : `<button class="mub" data-act="pmu" data-i="${i}" aria-label="Choisir le muscle de cet exercice">${esc(groupeDe(e.name, S.mu))} ${ico('crayon')}</button>`}${TG[e.name] ? ' · ' + esc(TG[e.name]) : ''}</div></div></div>${menuEx(e, i)}</div>
 ${meta}
 ${sg ? `<button class="sg" data-act="sug" data-i="${i}">${ico('progres')}${esc(sg.txt)}<small>${esc(sg.why)}</small></button>` : ''}
-<input class="note" data-note="${i}" maxlength="200" placeholder="${gymCur() ? 'Réglage dans ' + esc(gymCur().name) + ' (siège, hauteur…)' : 'Note (réglage du siège, hauteur…)'}" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
+<input class="note" data-note="${i}" maxlength="200" placeholder="✎ Ajouter une note" value="${esc(nt)}" autocomplete="off" aria-label="Note pour ${esc(e.name)}">
 <div class="gr gh"><span>Série</span><span>Précédent</span><span>kg</span><span>Réps</span><span></span></div>
 ${e.sets
   .map((x, j) => {
