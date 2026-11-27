@@ -6,10 +6,19 @@ import {resume} from '../resume-seance.js';
 import {partagerSeance} from '../partage.js';
 import {basculerMenu, deplier, fermerMenu, menuOuvert} from '../vues/historique.js';
 
+/* menus « ··· » des exercices (séance en cours, v3.19) : dans la page mais cachés ; un seul ouvert à la fois */
+const fermerMenusEx = sauf =>
+  document.querySelectorAll('.sx-menu:not([hidden])').forEach(m => {
+    if (m === sauf) return;
+    m.hidden = true;
+    const b = m.previousElementSibling;
+    if (b) b.setAttribute('aria-expanded', 'false');
+  });
 /* Toucher ailleurs que sur le bouton « ··· » ferme le menu (avant que le geste touché ne s'exécute) */
 document.addEventListener(
   'click',
   ev => {
+    if (!ev.target.closest('[data-act=emenu]')) fermerMenusEx(null);
     if (menuOuvert() === null || ev.target.closest('[data-act=hmenu]')) return;
     const dansMenu = ev.target.closest('.hx-menu');
     fermerMenu();
@@ -20,6 +29,13 @@ document.addEventListener(
 );
 
 export const gestes = {
+  emenu: ({b}) => {
+    const m = b.nextElementSibling;
+    if (!m || !m.classList.contains('sx-menu')) return;
+    fermerMenusEx(m);
+    m.hidden = !m.hidden;
+    b.setAttribute('aria-expanded', String(!m.hidden));
+  },
   hmenu: ({b}) => {
     basculerMenu(b.dataset.id);
     render();

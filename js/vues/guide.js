@@ -128,7 +128,7 @@ export function viewGuide() {
     const el = document.getElementById('gcpt');
     if (el) el.innerHTML = boutonCompteur(majCompteur);
   };
-  const pied = `<div id="gcpt">${boutonCompteur(majCompteur)}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
+  const pied = `<div class="card astuces"><div class="hist-date">Astuces</div><p class="mu">Pendant une séance, touche le numéro d’une série pour la marquer comme échauffement (É) : elle ne compte pas dans tes records ni dans ton volume.</p><p class="mu">Glisse un exercice vers la gauche pour le remplacer ou le supprimer.</p></div><div id="gcpt">${boutonCompteur(majCompteur)}</div><p class="mu" style="text-align:center;margin-top:18px">Fluxe v${VER}</p>`;
   if (!g)
     return `<h1>Ton enseigne</h1><p class="sub">Choisis ta salle de sport : tu verras uniquement ses machines.</p>${ensCards()}
 <h2>Toutes les machines</h2>${recherche}${muscles}<div id="gl">${glist()}</div>${pied}`;
