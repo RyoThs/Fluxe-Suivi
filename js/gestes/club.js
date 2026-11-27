@@ -9,7 +9,7 @@ import {avertir} from '../dialogue.js';
 import {chainOf, gymCur} from '../salle.js';
 import {render} from '../rendu.js';
 import {closePk, openSheet, sheet} from '../vues/panneaux.js';
-import {cacherEncart, listeClubs, zoneCreer} from '../vues/club.js';
+import {listeClubs, zoneCreer} from '../vues/club.js';
 import {creerClub, donnerAvis, listerClubs, lireAvis, oublier} from '../club-reseau.js';
 import {texteErreur} from '../nuage.js';
 
@@ -125,10 +125,9 @@ export const gestes = {
       }
     );
   },
-  cplustard: () => {
-    const g = gymCur();
-    if (g) cacherEncart(g.id);
-    return true;
+  /* « Comment ? » de la salle communautaire (v3.20) */
+  ccomment: () => {
+    openSheet({comment: 1});
   },
   csig: ({b}) => {
     if (!gymCur()) return;
