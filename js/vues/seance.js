@@ -1,14 +1,17 @@
 /* Fluxe Suivi — Écran Séance : séance en cours, exercices, séries, cardio. */
 import {MU, TG} from '../catalogue.js';
-import {S, cur} from '../etat.js';
+import {S, cur, done} from '../etat.js';
 import {BARRE, esc, mieux, fmt, fmtDate, fmtN, mins, nset, parCote, vol} from '../outils.js';
 import {best, cline, prevCardio, prevSets, restFor, suggest} from '../calculs.js';
 import {gymCur, noteOf} from '../salle.js';
-import {DB, thumb} from '../icones.js';
+import {thumb} from '../icones.js';
 import {backupCard} from '../rappel.js';
 import {dureeTxt} from '../minuteur.js';
-import {ico} from '../pictos.js';
-import {derniere, estCardio, ilYa, nbSeries} from '../routines.js';
+import {ico, pic} from '../pictos.js';
+import {derniere, estCardio} from '../routines.js';
+import {depuis, prevu, quand, suggestion} from '../resume-routine.js';
+import {dansLaSemaine} from '../resume-seance.js';
+import {menuOuvert} from './historique.js';
 import {groupeDe} from '../muscles.js';
 import {titreSerie} from './serie.js';
 function cardioCard(e, i) {
@@ -21,25 +24,53 @@ ${pc ? `<div class="prev">Dernière fois : ${esc(cline(pc))}</div>` : ''}
 ${e.sets.map((x, j) => `<div class="gr${x.done ? ' ok' : ''}"><span class="plate">${j + 1}</span><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="min" value="${esc(x.min)}" aria-label="Durée en minutes, bloc ${j + 1}"><input type="text" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="km" value="${esc(x.km)}" aria-label="Distance en km, bloc ${j + 1}"><input type="text" inputmode="numeric" data-i="${i}" data-j="${j}" data-f="kcal" value="${esc(x.kcal)}" aria-label="Calories, bloc ${j + 1}"><button class="ck" data-act="chk" data-i="${i}" data-j="${j}" aria-pressed="${!!x.done}" aria-label="Valider le bloc ${j + 1}">✓</button></div>`).join('')}
 <button class="ghost" data-act="addset" data-i="${i}">+ Ajouter un bloc</button></section>`;
 }
-/* Carte d'une routine sur l'accueil : exercices et séries prévues, dernière fois, Modifier, Démarrer */
-function carteRoutine(r, k) {
-  const d = derniere(r);
-  const li = r.exercises
-    .map((n, i) => {
-      const nb = nbSeries(r, i);
-      return `<div><b>${esc(n)}</b>${nb ? ' · ' + nb + (estCardio(n) ? ' bloc' : ' série') + (nb > 1 ? 's' : '') : ''}</div>`;
-    })
+/* ===== Accueil (v3.18) : « À faire aujourd'hui », Séance libre, routines compactes avec tous leurs exercices ===== */
+const sansAccent = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const repere = n => (estCardio(n) ? 'CAR' : sansAccent(groupeDe(n, S.mu)).slice(0, 3).toUpperCase());
+/* séries prévues d'un exercice : celles de la routine, sinon celles de la dernière fois */
+const planDe = (r, i) => {
+  const n = r.exercises[i];
+  if (r.sets && r.sets[i] && r.sets[i].length) return r.sets[i];
+  return (estCardio(n) ? (prevCardio(n) || {}).sets : prevSets(n)) || [];
+};
+const lignes = r =>
+  r.exercises
+    .map(
+      (n, i) =>
+        `<div><i class="${estCardio(n) ? 'c' : ''}" aria-hidden="true">${esc(repere(n))}</i><b>${esc(n)}</b><span>${esc(prevu(planDe(r, i), estCardio(n)))}</span></div>`
+    )
     .join('');
-  return `<div class="card"><div class="ex-head"><div><div class="ex-name">${esc(r.name)}</div><div class="mu">${d ? 'Faite ' + ilYa(d) : 'Pas encore faite'}</div></div><button class="del" style="color:var(--accent)" data-act="redit" data-k="${k}">${ico('crayon')}Modifier</button></div><div class="rlist">${li}</div><button class="btn" data-act="startr" data-k="${k}">Démarrer</button></div>`;
+const PLAY =
+  '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+function carteRoutine(r, k) {
+  const series = r.exercises.reduce((a, n, i) => (estCardio(n) ? a : a + planDe(r, i).filter(x => !x.w).length), 0),
+    id = 'r:' + k,
+    ouvert = menuOuvert() === id;
+  const menu = ouvert
+    ? `<div class="hx-menu" role="menu"><button role="menuitem" data-act="redit" data-k="${k}">${pic('crayon', 18)}Modifier la routine</button><button role="menuitem" class="r" data-act="delr" data-k="${k}">${pic('corbeille', 18)}Supprimer</button></div>`
+    : '';
+  return `<div class="card en-r"><div class="en-rc"><div class="en-rt">${esc(r.name)}</div><div class="en-rm">${r.exercises.length} exercice${r.exercises.length > 1 ? 's' : ''}${series ? ' · ' + series + ' série' + (series > 1 ? 's' : '') : ''} · ${esc(quand(derniere(r)))}</div><div class="rlist">${lignes(r)}</div></div><div class="en-ra"><button class="en-play" data-act="startr" data-k="${k}" aria-label="Démarrer ${esc(r.name)}">${PLAY}</button><button class="hx-m" data-act="rmenu" data-k="${k}" aria-haspopup="menu" aria-expanded="${ouvert}" aria-label="Actions pour la routine ${esc(r.name)}">${pic('points', 20)}</button></div>${menu}</div>`;
+}
+function carteSuggestion() {
+  const k = suggestion(S.routines.map(derniere));
+  if (k < 0) return '';
+  const r = S.routines[k],
+    d = derniere(r),
+    der = d ? done().find(s => s.rt === r.id && s.date === d) : null;
+  return `<div class="card en-sug"><div class="en-sug-k">À faire aujourd’hui</div><div class="en-sug-t">${esc(r.name)}</div><div class="en-sug-m">${esc(depuis(d))}${der && der.dur ? ' · dernière fois ' + der.dur + ' min' : ''}</div><div class="en-sx">${r.exercises.map((n, i) => `<div><b>${esc(n)}</b><span>${esc(prevu(planDe(r, i), estCardio(n)))}</span></div>`).join('')}</div><button class="en-go" data-act="startr" data-k="${k}">${PLAY}Démarrer ${esc(r.name)}</button></div>`;
+}
+function accueil() {
+  const jour = new Date().toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'short'}),
+    n = dansLaSemaine(done());
+  return `${titreSerie('Entraînement')}<p class="sub">${esc(jour.charAt(0).toUpperCase() + jour.slice(1))} · ${n ? n + ' séance' + (n > 1 ? 's' : '') + ' cette semaine' : 'aucune séance cette semaine'}</p>${backupCard()}
+${carteSuggestion()}<button class="en-libre" data-act="start">+ Séance libre</button>
+<div class="en-sec"><b>Mes routines</b>${S.routines.length ? `<span>${S.routines.length} routine${S.routines.length > 1 ? 's' : ''}</span>` : ''}</div>
+${S.routines.map(carteRoutine).join('') || '<p class="empty">Aucune routine pour l’instant.</p>'}
+<p class="mu" style="text-align:center;margin:6px 8px 14px">Nouvelle routine : Historique › « ··· » › Créer une routine</p>`;
 }
 export function viewSeance() {
   const s = cur();
-  if (!s)
-    return `${titreSerie('Entraînement')}<p class="sub">Lance une séance ou pars d’une routine.</p>${backupCard()}
-<div class="card"><button class="btn big" data-act="start">${DB} Séance vide</button></div>
-<h2>Mes routines</h2>
-${S.routines.map(carteRoutine).join('') || '<p class="empty">Aucune routine pour l’instant.</p>'}
-<p class="mu" style="text-align:center;margin:4px 8px 14px">Pour créer une routine : Historique, puis « Créer une routine » sous la séance de ton choix.</p>`;
+  if (!s) return accueil();
   const ed = !!s.edit;
   return `<h1>${esc(fmtDate(s.date))}</h1><p class="sub">${ed ? 'Modification d’une séance passée' : 'Séance en cours'}</p>
 ${bandeau(s, ed)}

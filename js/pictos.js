@@ -18,6 +18,7 @@ const D = {
     '<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12.5 3.5 3.5 0 0 0 6.5 19z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/>',
   coche: '<path d="M20 6 9 17l-5-5"/>',
   bas: '<path d="m6 9 6 6 6-6"/>',
+  croix: '<path d="M6 6l12 12M18 6 6 18"/>',
   points: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   partage: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>',

@@ -29,6 +29,11 @@ export const gestes = {
       s = l.find(x => x.id === b.dataset.id);
     if (s) partagerSeance(resume(s, l, S.mu), s.date);
   },
+  /* menu « ··· » d'une routine (page Entraînement, v3.18) */
+  rmenu: ({b}) => {
+    basculerMenu('r:' + b.dataset.k);
+    render();
+  },
   hplus: ({b}) => {
     deplier(b.dataset.id);
     render();
