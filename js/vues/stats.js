@@ -9,11 +9,10 @@ import {carteCorps} from './corps.js';
 import {ico} from '../pictos.js';
 import {MESURES_G, PERIODES, TOUTES, dessin, points, resume} from '../courbe.js';
 /* Rubriques repliables (v3.16) : repliées par défaut ; ce qu'on a ouvert est retenu par le téléphone */
-const PLIS = ['prog', 'cardio', 'rec'],
-  CLE_PLIS = 'fx-stats-ouvert';
+const PLIS = ['prog', 'cardio', 'rec']; /* mémorisé sous la clé fx-stats-ouvert */
 let ouverts = new Set();
 try {
-  const l = JSON.parse(localStorage.getItem(CLE_PLIS) || '[]');
+  const l = JSON.parse(localStorage.getItem('fx-stats-ouvert') || '[]');
   if (Array.isArray(l)) ouverts = new Set(l.filter(v => PLIS.includes(v)));
 } catch (e) {}
 export function basculer(v) {
@@ -21,7 +20,7 @@ export function basculer(v) {
   if (ouverts.has(v)) ouverts.delete(v);
   else ouverts.add(v);
   try {
-    localStorage.setItem(CLE_PLIS, JSON.stringify([...ouverts]));
+    localStorage.setItem('fx-stats-ouvert', JSON.stringify([...ouverts]));
   } catch (e) {}
 }
 /* Carte repliable : son titre est un bouton ; repliée, elle montre une ligne de résumé */
