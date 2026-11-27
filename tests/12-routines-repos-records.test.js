@@ -29,9 +29,9 @@ test('Historique : « Créer une routine » reprend les exercices, séries et bl
   assert.deepEqual(r.sets[1], [{ min: '20', km: '3', kcal: '200' }]);
   assert.ok(r.id);
   await p.click('nav [data-tab=seance]');
-  const carte = await p.textContent('.rlist');
-  assert.match(carte, /Squat · 3 séries/);
-  assert.match(carte, /Tapis de course · 1 bloc/);
+  const carte = await p.innerText('.rlist'); // v3.18 : une ligne par exercice (nom, puis ce qui est prévu)
+  assert.match(carte, /Squat\s+3 séries · 105 kg/);
+  assert.match(carte, /Tapis de course\s+1 bloc · 20 min/);
   assert.deepEqual(p.erreurs, []);
 });
 
@@ -53,6 +53,7 @@ test('fin de séance : plus aucune question « routine »', async () => {
 test('modifier une routine : poids, reps, + série, × série, bloc cardio, + exercice ; puis la séance démarre préremplie', async () => {
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [SEANCE], routines: [{ id: 'r1', name: 'Jambes', exercises: ['Squat', 'Tapis de course'], sets: [[{ kg: '100', reps: '8' }, { kg: '100', reps: '8' }], [{ min: '20', km: '3', kcal: '200' }]] }] });
+  await p.click('[data-act=rmenu][data-k="0"]'); // v3.18 : Modifier est dans le menu « ··· »
   await p.click('[data-act=redit][data-k="0"]');
   await p.fill('#rn', 'Jambes lourdes');
   await p.fill('[data-rf=kg][data-ri="0"][data-rj="1"]', '110');
@@ -81,6 +82,7 @@ test('modifier une routine : poids, reps, + série, × série, bloc cardio, + ex
 test('Fermer l’éditeur sans enregistrer ne change rien ; une ancienne routine (sans séries) reste utilisable', async () => {
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [SEANCE], routines: [{ name: 'Vieille', exercises: ['Squat'] }] });
+  await p.click('[data-act=rmenu][data-k="0"]'); // v3.18 : Modifier est dans le menu « ··· »
   await p.click('[data-act=redit][data-k="0"]');
   assert.equal(await p.inputValue('[data-rf=kg][data-ri="0"][data-rj="2"]'), '105', 'séries de la dernière fois proposées');
   await p.fill('[data-rf=kg][data-ri="0"][data-rj="0"]', '999');
@@ -95,6 +97,7 @@ test('données abîmées dans une routine : les valeurs invalides sont vidées, 
   const p = await A.page();
   await donner(p, { ...VIDE, routines: [{ id: 'ok', name: 'X', exercises: ['Squat'], sets: [[{ kg: 'abc', reps: '8' }, null, { kg: '50', reps: '5', w: true }]] }] });
   const d = await donnees(p);
+  await p.click('[data-act=rmenu][data-k="0"]'); // v3.18 : Modifier est dans le menu « ··· »
   await p.click('[data-act=redit][data-k="0"]'); await p.click('[data-act=rsave]');
   assert.deepEqual((await donnees(p)).routines[0].sets, [[{ kg: '', reps: '8' }, { kg: '50', reps: '5', w: true }]]);
   assert.ok(d);

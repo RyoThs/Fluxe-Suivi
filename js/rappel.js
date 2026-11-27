@@ -1,7 +1,6 @@
 /* Fluxe Suivi — Rappel de sauvegarde : séances pas encore dans un fichier. */
 import {S, done} from './etat.js';
-import {esc, fmtDate} from './outils.js';
-import {ico} from './pictos.js';
+import {pic} from './pictos.js';
 import {connecte, enAttente} from './nuage.js';
 /* Avec un compte « Sauvegarde en ligne » à jour, les séances sont déjà à l'abri : plus de rappel de fichier. */
 const enLigneAJour = () => connecte() && enAttente() === 0;
@@ -29,8 +28,9 @@ export function bkLine() {
     ? `<span class="bk warn">${u} séance${u > 1 ? 's' : ''} pas encore dans un fichier</span>`
     : '<span class="bk ok">✓ Tout est sauvegardé</span>';
 }
+/* Rappel sur une ligne (v3.18) : point orange, nombre de séances, « Sauvegarder », ✕ = plus tard (2 jours) */
 export function backupCard() {
   if (!bkDue() || Date.now() - (S.snooze || 0) < 1728e5 || enLigneAJour()) return '';
   const u = unsaved();
-  return `<div class="card bkc"><div class="hist-date">${ico('bouclier')}Pense à sauvegarder</div><div class="mu">${u > 1 ? u + ' séances ne sont' : '1 séance n’est'} que sur ce téléphone. ${S.lastBackup ? 'Dernier fichier : ' + esc(fmtDate(S.lastBackup)) + '.' : 'Tu n’as encore jamais fait de fichier.'} Si le téléphone est perdu, le fichier est le seul moyen de les retrouver.</div><div class="dat"><button class="btn" data-act="file">Sauvegarder</button><button class="sec" data-act="snz">Plus tard</button></div></div>`;
+  return `<div class="card bkc" role="status"><span class="d" aria-hidden="true"></span><span class="t"><b>Pense à sauvegarder</b> · ${u > 1 ? u + ' séances seulement' : '1 séance seulement'} sur ce téléphone</span><button class="bkb" data-act="file">Sauvegarder</button><button class="bkx" data-act="snz" aria-label="Plus tard (dans 2 jours)">${pic('croix', 16)}</button></div>`;
 }
