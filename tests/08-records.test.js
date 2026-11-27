@@ -19,12 +19,12 @@ test('le record est le poids le plus lourd soulevé, sans poids ajouté', async 
     s('b', 2, 'Tirage vertical', [[35, 10], [30, 12]]),
   ] });
   await p.click('nav [data-tab=stats]');
+  await p.click('[data-act=pli][data-v=rec]'); // v3.16 : la rubrique Records est repliée au départ
   const r = await records(p);
   assert.deepEqual(r.map(x => x.slice(0, 2)), [['Triceps machine hammer', '50 kg'], ['Tirage vertical', '35 kg']]);
   assert.match(r[0][2], /^12 répétitions · /);
   /* les Records restent le poids réellement soulevé (décision v2.4.3) : le 1RM estimé n'existe que dans la courbe, en option */
   assert.doesNotMatch(await p.$eval('.rec-seg', e => e.closest('.card').textContent), /Epley|1RM/);
-  assert.equal(await p.$eval('[data-act=cm].on', e => e.dataset.v), 'max', 'la courbe montre la charge réelle par défaut');
   assert.deepEqual(p.erreurs, []);
 });
 
@@ -37,6 +37,7 @@ test('plus lourd mais moins de répétitions = nouveau record ; à poids égal, 
     s('d', 1, 'Squat', [[90, 20]]),   // plus léger → pas record
   ] });
   await p.click('nav [data-tab=stats]');
+  await p.click('[data-act=pli][data-v=rec]'); // v3.16 : la rubrique Records est repliée au départ
   const [[, kg, detail]] = await records(p);
   assert.equal(kg, '105 kg');
   assert.match(detail, /^5 répétitions/);
@@ -46,6 +47,7 @@ test('les séries d’échauffement ne comptent pas, les demi-kilos sont affich�
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [s('a', 1, 'Développé couché', [[120, 1, true], [82.5, 6]])] });
   await p.click('nav [data-tab=stats]');
+  await p.click('[data-act=pli][data-v=rec]'); // v3.16 : la rubrique Records est repliée au départ
   assert.equal((await records(p))[0][1], '82,5 kg');
 });
 

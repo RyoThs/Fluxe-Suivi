@@ -23,9 +23,10 @@ test('Stats : les cartes existantes sont toutes là, dans le même ordre (chiffr
   await donner(p, AVEC_CARDIO);
   await p.click('nav [data-tab=stats]');
   const titres = await p.$$eval('#app .card .hist-date', l => l.map(x => x.textContent.trim()));
-  const attendus = ['Volume par semaine', 'Progression par exercice', 'Répartition par groupe', 'Cardio', 'Records'];
+  const attendus = ['Répartition par groupe', 'Volume par semaine', 'Progression globale', 'Cardio', 'Records']; // ordre choisi par Yoann (v3.16)
   assert.deepEqual(titres.filter(t => attendus.includes(t)), attendus);
   assert.equal(await p.locator('#app .stats').first().isVisible(), true, 'le bandeau de chiffres');
+  assert.ok(await p.$eval('#app .stats', e => !!(e.compareDocumentPosition(document.querySelector('#mp')) & Node.DOCUMENT_POSITION_FOLLOWING)), 'v3.16 : le bandeau de chiffres est tout en haut, avant Ma progression');
   assert.deepEqual(p.erreurs, []);
 });
 
@@ -153,7 +154,7 @@ test('la carte « Ma progression » arrive en premier dans les Stats, avec le ma
   assert.match(await p.textContent('#mp'), /Ma progression/);
   assert.equal(await p.locator('#mp svg.corps').count(), 2);
   const titres = await p.$$eval('#app .card .hist-date', l => l.map(x => x.textContent.trim()));
-  for (const t of ['Volume par semaine', 'Progression par exercice', 'Répartition par groupe', 'Cardio', 'Records']) assert.ok(titres.includes(t), t);
+  for (const t of ['Volume par semaine', 'Progression globale', 'Répartition par groupe', 'Cardio', 'Records']) assert.ok(titres.includes(t), t);
   assert.deepEqual(p.erreurs, []);
 });
 

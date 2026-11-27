@@ -16,7 +16,7 @@ const VERSION = PREFIXE + 'v51'; // change ce numéro à chaque mise à jour de 
 const ANCIENS_CACHES = ['fluxe-v10', 'fluxe-v6', 'fluxe-v5', 'muscu-v7', 'muscu-v6', 'muscu-v5', 'muscu-v4', 'muscu-v2', 'muscu-v1'];
 
 const FICHIERS = [
-  './', 'index.html', 'manifest.json', 'css/app.css?v=3.15.0', 'js/main.js?v=3.15.0',
+  './', 'index.html', 'manifest.json', 'css/app.css?v=3.16.0', 'js/main.js?v=3.16.0',
   // les autres morceaux du code (chargés par js/main.js)
   'js/actions.js',
   'js/nuage.js',
