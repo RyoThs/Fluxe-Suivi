@@ -108,10 +108,9 @@ export function viewStats() {
   const der = l.length ? l.reduce((a, x) => (x.date > a.date ? x : a)) : null;
   const gt = Object.values(gv).reduce((a, b) => a + b, 0) || 1;
   return `${titreSerie('Stats')}<p class="sub">Ta progression</p>
-${carteProgression()}${carteCorps()}
 <div class="stats"><div><b>${l.length}</b><span>séances</span></div><div><b>${l.filter(s => now - s.date < W).length}</b><span>7 derniers jours</span></div><div><b>${fmt(today)}</b><span>kg aujourd’hui</span></div></div>
+${carteProgression()}${carteCorps()}
 <div class="card"><div class="hist-date">Volume par semaine</div><div class="mu">en kg, 8 dernières semaines</div><div class="chart" role="img" aria-label="Volume hebdomadaire">${weeks.map(x => `<div><i style="height:${Math.round((x.v / mx) * 100)}px"></i>${new Date(x.t).getDate()}/${new Date(x.t).getMonth() + 1}</div>`).join('')}</div></div>
-${pli('prog', 'Progression globale', der ? 'Dernière séance : ' + fmt(vol(der)) + ' kg soulevés' : 'Pas encore de séance', progression(l), 'prog')}
 <div class="card"><div class="hist-date">Répartition par groupe</div><div class="mu">volume des 30 derniers jours</div>${
     Object.entries(gv)
       .sort((a, b) => b[1] - a[1])
@@ -121,6 +120,7 @@ ${pli('prog', 'Progression globale', der ? 'Dernière séance : ' + fmt(vol(der)
       )
       .join('') || '<p class="empty" style="margin:12px">Pas encore de données.</p>'
   }</div>
+${pli('prog', 'Progression globale', der ? 'Dernière séance : ' + fmt(vol(der)) + ' kg soulevés' : 'Pas encore de séance', progression(l), 'prog')}
 ${cardio7}${records(l)}`;
 }
 /* Records : 3 onglets
