@@ -64,3 +64,20 @@ test('Progression globale : aucun bouton d’exercice ni « Toutes », courbe de
   assert.ok((await titres(p)).includes('Progression globale'));
   assert.deepEqual(p.erreurs, []);
 });
+
+test('v3.16.1 : bouton rond en dégradé, flèche blanche bien centrée (ouvert comme replié)', async () => {
+  const p = await A.page();
+  await ouvrirStats(p);
+  await p.click('[data-act=pli][data-v=rec]');
+  const mesures = await p.$$eval('.pli-t .fl', l => l.map(f => {
+    const a = f.getBoundingClientRect(), b = f.querySelector('svg').getBoundingClientRect(), cs = getComputedStyle(f);
+    return { dx: Math.abs(b.left + b.width / 2 - (a.left + a.width / 2)), dy: Math.abs(b.top + b.height / 2 - (a.top + a.height / 2)), couleur: getComputedStyle(f.querySelector('svg')).color, fond: cs.backgroundImage };
+  }));
+  assert.equal(mesures.length, 3);
+  for (const m of mesures) {
+    assert.ok(m.dx <= 0.5 && m.dy <= 0.5, 'flèche décalée de ' + m.dx + ' × ' + m.dy + ' px');
+    assert.equal(m.couleur, 'rgb(255, 255, 255)', 'flèche blanche');
+    assert.match(m.fond, /gradient/, 'rond en dégradé');
+  }
+  assert.deepEqual(p.erreurs, []);
+});
