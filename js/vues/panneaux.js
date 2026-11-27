@@ -12,7 +12,7 @@ import {fillData, viewData} from './ecran-sauvegarde.js';
 import {panneauSerie} from './serie.js';
 import {formulaireCorps, toutesMesures} from './corps.js';
 import {groupeDe} from '../muscles.js';
-import {panneauAjout, panneauClub, panneauSignaler} from './club.js';
+import {panneauAjout, panneauClub, panneauComment, panneauSignaler} from './club.js';
 import {panneauCompteur} from './compteur.js';
 /* Ouvre un panneau plein écran (ou remplace celui déjà ouvert sans ajouter d'étape au bouton Retour) */
 export function openSheet(o) {
@@ -60,6 +60,10 @@ export function sheet() {
     return;
   }
   /* catalogue partagé (v3.8) */
+  if (pk.comment) {
+    el.innerHTML = top('La salle communautaire') + panneauComment();
+    return;
+  }
   if (pk.club) {
     el.innerHTML = top('Mon club') + panneauClub();
     return;

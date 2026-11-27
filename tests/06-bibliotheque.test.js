@@ -52,7 +52,7 @@ test('le catalogue ne montre que les machines de son enseigne (pas d’exclusivi
   const noms = await p.$$eval('#gl .gi b', l => l.map(x => x.textContent));
   assert.equal(noms.length, CAT.catOf(CAT.CHAINS.find(c => c.id === 'basic-fit')).length);
   assert.ok(!noms.some(n => /Iso-Lateral|Select|Super /.test(n)));
-  assert.match(await p.$eval('[data-act=gv][data-v=cat]', e => e.textContent), /^Catalogue Basic-Fit · \d+$/);
+  assert.match(await p.$eval('[data-act=gv][data-v=cat]', e => e.textContent), /^Catalogue · \d+$/);
 });
 
 test('décocher une machine : elle sort de Ma salle, le compteur baisse ; on peut la recocher', async () => {
@@ -89,6 +89,7 @@ test('changer d’enseigne : confirmation, puis toutes les machines de la nouvel
   await choisir(p, 'basic-fit');
   await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('muscu-v1')); s.gyms[0].notes['k:squat'] = 'Cran 4'; localStorage.setItem('muscu-v1', JSON.stringify(s)); });
   await p.reload(); await p.click('nav [data-tab=aide]');
+  await p.click('[data-act=gmenu]'); // v3.20 : dans le menu « ··· » de la salle
   await p.click('[data-act=gchg]');
   p.reponses.push(true);
   await p.click('#sheet [data-act=gens][data-t=fitness-park]');
@@ -105,6 +106,7 @@ test('refuser le changement d’enseigne ne touche à rien', async () => {
   await choisir(p, 'basic-fit');
   await p.click('#gl [data-act=gtog][data-n="Squat"]');
   const avant = (await donnees(p)).gyms[0];
+  await p.click('[data-act=gmenu]'); // v3.20 : dans le menu « ··· » de la salle
   await p.click('[data-act=gchg]');
   p.reponses.push(false);
   await p.click('#sheet [data-act=gens][data-t=on-air]');
@@ -114,6 +116,7 @@ test('refuser le changement d’enseigne ne touche à rien', async () => {
 test('+ Salle : une deuxième salle, puis on passe de l’une à l’autre', async () => {
   const p = await A.page();
   await choisir(p, 'on-air');
+  await p.click('[data-act=gmenu]'); // v3.20 : dans le menu « ··· » de la salle
   await p.click('[data-act=gnew]');
   await p.click('#sheet [data-act=gens][data-t=on-air]');
   const d = await donnees(p);

@@ -24,7 +24,8 @@ function derniers(avis) {
 /**
  * Ce que le club a décidé ensemble.
  * @param {Array<{m: string, k: string, u: string, t: number, g?: string, b?: string}>} avis
- * @returns {{retirees: Set<string>, verifiees: Set<string>, ajoutees: Array<{nom: string, muscle: string, marque: string, n: number}>, membres: number}}
+ * @returns {{retirees: Set<string>, verifiees: Set<string>, ajoutees: Array<{nom: string, muscle: string, marque: string, n: number}>, membres: number, confirmations: Map<string, {n: number, t: number}>}}
+ *   confirmations (v3.20) : pour chaque machine confirmée, le nombre de membres et la date de la dernière confirmation
  *   retirees / verifiees : noms en minuscules (norm) ; membres : nombre de comptes qui ont donné un avis
  */
 export function bilanClub(avis) {
@@ -32,17 +33,22 @@ export function bilanClub(avis) {
     par = new Map();
   for (const a of l) {
     const n = norm(a.m);
-    if (!par.has(n)) par.set(n, {absent: 0, present: 0, vus: 0, ajouts: []});
+    if (!par.has(n)) par.set(n, {absent: 0, present: 0, vus: 0, ajouts: [], tp: 0});
     const x = par.get(n);
     if (a.k === 'absent') x.absent++;
-    if (a.k === 'present') x.present++;
+    if (a.k === 'present') {
+      x.present++;
+      x.tp = Math.max(x.tp, +a.t || 0);
+    }
     if (a.k === 'present' || a.k === 'ajout') x.vus++;
     if (a.k === 'ajout') x.ajouts.push(a);
   }
   const retirees = new Set(),
     verifiees = new Set(),
-    ajoutees = [];
+    ajoutees = [],
+    confirmations = new Map();
   for (const [n, x] of par) {
+    if (x.present) confirmations.set(n, {n: x.present, t: x.tp});
     if (x.absent >= SEUIL.retrait && x.absent > x.present) retirees.add(n);
     if (x.present >= SEUIL.verifiee) verifiees.add(n);
     if (x.ajouts.length && x.vus >= SEUIL.ajout) {
@@ -56,7 +62,7 @@ export function bilanClub(avis) {
       });
     }
   }
-  return {retirees, verifiees, ajoutees, membres: new Set(l.map(a => a.u)).size};
+  return {retirees, verifiees, ajoutees, membres: new Set(l.map(a => a.u)).size, confirmations};
 }
 
 /* ===== Lecture sûre des réponses du serveur ===== */

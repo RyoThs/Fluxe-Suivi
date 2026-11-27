@@ -116,6 +116,7 @@ test('renommer la salle : le nom actuel est prérempli, Entrée enregistre', asy
   const p = await A.page({ auto: false });
   await p.click('nav [data-tab=aide]');
   await p.click('[data-act=gens][data-t=on-air]');
+  await p.click('[data-act=gmenu]'); // v3.20 : dans le menu « ··· » de la salle
   await p.click('[data-act=gren]');
   assert.equal(await p.$eval('.dlg .dlg-in', i => i.value), 'On Air');
   await p.fill('.dlg .dlg-in', 'On Air Lyon');

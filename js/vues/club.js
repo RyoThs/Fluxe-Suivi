@@ -21,24 +21,35 @@ export function bilanSalle() {
   return g && g.club ? bilanClub(avisConnus(g.club)) : null;
 }
 
-/* encart sous la carte de la salle ; « Plus tard » le cache jusqu'au prochain lancement */
-const caches = new Set();
-export const cacherEncart = id => caches.add(id);
-export function encartClub() {
+/* Encadré « Salle communautaire » (v3.20), dans la carte de la salle : court, clair, l'axe fort de l'app.
+   Pas encore rejointe : une phrase + « Rejoindre la salle de mon club » + « Comment ? ».
+   Rejointe : le nom du club, 3 chiffres (membres, vérifiées, ajoutées / retirées) et quoi faire. */
+const pluriel0 = (n, mot) => n + ' ' + mot + (n > 1 ? 's' : '');
+export function encadreCommunautaire() {
   const g = gymCur();
-  if (!g || caches.has(g.id)) return '';
-  const [titre, texte, bouton] = g.club
-    ? [
-        'Ta salle est-elle juste ?',
-        'Cette liste est probable. Aide les membres de ton club : signale une machine absente ou ajoute celle que tu as vue.',
-        `<button class="cb-p" data-act="cajout">${pic('signet', 16)}Ajouter une machine</button>`,
-      ]
-    : [
-        'Relie ta salle à ton club',
-        'Profite des corrections des autres membres de ton club (machines absentes, machines en plus).',
-        `<button class="cb-p" data-act="clien">${pic('salle', 16)}Relier à mon club</button>`,
-      ];
-  return `<div class="cband"><div class="ic">${GROUPE}</div><div><b>${titre}</b><span>${texte}</span><div class="bt">${bouton}<button class="cb-s" data-act="cplustard">Plus tard</button></div></div></div>`;
+  if (!g) return '';
+  const tete = etat => `<div class="co-k"><span class="co-ic">${GROUPE}</span>Salle communautaire${etat}</div>`;
+  if (!g.club)
+    return `<div class="co">${tete('')}<p>Ce sont <b>les membres de ton club</b> qui cochent les machines qu’ils voient vraiment. La liste se met <b>à jour toute seule</b>.</p><div class="co-b"><button class="co-go" data-act="clien">Rejoindre mon club</button><button class="co-lk" data-act="ccomment">Comment ?</button></div></div>`;
+  const b = bilanSalle() || {membres: 0, verifiees: new Set(), ajoutees: [], retirees: new Set()},
+    etat = navigator.onLine
+      ? `<span class="co-ok">${pic('coche', 12)}Club partagé</span>`
+      : '<span class="co-off">hors ligne · dernière liste connue</span>';
+  return `<div class="co">${tete('')}<div class="co-nom">${etat}<span>${esc(g.clubNom || g.name)}</span></div><div class="co-st"><div><b>${b.membres}</b><span>${b.membres > 1 ? 'membres' : 'membre'}</span></div><div><b>${b.verifiees.size}</b><span>${b.verifiees.size > 1 ? 'vérifiées' : 'vérifiée'}</span></div><div><b>+${b.ajoutees.length} / −${b.retirees.size}</b><span>ajouts / retraits</span></div></div><p>Ta salle est-elle juste ? Touche « ··· » sur une machine pour la confirmer ou la signaler.</p><div class="co-b"><button class="co-lk" data-act="cajout">+ Ajouter une machine vue</button><button class="co-lk" data-act="clien">Changer de club</button><button class="co-lk" data-act="ccomment">Comment ?</button></div></div>`;
+}
+/* Fenêtre « Comment ça marche ? » : 3 étapes */
+export function panneauComment() {
+  return `<div class="cpan"><div class="steps"><div><em>1</em><span>Tu rejoins la salle de ton club (par exemple Basic-Fit Lyon Part-Dieu).</span></div><div><em>2</em><span>À la salle, tu touches « ··· » sur une machine : elle est là, elle est absente, ou c’est une autre marque. Tu peux aussi ajouter une machine vue.</span></div><div><em>3</em><span>Quand plusieurs membres disent la même chose, la liste du club se met à jour pour tout le monde : machine retirée, ajoutée ou « vérifiée ».</span></div></div>
+<p class="cnote">${pic('info', 16)}<span>Gratuit. Il faut un compte (Sauvegarde en ligne) pour partager tes avis ; ta liste à toi marche sans compte.</span></p></div>`;
+}
+/* confiance d'une machine : « Confirmée par 3 membres · dernière fois le 12 nov. » */
+export function confiance(n) {
+  const b = bilanSalle(),
+    c = b && b.confirmations && b.confirmations.get(norm(n));
+  if (!c) return '';
+  const d =
+    c.t > 0 ? ' · dernière fois le ' + new Date(c.t).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) : '';
+  return `<p class="co-conf">${pic('valide', 16)}Confirmée par ${pluriel0(c.n, 'membre')}${d}</p>`;
 }
 
 /* ce qu'une ligne de machine ajoute : badge « vérifiée » et bouton « … » */
@@ -117,7 +128,7 @@ export function panneauSignaler() {
       : s.k === 'present'
         ? 'Elle est cochée dans <b>ta</b> salle. Avec <b>2 confirmations</b>, elle reçoit le badge « vérifiée ».'
         : 'Ton signalement aide à corriger le catalogue.';
-  return `<div class="cpan"><h3>${esc(s.n)}</h3><p class="sb">${esc(g ? g.clubNom || g.name : '')} · qu’est-ce qui ne va pas ?</p>
+  return `<div class="cpan"><h3>${esc(s.n)}</h3>${confiance(s.n)}<p class="sb">${esc(g ? g.clubNom || g.name : '')} · qu’est-ce qui ne va pas ?</p>
 ${CHOIX.map(([k, t]) => `<button class="copt radio${s.k === k ? ' on' : ''}" data-act="csel" data-k="${k}" aria-pressed="${s.k === k}"><i></i>${t}</button>`).join('')}
 <p class="cnote">${pic('info', 16)}<span>${info}</span></p>
 <button class="btn" data-act="cenv">Envoyer</button></div>`;

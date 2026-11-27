@@ -1,6 +1,7 @@
 /* Fluxe Suivi — Gestes : Historique (v3.17) : menu « ··· » d'une séance, « + n autres exercices ».
    Modifier, Créer une routine et Supprimer gardent leurs gestes d'avant (fin-seance.js, routines.js). */
 import {S, done} from '../etat.js';
+import {gymCur} from '../salle.js';
 import {render} from '../rendu.js';
 import {gestes as seance} from './seance.js';
 import {gestes as repos} from './repos.js';
@@ -54,6 +55,13 @@ export const gestes = {
   /* menu « ··· » d'une routine (page Entraînement, v3.18) */
   rmenu: ({b}) => {
     basculerMenu('r:' + b.dataset.k);
+    render();
+  },
+  /* menu « ··· » de la salle (écran Ma salle, v3.20) */
+  gmenu: () => {
+    const g = gymCur();
+    if (!g) return;
+    basculerMenu('g:' + g.id);
     render();
   },
   hplus: ({b}) => {
