@@ -595,3 +595,4 @@ nav button[data-tab=aide]{flex:0 0 68px;flex-direction:column;gap:1px;padding:5p
 .qq-o{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-weight:800;font-size:13px;color:var(--ink)}
 .qq-x{flex:none;background:none;border:0;color:var(--muted);width:28px;height:28px;display:grid;place-items:center;padding:0}
 .qq.merci{justify-content:center;gap:6px;font-weight:700;color:#0f766e;background:#e6fbf6;border-color:#bfeee2;padding:11px}
+@media (max-width:360px){.qq-ic,.qq-t small{display:none}.qq-o{padding:7px 9px}}

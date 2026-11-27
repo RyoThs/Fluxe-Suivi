@@ -47,10 +47,10 @@ test('✕ trois fois de suite : pause de 30 jours ; répondre remet le compteur 
 /* ===== Dans l'appli ===== */
 let BF;
 const COMPTE = { uid: 'u1', email: 'yo@test.fr', verifie: true, envoye: {}, metaMod: 0, metaEnvoye: 0, metaHash: '', dernier: 0, dernierT: 0 };
-async function finirSeance({ club = 'c1', compte = true, avis = {} } = {}) {
+async function finirSeance({ club = 'c1', compte = true, avis = {}, ecran } = {}) {
   BF = BF || CAT.catOf(CAT.CHAINS.find(c => c.id === 'basic-fit'));
   const m = BF.find(n => /Pec deck/.test(n)) || BF[3];
-  const p = await A.page();
+  const p = await A.page(ecran ? { viewport: ecran } : {});
   await p.context().addInitScript(installer);
   await p.evaluate(([avis, compte, C]) => {
     const s = { comptes: {}, data: {}, t: 1000, user: null, clubs: { c1: { n: 'Basic-Fit Lyon Part-Dieu', e: 'basic-fit', v: 'Lyon' } }, avis: { c1: avis } };
@@ -101,4 +101,11 @@ test('pas de question sans club rejoint, ni sans compte ; ✕ ferme sans rien en
   await r.p.waitForTimeout(300);
   assert.equal(JSON.stringify((await serveur(r.p)).avis.c1), '{}', 'rien envoyé');
   assert.deepEqual(r.p.erreurs, []);
+});
+
+test('petit écran (320 px, iPhone SE) : la question reste une petite ligne, rien ne dépasse', async () => {
+  const { p } = await finirSeance({ ecran: { width: 320, height: 568 } });
+  assert.ok((await p.locator('.qq').boundingBox()).height < 100, 'hauteur : ' + (await p.locator('.qq').boundingBox()).height);
+  assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  assert.deepEqual(p.erreurs, []);
 });
