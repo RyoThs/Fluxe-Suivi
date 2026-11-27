@@ -33,6 +33,7 @@ test('supprimer une séance : fenêtre claire ; « Garder » ne fait rien, « Me
   const p = await A.page({ auto: false });
   await donner(p, { ...VIDE, sessions: [seance('a', 2)] });
   await p.click('nav [data-tab=histo]');
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   const f = await fenetre(p);
   assert.equal(f.titre, 'Mettre à la corbeille ?');
@@ -42,6 +43,7 @@ test('supprimer une séance : fenêtre claire ; « Garder » ne fait rien, « Me
   await p.click('.dlg [data-r=non]');
   assert.equal(await p.$('.dlg'), null, 'fenêtre fermée');
   assert.equal((await donnees(p)).sessions.length, 1);
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   await p.click('.dlg [data-r=ok]');
   await p.waitForTimeout(100);
@@ -55,10 +57,12 @@ test('toucher à côté ou appuyer sur Échap = annuler (sans risque)', async ()
   const p = await A.page({ auto: false });
   await donner(p, { ...VIDE, sessions: [seance('a', 2)] });
   await p.click('nav [data-tab=histo]');
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   await p.mouse.click(195, 60); // sur le fond flouté
   await p.waitForTimeout(100);
   assert.equal(await p.$('.dlg'), null);
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   await p.keyboard.press('Escape');
   await p.waitForTimeout(100);

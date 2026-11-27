@@ -13,6 +13,7 @@ test('une séance supprimée va dans la corbeille, puis peut être restaurée', 
   await donner(p, { ...VIDE, sessions: [seance('a', 2), seance('b', 1)] });
   await p.click('nav [data-tab=histo]');
   p.reponses.push(true);
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   let d = await donnees(p);
   assert.deepEqual(d.sessions.map(s => s.id), ['b']);
@@ -30,6 +31,7 @@ test('refuser la suppression ne supprime rien', async () => {
   await donner(p, { ...VIDE, sessions: [seance('a', 1)] });
   await p.click('nav [data-tab=histo]');
   p.reponses.push(false);
+  await p.click('[data-act=hmenu][data-id=a]'); // v3.17 : actions dans le menu « ··· »
   await p.click('[data-act=delsess][data-id=a]');
   assert.equal((await donnees(p)).sessions.length, 1);
 });

@@ -23,6 +23,7 @@ import {gestes as ecrans} from './gestes/ecrans.js';
 import {gestes as nuage} from './gestes/nuage.js';
 import {gestes as corps} from './gestes/corps.js';
 import {gestes as club} from './gestes/club.js';
+import {gestes as historique} from './gestes/historique.js';
 import './glisser.js'; /* glisser vers la gauche */
 import {noter, setEnvoiAuto} from './erreurs.js';
 /* Tous les boutons de l'app : nom du geste (data-act) → ce qu'il fait */
@@ -37,7 +38,8 @@ const GESTES = Object.assign(
   ecrans,
   nuage,
   corps,
-  club
+  club,
+  historique
 );
 export const nomsGestes = () => Object.keys(GESTES);
 $('#fi').addEventListener('change', ev => {

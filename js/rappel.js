@@ -19,6 +19,8 @@ function bkDue() {
   if (!u) return false;
   return !S.lastBackup || n - S.lastBackup >= (S.bkEvery || 7) * 864e5 || u >= 5;
 }
+/* point orange du bouton « Sauvegarde » (Historique) : des séances ne sont encore ni dans un fichier ni en ligne */
+export const aSauvegarder = () => unsaved() > 0 && !enLigneAJour();
 export function bkLine() {
   const u = unsaved();
   if (!done().length) return '';

@@ -18,7 +18,7 @@ test('des séances existantes sont chargées et visibles dans l’Historique', a
   const p = await A.page();
   await donner(p, { ...VIDE, sessions: [seance('a1', 3), seance('a2', 1)], notes: { 'k:squat': 'Barre haute' } });
   await p.click('nav [data-tab=histo]');
-  assert.equal(await p.locator('[data-act=delsess]').count(), 2);
+  assert.equal(await p.locator('[data-act=hmenu]').count(), 2); // v3.17 : un menu « ··· » par séance
   const d = await donnees(p);
   assert.equal(d.sessions.length, 2);
   assert.equal(d.notes['k:squat'], 'Barre haute');
@@ -30,7 +30,7 @@ test('une séance abîmée est écartée, les bonnes sont gardées, et l’origi
   const abimee = { id: 'pas bon !', date: 'hier', exercises: 'rien' };
   await donner(p, { ...VIDE, sessions: [seance('ok1', 2), abimee, seance('ok2', 1)] });
   await p.click('nav [data-tab=histo]');
-  assert.equal(await p.locator('[data-act=delsess]').count(), 2);
+  assert.equal(await p.locator('[data-act=hmenu]').count(), 2); // v3.17 : un menu « ··· » par séance
   /* l'original complet est copié dans « muscu-v1-brut » pour pouvoir le récupérer */
   const brut = await p.evaluate(k => localStorage.getItem(k + '-brut'), KEY);
   assert.ok(brut && JSON.parse(brut).sessions.length === 3);

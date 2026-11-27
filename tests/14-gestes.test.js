@@ -49,6 +49,7 @@ test('parcours complet après le rangement : séance, chrono, fin, historique, r
     await p.click('[data-act=addset][data-i="0"]');
     await p.click('[data-act=t0]');
     await p.click('[data-act=finish]');
+    await p.click('[data-act=hmenu]'); // v3.17 : actions dans le menu « ··· »
     await p.click('[data-act=mkr]');
     const d = await donnees(p);
     assert.equal(d.sessions.length, 1);
