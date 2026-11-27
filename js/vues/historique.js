@@ -1,30 +1,79 @@
-/* Fluxe Suivi — Écran Historique. */
+/* Fluxe Suivi — Écran Historique (v3.17) : séances rangées par semaine, une carte par séance
+   (titre selon les muscles, durée / volume / records, liste compacte), actions dans un menu « ··· »,
+   bouton « Sauvegarde » en haut (point orange tant que des séances ne sont pas à l'abri). */
 import {S, done} from '../etat.js';
-import {dn, esc, top, fmt, fmtDate, nset, ok, vol} from '../outils.js';
-import {cline} from '../calculs.js';
-import {bkLine} from '../rappel.js';
-import {ico} from '../pictos.js';
+import {esc} from '../outils.js';
+import {bkLine, aSauvegarder} from '../rappel.js';
+import {pic} from '../pictos.js';
+import {dansLaSemaine, resume, semaines} from '../resume-seance.js';
+
+/* menu « ··· » ouvert (id de la séance) et cartes dont tous les exercices sont dépliés */
+let menu = null;
+const deplies = new Set();
+export function basculerMenu(id) {
+  menu = menu === id ? null : id;
+}
+export const fermerMenu = () => {
+  const ouvert = menu !== null;
+  menu = null;
+  return ouvert;
+};
+export const menuOuvert = () => menu;
+export function deplier(id) {
+  if (deplies.has(id)) deplies.delete(id);
+  else deplies.add(id);
+}
+
+const MONTRES = 3; /* exercices visibles avant « + n autres » */
+
+function boutonSauvegarde() {
+  return `<button class="hx-sv" data-act="data" aria-label="Sauvegarde, versions de secours et corbeille">${aSauvegarder() ? '<span class="pt" aria-hidden="true"></span>' : ''}${pic('bouclier', 18)}<b>Sauvegarde</b><span class="sr">${bkLine().replace(/<[^>]+>/g, '')}</span></button>`;
+}
+
+function carte(r) {
+  const tous = deplies.has(r.id),
+    l = tous ? r.exercices : r.exercices.slice(0, MONTRES),
+    reste = r.exercices.length - MONTRES,
+    id = esc(r.id),
+    ouvert = menu === r.id;
+  const ex = l
+    .map(
+      e =>
+        `<div class="hx-e"><span class="ic${e.cardio ? ' c' : ''}" aria-hidden="true">${esc(e.code)}</span><div class="n"><b>${esc(e.nom)}</b><span>${esc(e.ligne)}</span></div>${e.record ? `<span class="hx-b">${pic('trophee', 13)}Record</span>` : ''}</div>`
+    )
+    .join('');
+  const plus =
+    reste > 0
+      ? `<button class="hx-plus" data-act="hplus" data-id="${id}">${tous ? 'Voir moins' : '+ ' + reste + ' autre' + (reste > 1 ? 's' : '') + ' exercice' + (reste > 1 ? 's' : '')}</button>`
+      : '';
+  const m = ouvert
+    ? `<div class="hx-menu" role="menu">${[
+        ['editsess', 'crayon', 'Modifier la séance'],
+        ['mkr', 'signet', 'Créer une routine'],
+        ['hpart', 'partage', 'Partager (image)'],
+        ['delsess', 'corbeille', 'Supprimer'],
+      ]
+        .map(
+          ([a, i, t]) =>
+            `<button role="menuitem" data-act="${a}" data-id="${id}"${a === 'delsess' ? ' class="r"' : ''}>${pic(i, 18)}${t}</button>`
+        )
+        .join('')}</div>`
+    : '';
+  return `<div class="card hx-c" data-id="${id}"><div class="hx-top"><div><div class="hx-t">${esc(r.titre)}</div><div class="hx-d">${esc(r.date)}</div></div><button class="hx-m" data-act="hmenu" data-id="${id}" aria-haspopup="menu" aria-expanded="${ouvert}" aria-label="Actions pour cette séance">${pic('points', 20)}</button></div>
+<div class="hx-k"><div><b>${esc(r.duree)}</b><span>durée</span></div><div><b>${esc(r.volume)}</b><span>volume</span></div><div class="${r.records ? 'pr' : ''}"><b>${r.records}</b><span>record${r.records > 1 ? 's' : ''}</span></div></div>${ex}${plus}${m}</div>`;
+}
+
 export function viewHisto() {
-  const l = done().sort((a, b) => b.date - a.date);
-  const nt = S.trash.length,
-    tools = `<h2>Mes données</h2><p class="mu" style="margin-left:4px">Sauvegarde, versions de secours et corbeille : tout est au même endroit.</p><button class="sec" data-act="data" style="margin-bottom:14px">${ico('bouclier')}Sauvegarde et récupération${nt ? ' · ' + nt + ' dans la corbeille' : ''}</button>${done().length ? '<p class="mu" style="margin:-6px 0 14px 4px">' + bkLine() + '</p>' : ''}`;
-  if (!l.length) return `<h1>Historique</h1><p class="empty">Tes séances terminées apparaîtront ici.</p>${tools}`;
-  return `<h1>Historique</h1><p class="sub">${l.length} séance${l.length > 1 ? 's' : ''}</p>
-${l
+  const l = done();
+  if (menu && !l.some(s => s.id === menu)) menu = null;
+  const tete = `<div class="hx-h"><h1>Historique</h1>${boutonSauvegarde()}</div>`;
+  if (!l.length) return `${tete}<p class="empty">Tes séances terminées apparaîtront ici.</p>`;
+  const n = dansLaSemaine(l);
+  return `${tete}<p class="sub">${l.length} séance${l.length > 1 ? 's' : ''}${n ? ' · ' + n + ' cette semaine' : ''}</p>
+${semaines(l)
   .map(
-    s => `<div class="card"><div class="ex-head"><div><div class="hist-date">${esc(fmtDate(s.date))}</div><div class="mu">${nset(s)} séries · ${fmt(vol(s))} kg${s.dur ? ' · ' + s.dur + ' min' : ''}${s.gn ? ' · ' + esc(s.gn) : ''}</div></div><div><button class="del" style="color:var(--accent)" data-act="editsess" data-id="${esc(s.id)}">Modifier</button><button class="del" data-act="delsess" data-id="${esc(s.id)}">Supprimer</button></div></div>
-${s.exercises
-  .map(e => {
-    if (e.cardio)
-      return e.sets.some(dn) ? `<div class="hist-ex"><b>${esc(e.name)}</b><div>${esc(cline(e))}</div></div>` : '';
-    const d = e.sets.filter(ok);
-    if (!d.length) return '';
-    const b = top(d);
-    return `<div class="hist-ex"><b>${esc(e.name)}</b><div>${d.length} série${d.length > 1 ? 's' : ''} · meilleure ${esc(b.kg)} kg × ${esc(b.reps)}</div></div>`;
-  })
-  .join(
-    ''
-  )}<button class="sec" style="margin-top:10px" data-act="mkr" data-id="${esc(s.id)}">${ico('signet')}Créer une routine avec cette séance</button></div>`
+    w =>
+      `<div class="hx-sem"><b>${esc(w.titre)}</b><span>${esc(w.info)}</span></div>${w.seances.map(s => carte(resume(s, l, S.mu))).join('')}`
   )
-  .join('')}${tools}`;
+  .join('')}`;
 }
