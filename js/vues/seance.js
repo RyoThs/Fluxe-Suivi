@@ -57,7 +57,7 @@ function carteSuggestion() {
   const r = S.routines[k],
     d = derniere(r),
     der = d ? done().find(s => s.rt === r.id && s.date === d) : null;
-  return `<div class="card en-sug"><div class="en-sug-k">À faire aujourd’hui</div><div class="en-sug-t">${esc(r.name)}</div><div class="en-sug-m">${esc(depuis(d))}${der && der.dur ? ' · dernière fois ' + der.dur + ' min' : ''}</div><div class="en-sx">${r.exercises.map((n, i) => `<div><b>${esc(n)}</b><span>${esc(prevu(planDe(r, i), estCardio(n)))}</span></div>`).join('')}</div><button class="en-go" data-act="startr" data-k="${k}">${PLAY}Démarrer ${esc(r.name)}</button></div>`;
+  return `<div class="card en-sug"><div class="en-sug-k">À faire aujourd’hui</div><div class="en-sug-t">${esc(r.name)}</div><div class="en-sug-m">${esc(depuis(d))}${der && der.dur ? ' · dernière fois ' + der.dur + ' min' : ''}</div><div class="en-sx">${r.exercises.map((n, i) => `<div><b>${esc(n)}</b><span>${esc(prevu(planDe(r, i), estCardio(n)))}</span></div>`).join('')}</div><button class="en-go" data-act="startr" data-k="${k}">${PLAY}<span>Démarrer ${esc(r.name)}</span></button></div>`;
 }
 function accueil() {
   const jour = new Date().toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'short'}),

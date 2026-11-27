@@ -508,3 +508,8 @@ nav{box-shadow:var(--shadow)}
 .en-play{width:46px;height:46px;border-radius:50%;background:var(--grad);border:0;display:grid;place-items:center;color:#fff;box-shadow:0 5px 12px -4px rgba(79,70,229,.5)}
 .en-play svg{margin-left:2px}
 .en-r .hx-menu{top:64px}
+/* petit écran (iPhone SE, 320 px) : titre plus petit pour que le bouton à droite tienne sur la ligne */
+.titre-l h1{min-width:0}
+@media (max-width:360px){.titre-l h1,.hx-h h1{font-size:36px}.serie-t{padding:7px 9px;gap:6px}.serie-t .big{font-size:26px}}
+.en-go span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.en-go svg{flex:none}

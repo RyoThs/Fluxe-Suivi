@@ -123,3 +123,16 @@ test('rappel de sauvegarde sur une ligne (sans compte) ; sans routine : pas de s
   assert.match(await p.textContent('#app'), /Aucune routine pour l’instant/);
   assert.deepEqual(p.erreurs, []);
 });
+
+test('petit écran (320 px, iPhone SE) : le titre et le bouton des semaines d’affilée tiennent sur la ligne, rien ne dépasse', async () => {
+  const p = await A.page({ viewport: { width: 320, height: 568 } });
+  await accueil(p, { ...VIDE, sessions: SEANCES, routines: ROUTINES, lastBackup: Date.now() });
+  assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'aucun défilement sur le côté');
+  // panne volontaire : un nom de routine de 60 lettres sans espace (proposé dans « À faire aujourd'hui »)
+  await accueil(p, { ...VIDE, routines: [{ id: 'r9', name: 'X'.repeat(60), exercises: ['Squat'] }, ...ROUTINES], lastBackup: Date.now() });
+  assert.equal(await p.textContent('.en-sug-t'), 'X'.repeat(60));
+  assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'nom très long : aucun défilement sur le côté');
+  const trop = await p.evaluate(() => [...document.querySelectorAll('#app *')].filter(e => !e.closest('.sr') && e.getBoundingClientRect().right > innerWidth + 0.5).map(e => e.className || e.tagName));
+  assert.deepEqual(trop, [], 'éléments qui dépassent');
+  assert.deepEqual(p.erreurs, []);
+});
