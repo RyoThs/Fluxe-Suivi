@@ -1,5 +1,5 @@
 /* v3.20 : écran « Ma salle » (ancien Guide « ? ») : pro, épuré, et la salle communautaire au cœur.
-   - onglet du bas « Ma salle » (icône + mot), étroit mais clair ;
+   - onglet du bas « Ma salle » (icône + mot), même largeur que les autres depuis la v3.21.1 ;
    - sans salle : « Ta salle », enseignes sur une ligne ;
    - avec salle : carte compacte, menu « ··· » (Changer d'enseigne, Renommer, + Nouvelle salle, Supprimer), choix court « Catalogue · n | Ma salle · n »,
      loupe dans la recherche, machines compactes, titre du muscle collé en haut ;
@@ -40,14 +40,14 @@ test('bilanClub : nombre de confirmations et date de la dernière, par machine',
   assert.equal(b.confirmations.has('squat'), false);
 });
 
-test('onglet du bas « Ma salle » : icône + mot, plus étroit que les autres, nom lu par les lecteurs d’écran', async () => {
+test('onglet du bas « Ma salle » : icône + mot, même largeur que les autres (v3.21.1), nom lu par les lecteurs d’écran', async () => {
   const p = await A.page();
   const t = p.locator('nav [data-tab=aide]');
   assert.equal((await t.innerText()).trim(), 'Ma salle');
   assert.equal(await t.locator('svg').count(), 1);
   assert.equal(await t.getAttribute('aria-label'), 'Ma salle');
   const l = await p.$$eval('nav button', b => b.map(x => x.getBoundingClientRect().width));
-  assert.ok(l[3] < l[0], 'plus étroit que « Séance »');
+  assert.equal(Math.round(l[3]), Math.round(l[0]), 'même largeur que « Séance » (v3.21.1, accord de Yoann)');
   assert.deepEqual(p.erreurs, []);
 });
 
