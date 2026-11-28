@@ -9,9 +9,10 @@ let A;
 test.before(async () => { A = await demarrer(); });
 test.after(async () => { await A.fermer(); });
 
-async function mesurer(largeur) {
+async function mesurer(largeur, police) {
   const p = await A.page({ viewport: { width: largeur, height: 700 } });
   await p.waitForSelector('nav');
+  if (police) await p.addStyleTag({ content: `nav button{font-family:${police},sans-serif !important}` });
   const m = await p.$$eval('nav button', bs => bs.map(b => {
     const r = b.getBoundingClientRect(), s = b.querySelector('svg'), rs = s && s.getBoundingClientRect(), cs = getComputedStyle(b);
     return { l: r.width, nom: b.innerText.trim(), logo: !!s && getComputedStyle(s).display !== 'none' && rs.width > 0,
@@ -38,3 +39,13 @@ for (const largeur of [320, 390, 430]) {
     assert.deepEqual(p.erreurs, []);
   });
 }
+
+/* trouvé par GitHub : certains téléphones (Android, Linux) ont une police plus large → « Historique » ne doit pas être coupé non plus */
+test('320 px avec une police large (DejaVu Sans) : aucun nom coupé, texte toujours lisible', async () => {
+  const { p, m } = await mesurer(320, '"DejaVu Sans"');
+  for (const x of m) {
+    assert.ok(!x.coupe, `« ${x.nom} » n’est pas coupé`);
+    assert.ok(x.police >= 12.5, `texte lisible pour « ${x.nom} » (${x.police} px)`);
+  }
+  assert.equal(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'pas de débordement');
+});
