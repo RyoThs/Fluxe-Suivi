@@ -51,7 +51,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .gr.ok .ck{background:var(--ok);color:var(--on)}
 .ghost{width:100%;margin-top:6px;padding:12px;border-radius:14px;background:var(--raise);font-weight:600;color:var(--accent)}
 nav{position:fixed;left:14px;right:14px;bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:532px;margin:0 auto;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);z-index:20}
-nav button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:999px;color:var(--muted);font-weight:600;font-size:14px}
+nav button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 0 5px;border-radius:999px;color:var(--muted);font-weight:700;font-size:12.5px;line-height:1.1}
+nav button svg{width:22px;height:22px;flex:none}
 nav button[aria-current=true]{background:var(--grad);color:var(--on)}
 #timer{position:fixed;left:14px;right:14px;bottom:calc(78px + env(safe-area-inset-bottom,0px));max-width:532px;margin:0 auto;background:var(--raise);border:1px solid var(--line);color:var(--ink);border-radius:22px;padding:12px 14px 14px;display:none;z-index:21;box-shadow:var(--shadow)}
 #timer.on{display:block}
@@ -110,8 +111,6 @@ nav button[aria-current=true]{background:var(--grad);color:var(--on)}
 .pt small{color:var(--muted);font-size:11px;word-break:break-all;margin-top:2px}
 .gi{display:flex;align-items:center;gap:14px;padding:12px;margin-bottom:10px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
 .eh{display:flex;align-items:center;gap:12px;min-width:0}
-nav button[data-tab=aide]{flex:0 0 56px;font-size:20px;font-weight:800;padding:12px 0}
-@media (max-width:400px){nav button svg{display:none}}
 #warn{position:sticky;top:0;z-index:35;margin:8px 0 0;padding:10px 14px;border-radius:14px;background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;font-size:14px;line-height:1.35}
 #warn[hidden]{display:none}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(150px + env(safe-area-inset-bottom,0px));max-width:90%;padding:12px 18px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
@@ -534,8 +533,6 @@ nav{box-shadow:var(--shadow)}
 .sx-rep span{font-size:12px;color:var(--muted);font-weight:600}
 .sx-rep b{font-family:var(--num);font-size:18px;font-weight:700}
 /* Ma salle (v3.20) : onglet du bas étroit mais nommé ; carte de salle compacte ; salle communautaire ; machines compactes */
-nav button[data-tab=aide]{flex:0 0 68px;flex-direction:column;gap:1px;padding:5px 0;font-size:10.5px;font-weight:700;line-height:1.1}
-@media (max-width:400px){nav button[data-tab=aide] svg{display:block}}
 .ens{grid-template-columns:1fr;gap:8px}
 .ens button{min-height:0;display:grid;grid-template-columns:44px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:11px 12px}
 .ens .ini{grid-row:1/3;width:44px;height:44px;border-radius:14px;background:var(--tint);color:var(--accent);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:15px}
