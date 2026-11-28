@@ -15,6 +15,7 @@ utilisée n'est pas listée ici, ou si elle ne commence pas par `muscu-v1`, `fx-
 | `muscu-v1-sauvegarde` | Ancienne copie de secours (avant la v2.1). Seulement lue une fois, pour la ranger dans les versions de secours | `js/versions.js` |
 | `fx-no` | Tu as fermé le bandeau « Installer » : il ne revient plus | `js/installation.js` |
 | `fx-stats-ouvert` | Les rubriques des Stats que tu as dépliées (Progression globale, Cardio, Records) : elles restent ouvertes la prochaine fois | `js/vues/stats.js` |
+| `fx-question` | Question à un toucher après une séance (v3.21) : combien de fois de suite tu l’as fermée (✕), et la date de fin de pause (après 3 ✕, plus de question pendant 30 jours). Rien sur ta salle ni tes réponses | `js/question.js` |
 | `fx-test` | Petit essai d'écriture au démarrage (vérifie que le téléphone accepte d'enregistrer), effacé aussitôt | `js/etat.js` |
 | `fluxe-suivi-nuage-v1` | Sauvegarde en ligne (v3.0) : compte connecté (identifiant et e-mail, **jamais le mot de passe**) et ce qui a déjà été envoyé. Absent si on n'a pas de compte. Jamais dans le fichier de sauvegarde | `js/nuage.js` |
 | `fluxe-suivi-clubs-v1` | Catalogue partagé (v3.8) : dernière liste des clubs et derniers avis lus pour les clubs reliés (pour voir les corrections hors ligne). Copie de données publiques, recréée à la prochaine lecture. Jamais dans le fichier de sauvegarde | `js/club-reseau.js` |

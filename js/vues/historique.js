@@ -6,6 +6,8 @@ import {esc} from '../outils.js';
 import {bkLine, aSauvegarder} from '../rappel.js';
 import {pic} from '../pictos.js';
 import {dansLaSemaine, resume, semaines} from '../resume-seance.js';
+import {questionEnCours} from '../question.js';
+import {gymCur} from '../salle.js';
 
 /* menu « ··· » ouvert (id de la séance) et cartes dont tous les exercices sont dépliés */
 let menu = null;
@@ -63,13 +65,21 @@ function carte(r) {
 <div class="hx-k"><div><b>${esc(r.duree)}</b><span>durée</span></div><div><b>${esc(r.volume)}</b><span>volume</span></div><div class="${r.records ? 'pr' : ''}"><b>${r.records}</b><span>record${r.records > 1 ? 's' : ''}</span></div></div>${ex}${plus}${m}</div>`;
 }
 
+/* question à un toucher après une séance (v3.21) : une seule petite ligne */
+function carteQuestion() {
+  const q = questionEnCours();
+  if (!q) return '';
+  if (q.merci) return `<div class="qq merci" role="status">${pic('coche', 16)}Merci ! Ton club en profite.</div>`;
+  const g = gymCur();
+  return `<div class="qq" role="group" aria-label="Question pour ton club"><span class="qq-ic" aria-hidden="true">${pic('salle', 16)}</span><div class="qq-t">Le <b>${esc(q.machine)}</b> est-il bien dans ta salle ?<small>Aide ton club${g ? ' · ' + esc(g.clubNom || g.name) : ''}</small></div><button class="qq-o" data-act="qoui">Oui</button><button class="qq-o" data-act="qnon">Non</button><button class="qq-x" data-act="qx" aria-label="Fermer la question">${pic('croix', 16)}</button></div>`;
+}
 export function viewHisto() {
   const l = done();
   if (menu && !l.some(s => s.id === menu)) menu = null;
   const tete = `<div class="hx-h"><h1>Historique</h1>${boutonSauvegarde()}</div>`;
   if (!l.length) return `${tete}<p class="empty">Tes séances terminées apparaîtront ici.</p>`;
   const n = dansLaSemaine(l);
-  return `${tete}<p class="sub">${l.length} séance${l.length > 1 ? 's' : ''}${n ? ' · ' + n + ' cette semaine' : ''}</p>
+  return `${tete}<p class="sub">${l.length} séance${l.length > 1 ? 's' : ''}${n ? ' · ' + n + ' cette semaine' : ''}</p>${carteQuestion()}
 ${semaines(l)
   .map(
     w =>

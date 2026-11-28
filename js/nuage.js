@@ -64,6 +64,7 @@ export const connecte = () => !!E.uid;
 export const compte = () => E.email || '';
 export const dernierEnvoi = () => E.dernier || 0;
 export const verifie = () => E.verifie === true;
+export const monUid = () => E.uid || '';
 
 async function charger() {
   if (api) return api;

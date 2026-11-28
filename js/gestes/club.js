@@ -23,8 +23,8 @@ function pourquoi(e) {
   if (!navigator.onLine) return 'Corrigé dans ta liste. Pas de réseau : réessaie plus tard pour partager.';
   return 'Corrigé dans ta liste, mais le partage a échoué : ' + texteErreur(e);
 }
-/* envoie un avis au club de la salle, puis relit les avis et redessine */
-function partager(g, a, merci) {
+/* envoie un avis au club de la salle, puis relit les avis et redessine (merci vide : pas de message en cas de réussite) */
+export function partager(g, a, merci) {
   if (!g.club) {
     toast('Corrigé dans ta liste. Relie ta salle à ton club pour partager.');
     return;
@@ -32,7 +32,7 @@ function partager(g, a, merci) {
   const club = g.club;
   donnerAvis(club, a).then(
     () => {
-      toast(merci);
+      if (merci) toast(merci);
       oublier(club);
       lireAvis(club).then(render, () => {});
     },
