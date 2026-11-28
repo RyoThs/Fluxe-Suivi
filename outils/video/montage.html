@@ -1,0 +1,149 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+<!-- Montage de la vidéo de présentation : window.render(t) dessine l’image à l’instant t (en secondes). Les captures viennent de filmer.mjs (dossier cap/, non enregistré dans Git). -->
+@font-face{font-family:B;font-weight:800;src:url(../../fonts/barlow-condensed-800.woff2)}
+@font-face{font-family:B;font-weight:600;src:url(../../fonts/barlow-condensed-600.woff2)}
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#f3f5fb;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;position:relative}
+.bulle{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;width:900px;height:900px}
+.abs{position:absolute;left:0;right:0;text-align:center}
+.grad{background:linear-gradient(135deg,#0d9488,#4f46e5 55%,#9333ea);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cap{top:66px;opacity:0;z-index:15}
+.tag{display:inline-block;font-weight:800;letter-spacing:4px;font-size:30px;color:#4f46e5;background:rgba(79,70,229,.1);padding:12px 28px;border-radius:999px}
+.cap h2{font-family:B;font-weight:800;font-size:100px;line-height:.95;margin-top:20px;color:#0b1022}
+#cam{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 1300px}
+#tel{position:absolute;left:150px;top:400px;width:780px;height:1637px;border-radius:110px;background:#0b1022;padding:22px;box-shadow:0 60px 140px rgba(40,30,120,.30)}
+#ecran{position:relative;width:736px;height:1593px;border-radius:90px;overflow:hidden;background:#f3f5fb}
+.sb{position:absolute;left:0;right:0;top:0;height:60px;display:flex;justify-content:space-between;align-items:center;padding:14px 70px 0;font-weight:700;font-size:30px;color:#0b1022;z-index:5;background:#f3f5fb}
+.ile{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:200px;height:56px;background:#0b1022;border-radius:999px;z-index:6}
+.vue{position:absolute;left:0;top:60px;width:736px;opacity:0}
+.vue img{width:736px;display:block}
+#doigt{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:rgba(255,255,255,.55);border:4px solid rgba(255,255,255,.95);box-shadow:0 10px 30px rgba(11,16,34,.35);opacity:0;z-index:8}
+#onde{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:6px solid #818cf8;opacity:0;z-index:7}
+.mot{display:inline-block;opacity:0}
+#accroche{top:620px;font-family:B;font-weight:800;font-size:150px;line-height:1;color:#0b1022}
+#logo{top:640px;opacity:0}
+#logo img{width:260px;height:260px;border-radius:62px;box-shadow:0 30px 80px rgba(40,30,120,.3)}
+#logo h1{font-family:B;font-weight:800;font-size:170px;line-height:1;margin-top:40px}
+#logo p{font-size:44px;color:#5b6482;margin-top:20px}
+#puce{position:absolute;left:640px;top:1180px;padding:22px 34px;border-radius:999px;background:#fff3c4;color:#b45309;font-weight:800;font-size:44px;box-shadow:0 20px 50px rgba(180,83,9,.25);opacity:0;z-index:20}
+#clubs{position:absolute;left:140px;right:140px;top:1420px;text-align:center;opacity:0;z-index:20;background:#fff;border-radius:56px;padding:30px 20px 34px;box-shadow:0 30px 80px rgba(40,30,120,.28)}
+#clubs b{display:block;font-family:B;font-weight:800;font-size:150px;line-height:1}
+#clubs span{display:block;font-size:38px;color:#5b6482;font-weight:700;margin-top:6px}
+#fin{top:470px}
+#fin .l{font-family:B;font-weight:800;font-size:150px;line-height:1.02;opacity:0;color:#0b1022}
+#signe{top:1240px;opacity:0}
+#signe img{width:170px;height:170px;border-radius:40px;box-shadow:0 20px 60px rgba(40,30,120,.3)}
+#signe h1{font-family:B;font-weight:800;font-size:110px;margin-top:24px}
+#signe p{font-size:38px;color:#5b6482;margin-top:6px}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:50}
+</style></head><body>
+<div class="bulle" id="b1" style="background:#5eead4"></div>
+<div class="bulle" id="b2" style="background:#c084fc"></div>
+<div class="abs" id="accroche"><span class="mot">Tu notes</span> <span class="mot">encore</span><br><span class="mot">ta muscu</span><br><span class="mot">sur un</span> <span class="mot grad" id="carnet">carnet ?</span></div>
+<div class="abs" id="logo"><img src="../../icons/icon-512.png"><h1 class="grad">Fluxe Suivi</h1><p>Le carnet de muscu qui connaît ta salle.</p></div>
+<div class="abs cap" id="c1"><span class="tag">PENDANT LA SÉANCE</span><h2>Note tes séries<br><span class="grad">en 1 touche</span></h2></div>
+<div class="abs cap" id="c2"><span class="tag">TA PROGRESSION</span><h2>Vois ton corps<br><span class="grad">progresser</span></h2></div>
+<div class="abs cap" id="c3"><span class="tag">TES RECORDS</span><h2>Chaque record<br><span class="grad">est fêté</span></h2></div>
+<div class="abs cap" id="c4"><span class="tag">TA SALLE</span><h2>Il connaît<br><span class="grad">ta salle</span></h2></div>
+<div id="cam"><div id="tel"><div id="ecran">
+  <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+  <div class="vue" id="v-s0"><img src="cap/s0.png"></div>
+  <div class="vue" id="v-s1"><img src="cap/s1.png"></div>
+  <div class="vue" id="v-s2-0"><img src="cap/s2-0.png"></div>
+  <div class="vue" id="v-s2-1"><img src="cap/s2-1.png"></div>
+  <div class="vue" id="v-s2-2"><img src="cap/s2-2.png"></div>
+  <div class="vue" id="v-s2-3"><img src="cap/s2-3.png"></div>
+  <div class="vue" id="v-stats"><img src="cap/stats-full.png"></div>
+  <div class="vue" id="v-histo"><img src="cap/histo-full.png"></div>
+  <div class="vue" id="v-salle"><img src="cap/salle-full.png"></div>
+  <div id="onde"></div><div id="doigt"></div>
+</div><div class="ile"></div></div></div>
+<div id="puce">🏆 3 records</div>
+<div id="clubs"><b><span class="grad" id="nb" style="font-size:inherit;color:transparent;margin:0">0</span></b><span>clubs en France, avec leurs machines</span></div>
+<div class="abs" id="fin"><div class="l">Gratuit.</div><div class="l">Sans compte.</div><div class="l grad">Même hors ligne.</div></div>
+<div class="abs" id="signe"><img src="../../icons/icon-512.png"><h1 class="grad">Fluxe Suivi</h1><p>Ton carnet de muscu</p></div>
+<div id="flash"></div>
+<script>
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const p = (t, a, b) => cl((t - a) / (b - a));                 // progression 0→1 entre a et b
+const eo = x => 1 - Math.pow(1 - x, 3);                       // freinage
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c = 1.70158, d = c + 1; return 1 + d * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+/* fenêtre : apparaît de a à a+d, disparaît de b-d à b */
+const fen = (t, a, b, d = .4) => Math.min(eo(p(t, a, a + d)), 1 - eio(p(t, b - d, b)));
+const K = 736 / 1080, TAP = [[628, 951], [628, 1058]];
+const VUES = ['s0','s1','s2-0','s2-1','s2-2','s2-3','stats','histo','salle'];
+function vue(t) {
+  if (t < 7.05) return ['s0', 0];
+  if (t < 8.65) return ['s1', 0];
+  if (t < 13) return ['s2-' + Math.min(3, Math.floor((t - 8.65) / 1)), 0];
+  if (t < 18) return ['stats', 1300 * eio(p(t, 13.8, 17.4))];
+  if (t < 22.5) return ['histo', 820 * eio(p(t, 18.8, 22))];
+  return ['salle', 900 * eio(p(t, 23.4, 26.6))];
+}
+window.render = t => {
+  $('b1').style.transform = `translate(${-300 + 120 * Math.sin(t * .5)}px, ${300 + 160 * Math.cos(t * .4)}px)`;
+  $('b2').style.transform = `translate(${520 + 100 * Math.cos(t * .45)}px, ${1000 + 140 * Math.sin(t * .35)}px)`;
+  /* 1. accroche */
+  const mots = document.querySelectorAll('.mot');
+  mots.forEach((m, i) => { const a = .15 + i * .32, e = back(p(t, a, a + .35)); m.style.opacity = cl(p(t, a, a + .2)) * (1 - p(t, 2.75, 3)); m.style.transform = `translateY(${(1 - e) * 60}px) scale(${.9 + .1 * e})`; });
+  $('carnet').style.textDecoration = t > 2.1 ? 'line-through' : 'none';
+  $('carnet').style.textDecorationThickness = '10px';
+  /* flash d'impact */
+  $('flash').style.opacity = .85 * (1 - p(t, 3, 3.35)) * (t >= 3 ? 1 : 0);
+  /* 2. logo */
+  const lg = fen(t, 3, 5.1, .35);
+  $('logo').style.opacity = lg;
+  $('logo').style.transform = `scale(${.85 + .15 * back(p(t, 3, 3.5))}) translateY(${-p(t, 4.7, 5.1) * 80}px)`;
+  /* 3. téléphone et caméra */
+  const entree = eo(p(t, 4.8, 5.7)), sortie = eio(p(t, 26.8, 27.6));
+  const zoom = eio(p(t, 6, 7.2)) - eio(p(t, 12.2, 13.1)); let s = 1 + .12 * zoom, ty = 100 * zoom;
+  s *= 1 - .25 * sortie;
+  $('cam').style.transform = `translateY(${(1 - entree) * 1700 + ty + sortie * 300}px) scale(${s})`;
+  $('cam').style.opacity = (t < 4.8 ? 0 : 1) * (1 - sortie);
+  /* vues de l'écran : glissement latéral entre les rubriques */
+  const [v, scroll] = vue(t);
+  const chg = [[13, 'stats'], [18, 'histo'], [22.5, 'salle']];
+  VUES.forEach(n => { const e = $('v-' + n); e.style.opacity = n === v ? 1 : 0; e.style.transform = 'none'; });
+  for (const [tc, n] of chg) {
+    if (t >= tc && t < tc + .5) {
+      const x = eio(p(t, tc, tc + .5)), prev = vue(tc - .01)[0], ps = vue(tc - .01)[1];
+      const ep = $('v-' + prev); ep.style.opacity = 1; ep.style.transform = `translate(${-x * 736}px, ${-ps}px)`;
+      $('v-' + n).style.transform = `translate(${(1 - x) * 736}px, 0)`;
+      return finir(t);
+    }
+  }
+  $('v-' + v).style.transform = `translateY(${-scroll}px)`;
+  finir(t);
+};
+function finir(t) {
+  /* doigt : deux touches sur les cases à cocher */
+  let d = 0, x = 0, y = 0, sc = 1, o = 0, os = 1;
+  for (const [i, tt] of [[0, 7], [1, 8.6]]) {
+    if (t > tt - .55 && t < tt + .45) {
+      d = Math.min(p(t, tt - .55, tt - .3), 1 - p(t, tt + .2, tt + .45));
+      [x, y] = TAP[i]; y += (1 - eo(p(t, tt - .55, tt))) * 120;
+      sc = t > tt - .08 && t < tt + .12 ? .82 : 1;
+      if (t >= tt) { o = 1 - p(t, tt, tt + .45); os = 1 + 1.6 * eo(p(t, tt, tt + .45)); }
+    }
+  }
+  Object.assign($('doigt').style, { opacity: d, left: x + 'px', top: y + 'px', transform: `scale(${sc})` });
+  Object.assign($('onde').style, { opacity: o, left: TAP[t < 8 ? 0 : 1][0] + 'px', top: TAP[t < 8 ? 0 : 1][1] + 'px', transform: `scale(${os})` });
+  /* titres */
+  [['c1', 5.4, 13.1], ['c2', 13.1, 18.1], ['c3', 18.1, 22.6], ['c4', 22.6, 27.2]].forEach(([id, a, b]) => {
+    const f = fen(t, a, b, .35); $(id).style.opacity = f; $(id).style.transform = `translateY(${(1 - f) * 40}px)`;
+  });
+  /* puce des records */
+  const pr = fen(t, 19.6, 22.3, .4);
+  $('puce').style.opacity = pr; $('puce').style.transform = `scale(${.6 + .4 * back(p(t, 19.6, 20.1))}) rotate(-4deg)`;
+  /* compteur des clubs */
+  const cb = fen(t, 23.6, 27, .4);
+  $('clubs').style.opacity = cb; $('clubs').style.transform = `translateY(${(1 - eo(p(t, 23.6, 24.1))) * 80}px)`;
+  $('nb').textContent = Math.round(2084 * eo(p(t, 23.8, 25.6))).toLocaleString('fr-FR').replace(/ | /g, ' ');
+  /* fin */
+  document.querySelectorAll('#fin .l').forEach((l, i) => { const a = 27.5 + i * .45, e = back(p(t, a, a + .4)); l.style.opacity = cl(p(t, a, a + .2)); l.style.transform = `translateY(${(1 - e) * 60}px)`; });
+  const sg = p(t, 29.2, 29.7);
+  $('signe').style.opacity = sg; $('signe').style.transform = `scale(${.85 + .15 * back(sg)})`;
+}
+</script></body></html>
